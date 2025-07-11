@@ -1,0 +1,55 @@
+name: Create and Push Tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    outputs:
+      version_tag: ${{ steps.tag_version.outputs.version_tag }}
+      version_exists: ${{ steps.tag_version.outputs.version_exists }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create version tag and trigger release
+        if: success()
+        id: tag_version
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Extract version from main.go
+          VERSION=$(grep -o 'version string = "[^"]*"' main.go | cut -d'"' -f2)
+          echo "Extracted version: $VERSION"
+          
+          # Check if version tag already exists
+          VERSION_TAG="v$VERSION"
+          echo "Checking if tag $VERSION_TAG exists..."
+          if git rev-parse "$VERSION_TAG" >/dev/null 2>&1; then
+            echo "Tag $VERSION_TAG already exists. Skipping version tag creation."
+            echo "version_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag $VERSION_TAG does not exist. Creating version tag..."
+            git tag $VERSION_TAG
+            echo "Pushing tag $VERSION_TAG to remote..."
+            git push origin $VERSION_TAG
+            echo "Version tag $VERSION_TAG created successfully!"
+            echo "version_exists=false" >> $GITHUB_OUTPUT
+          fi
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+  call-release:
+    needs: tag
+    if: needs.tag.outputs.version_exists == 'false'
+    uses: ./.github/workflows/release.yml
+    with:
+      version_tag: ${{ needs.tag.outputs.version_tag }}
+    secrets: inherit
