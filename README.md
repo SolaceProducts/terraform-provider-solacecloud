@@ -1,6 +1,5 @@
 # Terraform Provider for Solace Cloud
 
-[![Staging Acceptance Test](https://github.com/SolaceDev/terraform-provider-solacecloud/actions/workflows/staging-acceptance.yml/badge.svg)](https://github.com/SolaceDev/terraform-provider-solacecloud/actions/workflows/staging-acceptance.yml)
 
 This repository contains the official Terraform provider for Solace Cloud. This provider allows you to manage Solace Cloud resources using HashiCorp Terraform, enabling infrastructure as code practices for your Solace event streaming and management services.
 
