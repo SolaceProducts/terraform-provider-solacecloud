@@ -27,7 +27,7 @@ var (
 	// these will be set by the goreleaser configuration
 	// to appropriate values for the compiled binary.
 	// updating this will trigger a build
-	version string = "0.0.9"
+	version string = "0.1.0"
 
 	// goreleaser can pass other information to the main package, such as the specific commit
 	// https://goreleaser.com/cookbooks/using-main.version/
