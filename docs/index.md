@@ -1,4 +1,6 @@
-# Solace Cloud Provider
+# Solace Cloud Provider (Beta)
+
+**Note:** This provider is currently in beta and under active development. Functionality may change and issues may be encountered.
 
 The Solace Cloud Provider for Terraform enables you to manage Solace Cloud resources through Terraform. This provider allows you to create, configure, and manage event broker services programmatically using Terraform's infrastructure as code approach.
 
@@ -15,7 +17,7 @@ terraform {
 
 # Configure the Solace Cloud Provider
 provider "solacecloud" {
-  base_url             = "https://api.solace.cloud/"
+  base_url             = "https://production-api.solace.cloud/"
   api_token            = var.solace_api_token # or use SOLACECLOUD_API_TOKEN env variable
   api_polling_interval = 30
 }
