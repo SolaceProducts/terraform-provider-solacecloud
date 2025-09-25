@@ -92,6 +92,12 @@ type ConfigurableParams struct {
 	MaxSpoolUsage    int
 	OwnerId          string
 	CustomRouterName string
+	// DNS Name specific params
+	DnsName            string
+	ConnectionEndpointId string
+	// DNS Name move specific params
+	TargetServiceId           string
+	TargetConnectionEndpointId string
 }
 
 func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
@@ -358,4 +364,226 @@ provider "solacecloud" {
   api_polling_interval = 1
 }
 `
+}
+
+// SetupDnsNameMocks sets up DNS name-specific HTTP mocks
+func (provider *TestInstance) SetupDnsNameMocks(params ConfigurableParams) {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	if params.ConnectionEndpointId == "" {
+		params.ConnectionEndpointId = "80dx8er674q"
+	}
+	if params.DnsName == "" {
+		params.DnsName = "test-example.com"
+	}
+
+	// Mock GET DNS names for the connection endpoint (returns the DNS name)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+		JsonResponder(200, `{
+    "data": [
+        {
+            "id": "dns-id-123",
+            "dnsName": "`+params.DnsName+`",
+            "domainType": "CUSTOM"
+        }
+    ]
+}`))
+
+	// Mock CREATE DNS name
+	httpmock.RegisterResponder("POST", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+		JsonResponder(202, `{
+    "data": {
+        "id": "create-operation-123",
+        "type": "operation",
+        "operationType": "createDnsName",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "resourceId": "dns-id-123",
+        "resourceType": "dnsName",
+        "status": "INPROGRESS"
+    }
+}`))
+
+	// Mock GET operation status for the create operation (polling endpoint)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/operations/create-operation-123",
+		JsonResponder(200, `{
+    "data": {
+        "id": "create-operation-123",
+        "type": "operation",
+        "operationType": "createDnsName",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "completedTime": "2025-02-19T01:33:04Z",
+        "resourceId": "dns-id-123",
+        "resourceType": "dnsName",
+        "status": "SUCCEEDED",
+        "error": null
+    }
+}`))
+
+	// Mock DELETE DNS name
+	httpmock.RegisterResponder("DELETE", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames/"+params.DnsName,
+		JsonResponder(202, `{
+    "data": {
+        "id": "delete-operation-123",
+        "type": "operation",
+        "operationType": "deleteDnsName",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "resourceId": "dns-id-123",
+        "resourceType": "dnsName",
+        "status": "INPROGRESS"
+    }
+}`))
+
+	// Mock GET operation status for the delete operation (polling endpoint)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/operations/delete-operation-123",
+		JsonResponder(200, `{
+    "data": {
+        "id": "delete-operation-123",
+        "type": "operation",
+        "operationType": "deleteDnsName",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "completedTime": "2025-02-19T01:33:04Z",
+        "resourceId": "dns-id-123",
+        "resourceType": "dnsName",
+        "status": "SUCCEEDED",
+        "error": null
+    }
+}`))
+}
+
+// SetupDnsNameMoveMocks sets up DNS name move-specific HTTP mocks
+func (provider *TestInstance) SetupDnsNameMoveMocks(params ConfigurableParams) {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	if params.ConnectionEndpointId == "" {
+		params.ConnectionEndpointId = "80dx8er674q"
+	}
+	if params.TargetServiceId == "" {
+		params.TargetServiceId = "target-service-id"
+	}
+	if params.TargetConnectionEndpointId == "" {
+		params.TargetConnectionEndpointId = "target-endpoint-id"
+	}
+	if params.DnsName == "" {
+		params.DnsName = "move-test-example.com"
+	}
+
+	// Mock service details for source service (for organization validation)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
+		JsonResponder(200, CreateGetServiceResponse(params)))
+
+	// Mock service details for target service
+	targetParams := params
+	targetParams.ServiceId = params.TargetServiceId
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId,
+		JsonResponder(200, CreateGetServiceResponse(targetParams)))
+
+	// Mock PATCH operations for service updates (needed when services are created with specific IDs)
+	httpmock.RegisterResponder("PATCH", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
+		JsonResponder(202, `{
+    "data": {
+        "id": "update-operation-123",
+        "type": "operation",
+        "operationType": "updateService",
+        "status": "COMPLETED"
+    }
+}`))
+
+	httpmock.RegisterResponder("PATCH", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId,
+		JsonResponder(202, `{
+    "data": {
+        "id": "update-operation-124",
+        "type": "operation",
+        "operationType": "updateService",
+        "status": "COMPLETED"
+    }
+}`))
+
+	// Mock GET DNS names for target endpoint (returns empty initially for capacity check)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId+"/connectionEndpoints/"+params.TargetConnectionEndpointId+"/dnsNames",
+		JsonResponder(200, `{
+    "data": []
+}`))
+
+	// Mock POST DNS name move operation (correct endpoint)
+	httpmock.RegisterResponder("POST", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames/"+params.DnsName+"/move",
+		JsonResponder(202, `{
+    "data": {
+        "id": "move-operation-123",
+        "type": "operation",
+        "operationType": "moveDnsName",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "completedTime": "2025-02-19T01:33:04Z",
+        "resourceId": "dns-id-123",
+        "resourceType": "dnsName",
+        "status": "COMPLETED",
+        "error": null
+    }
+}`))
+
+	// Mock GET operation status for the move operation (polling endpoint)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId+"/operations/move-operation-123",
+		JsonResponder(200, `{
+    "data": {
+        "id": "move-operation-123",
+        "type": "operation",
+        "operationType": "moveDnsName",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "completedTime": "2025-02-19T01:33:04Z",
+        "resourceId": "dns-id-123",
+        "resourceType": "dnsName",
+        "status": "SUCCEEDED",
+        "error": null
+    }
+}`))
+
+	// Mock GET DNS names on source (returns the DNS name initially)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+		JsonResponder(200, `{
+    "data": [
+        {
+            "id": "dns-id-123",
+            "dnsName": "`+params.DnsName+`",
+            "domainType": "CUSTOM"
+        }
+    ]
+}`))
+}
+
+// SetupDnsNameErrorMocks sets up DNS name error scenario mocks
+func (provider *TestInstance) SetupDnsNameErrorMocks(params ConfigurableParams) {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	if params.ConnectionEndpointId == "" {
+		params.ConnectionEndpointId = "80dx8er674q"
+	}
+
+	// Mock GET DNS names returning max capacity (5 DNS names)
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+		JsonResponder(200, `{
+    "data": [
+        {"id": "1", "dnsName": "dns1.example.com", "domainType": "CUSTOM"},
+        {"id": "2", "dnsName": "dns2.example.com", "domainType": "CUSTOM"},
+        {"id": "3", "dnsName": "dns3.example.com", "domainType": "CUSTOM"},
+        {"id": "4", "dnsName": "dns4.example.com", "domainType": "CUSTOM"},
+        {"id": "5", "dnsName": "dns5.example.com", "domainType": "CUSTOM"}
+    ]
+}`))
+
+	// Mock CREATE returning 400 for capacity exceeded
+	httpmock.RegisterResponder("POST", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+		JsonResponder(400, `{
+    "error": {
+        "code": "CAPACITY_EXCEEDED",
+        "message": "Maximum number of DNS names (5) reached for this connection endpoint"
+    }
+}`))
 }

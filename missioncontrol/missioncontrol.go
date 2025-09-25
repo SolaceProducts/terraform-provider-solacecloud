@@ -35,8 +35,8 @@ const (
 
 // Defines values for ConnectionEndpointAccessType.
 const (
-	PRIVATE ConnectionEndpointAccessType = "PRIVATE"
-	PUBLIC  ConnectionEndpointAccessType = "PUBLIC"
+	ConnectionEndpointAccessTypePRIVATE ConnectionEndpointAccessType = "PRIVATE"
+	ConnectionEndpointAccessTypePUBLIC  ConnectionEndpointAccessType = "PUBLIC"
 )
 
 // Defines values for ConnectionEndpointK8sServiceType.
@@ -46,15 +46,47 @@ const (
 	ConnectionEndpointK8sServiceTypeNODEPORT     ConnectionEndpointK8sServiceType = "NODEPORT"
 )
 
+// Defines values for CreateConnectionEndpointAccessType.
+const (
+	CreateConnectionEndpointAccessTypePRIVATE CreateConnectionEndpointAccessType = "PRIVATE"
+	CreateConnectionEndpointAccessTypePUBLIC  CreateConnectionEndpointAccessType = "PUBLIC"
+)
+
+// Defines values for CreateConnectionEndpointK8sServiceType.
+const (
+	CreateConnectionEndpointK8sServiceTypeCLUSTERIP    CreateConnectionEndpointK8sServiceType = "CLUSTERIP"
+	CreateConnectionEndpointK8sServiceTypeLOADBALANCER CreateConnectionEndpointK8sServiceType = "LOADBALANCER"
+	CreateConnectionEndpointK8sServiceTypeNODEPORT     CreateConnectionEndpointK8sServiceType = "NODEPORT"
+)
+
 // Defines values for DatacenterK8sServiceType.
 const (
 	DatacenterK8sServiceTypeLOADBALANCER DatacenterK8sServiceType = "LOADBALANCER"
 	DatacenterK8sServiceTypeNODEPORT     DatacenterK8sServiceType = "NODEPORT"
 )
 
+// Defines values for DnsNameDomainType.
+const (
+	CustomerManaged DnsNameDomainType = "CustomerManaged"
+	SolaceManaged   DnsNameDomainType = "SolaceManaged"
+)
+
 // Defines values for EventBrokerServiceVersionDetailsReleaseStatus.
 const (
 	REVOKED EventBrokerServiceVersionDetailsReleaseStatus = "REVOKED"
+)
+
+// Defines values for GetConnectionEndpointAccessType.
+const (
+	GetConnectionEndpointAccessTypePRIVATE GetConnectionEndpointAccessType = "PRIVATE"
+	GetConnectionEndpointAccessTypePUBLIC  GetConnectionEndpointAccessType = "PUBLIC"
+)
+
+// Defines values for GetConnectionEndpointK8sServiceType.
+const (
+	GetConnectionEndpointK8sServiceTypeCLUSTERIP    GetConnectionEndpointK8sServiceType = "CLUSTERIP"
+	GetConnectionEndpointK8sServiceTypeLOADBALANCER GetConnectionEndpointK8sServiceType = "LOADBALANCER"
+	GetConnectionEndpointK8sServiceTypeNODEPORT     GetConnectionEndpointK8sServiceType = "NODEPORT"
 )
 
 // Defines values for MsgVpnAuthenticationBasicType.
@@ -65,20 +97,12 @@ const (
 	RADIUS   MsgVpnAuthenticationBasicType = "RADIUS"
 )
 
-// Defines values for OperationOperationType.
+// Defines values for MultiResourceOperationStatus.
 const (
-	OperationOperationTypeCloneService          OperationOperationType = "cloneService"
-	OperationOperationTypeCreateClientProfile   OperationOperationType = "createClientProfile"
-	OperationOperationTypeCreateService         OperationOperationType = "createService"
-	OperationOperationTypeDatacenterRequest     OperationOperationType = "datacenterRequest"
-	OperationOperationTypeDeleteCertificate     OperationOperationType = "deleteCertificate"
-	OperationOperationTypeDeleteClientProfile   OperationOperationType = "deleteClientProfile"
-	OperationOperationTypeDeleteService         OperationOperationType = "deleteService"
-	OperationOperationTypeInfrastructureRequest OperationOperationType = "infrastructureRequest"
-	OperationOperationTypeInstallCertificate    OperationOperationType = "installCertificate"
-	OperationOperationTypeServiceRequest        OperationOperationType = "serviceRequest"
-	OperationOperationTypeUpdateClientProfile   OperationOperationType = "updateClientProfile"
-	OperationOperationTypeUploadCertificate     OperationOperationType = "uploadCertificate"
+	MultiResourceOperationStatusFAILED     MultiResourceOperationStatus = "FAILED"
+	MultiResourceOperationStatusINPROGRESS MultiResourceOperationStatus = "INPROGRESS"
+	MultiResourceOperationStatusPENDING    MultiResourceOperationStatus = "PENDING"
+	MultiResourceOperationStatusSUCCEEDED  MultiResourceOperationStatus = "SUCCEEDED"
 )
 
 // Defines values for OperationStatus.
@@ -89,12 +113,32 @@ const (
 	OperationStatusSUCCEEDED  OperationStatus = "SUCCEEDED"
 )
 
+// Defines values for RedundancyActiveNode.
+const (
+	BACKUP  RedundancyActiveNode = "BACKUP"
+	PRIMARY RedundancyActiveNode = "PRIMARY"
+)
+
+// Defines values for RedundancyConfigSync.
+const (
+	RedundancyConfigSyncDOWN RedundancyConfigSync = "DOWN"
+	RedundancyConfigSyncUP   RedundancyConfigSync = "UP"
+)
+
+// Defines values for RedundancyRedundancy.
+const (
+	RedundancyRedundancyDOWN RedundancyRedundancy = "DOWN"
+	RedundancyRedundancyUP   RedundancyRedundancy = "UP"
+)
+
 // Defines values for ReleaseChannel.
 const (
-	DECLINED      ReleaseChannel = "DECLINED"
-	PREVIEW       ReleaseChannel = "PREVIEW"
-	PRODUCTION    ReleaseChannel = "PRODUCTION"
-	PRODUCTIONLTS ReleaseChannel = "PRODUCTION_LTS"
+	ReleaseChannelDECLINED      ReleaseChannel = "DECLINED"
+	ReleaseChannelLTS           ReleaseChannel = "LTS"
+	ReleaseChannelPREVIEW       ReleaseChannel = "PREVIEW"
+	ReleaseChannelPRODUCTION    ReleaseChannel = "PRODUCTION"
+	ReleaseChannelPRODUCTIONLTS ReleaseChannel = "PRODUCTION_LTS"
+	ReleaseChannelROLLING       ReleaseChannel = "ROLLING"
 )
 
 // Defines values for ServiceAdminState.
@@ -150,10 +194,54 @@ const (
 
 // Defines values for ServiceCreationState.
 const (
-	ServiceCreationStateCOMPLETED  ServiceCreationState = "COMPLETED"
-	ServiceCreationStateFAILED     ServiceCreationState = "FAILED"
-	ServiceCreationStateINPROGRESS ServiceCreationState = "INPROGRESS"
-	ServiceCreationStatePENDING    ServiceCreationState = "PENDING"
+	COMPLETED  ServiceCreationState = "COMPLETED"
+	FAILED     ServiceCreationState = "FAILED"
+	INPROGRESS ServiceCreationState = "INPROGRESS"
+	PENDING    ServiceCreationState = "PENDING"
+)
+
+// Defines values for UpdateConnectionEndpointAccessType.
+const (
+	UpdateConnectionEndpointAccessTypePRIVATE UpdateConnectionEndpointAccessType = "PRIVATE"
+	UpdateConnectionEndpointAccessTypePUBLIC  UpdateConnectionEndpointAccessType = "PUBLIC"
+)
+
+// Defines values for UpdateConnectionEndpointK8sServiceType.
+const (
+	CLUSTERIP    UpdateConnectionEndpointK8sServiceType = "CLUSTERIP"
+	LOADBALANCER UpdateConnectionEndpointK8sServiceType = "LOADBALANCER"
+	NODEPORT     UpdateConnectionEndpointK8sServiceType = "NODEPORT"
+)
+
+// Defines values for JobOperationTypes.
+const (
+	JobOperationTypesCloneService             JobOperationTypes = "cloneService"
+	JobOperationTypesCreateClientProfile      JobOperationTypes = "createClientProfile"
+	JobOperationTypesCreateConnectionEndpoint JobOperationTypes = "createConnectionEndpoint"
+	JobOperationTypesCreateDnsName            JobOperationTypes = "createDnsName"
+	JobOperationTypesCreateService            JobOperationTypes = "createService"
+	JobOperationTypesDatacenterRequest        JobOperationTypes = "datacenterRequest"
+	JobOperationTypesDeleteCertificate        JobOperationTypes = "deleteCertificate"
+	JobOperationTypesDeleteClientProfile      JobOperationTypes = "deleteClientProfile"
+	JobOperationTypesDeleteConnectionEndpoint JobOperationTypes = "deleteConnectionEndpoint"
+	JobOperationTypesDeleteDnsName            JobOperationTypes = "deleteDnsName"
+	JobOperationTypesDeleteService            JobOperationTypes = "deleteService"
+	JobOperationTypesHaSwitchover             JobOperationTypes = "haSwitchover"
+	JobOperationTypesInfrastructureRequest    JobOperationTypes = "infrastructureRequest"
+	JobOperationTypesInstallCertificate       JobOperationTypes = "installCertificate"
+	JobOperationTypesMoveDnsName              JobOperationTypes = "moveDnsName"
+	JobOperationTypesRotateReplicationPSK     JobOperationTypes = "rotateReplicationPSK"
+	JobOperationTypesServiceRequest           JobOperationTypes = "serviceRequest"
+	JobOperationTypesServiceScaleUp           JobOperationTypes = "serviceScaleUp"
+	JobOperationTypesServiceUpgrade           JobOperationTypes = "serviceUpgrade"
+	JobOperationTypesUpdateClientProfile      JobOperationTypes = "updateClientProfile"
+	JobOperationTypesUpdateConnectionEndpoint JobOperationTypes = "updateConnectionEndpoint"
+	JobOperationTypesUploadCertificate        JobOperationTypes = "uploadCertificate"
+)
+
+// Defines values for OperationTypesFilter.
+const (
+	OperationTypesFilterHaSwitchover OperationTypesFilter = "haSwitchover"
 )
 
 // Defines values for GetDatacentersParamsDatacenterType.
@@ -173,6 +261,16 @@ const (
 	Eks   GetDatacentersParamsProvider = "eks"
 	Gcp   GetDatacentersParamsProvider = "gcp"
 	K8s   GetDatacentersParamsProvider = "k8s"
+)
+
+// Defines values for GetEventBrokerServiceVersionsParamsReleaseChannel.
+const (
+	GetEventBrokerServiceVersionsParamsReleaseChannelDECLINED      GetEventBrokerServiceVersionsParamsReleaseChannel = "DECLINED"
+	GetEventBrokerServiceVersionsParamsReleaseChannelLTS           GetEventBrokerServiceVersionsParamsReleaseChannel = "LTS"
+	GetEventBrokerServiceVersionsParamsReleaseChannelPREVIEW       GetEventBrokerServiceVersionsParamsReleaseChannel = "PREVIEW"
+	GetEventBrokerServiceVersionsParamsReleaseChannelPRODUCTION    GetEventBrokerServiceVersionsParamsReleaseChannel = "PRODUCTION"
+	GetEventBrokerServiceVersionsParamsReleaseChannelPRODUCTIONLTS GetEventBrokerServiceVersionsParamsReleaseChannel = "PRODUCTION_LTS"
+	GetEventBrokerServiceVersionsParamsReleaseChannelROLLING       GetEventBrokerServiceVersionsParamsReleaseChannel = "ROLLING"
 )
 
 // Defines values for GetServiceParamsExpand.
@@ -224,7 +322,7 @@ type Broker struct {
 	// Cluster The DMR cluster details.
 	Cluster *Cluster `json:"cluster,omitempty"`
 
-	// ConfigSyncSslEnabled Enable or disable Config-Sync encryption (SSL). The default value is true, and the valid values are: <p><ul><li>'true' - enabled</li><li>'false' - disabled</li></ul></p>
+	// ConfigSyncSslEnabled Indicates whether Config-Sync encryption (SSL) is enabled. The valid values are: <p><ul><li>'true' - enabled</li><li>'false' - disabled</li></ul></p>
 	ConfigSyncSslEnabled *bool `json:"configSyncSslEnabled,omitempty"`
 
 	// DiskSize The disk size for the message spool, in gigabytes (GB).
@@ -242,14 +340,20 @@ type Broker struct {
 	// MaxSpoolUsage The maximum message spool usage allowed on the event broker service, in gigabytes (GB).
 	MaxSpoolUsage *int32 `json:"maxSpoolUsage,omitempty"`
 
+	// MonitoringAgentEnabled Indicates whether the Datadog monitoring agent is enabled. The valid values are: <p><ul><li>'true' - enabled</li><li>'false' - disabled</li></ul></p>
+	MonitoringAgentEnabled *bool `json:"monitoringAgentEnabled,omitempty"`
+
 	// MonitoringMode The monitoring mode. This can be 'BASIC' or 'ADVANCED'. The value of BASIC is default monitoring and ADVANCED means that monitoring of the event broker is enabled.
 	MonitoringMode *BrokerMonitoringMode `json:"monitoringMode,omitempty"`
 
 	// MsgVpns The list of Message VPNs configured on the event broker service.
 	MsgVpns *[]MsgVpn `json:"msgVpns,omitempty"`
 
-	// RedundancyGroupSslEnabled Enable or disable SSL for the redundancy group (for mate-link encryption).  The default value is false and the valid values are: <p><ul><li>'true' - enabled</li><li>'false' - disabled</li></ul></p>
+	// RedundancyGroupSslEnabled Indicates whether SSL is enabled for the mate-link encryption for the redundancy group.  The valid values are: <p><ul><li>'true' - enabled</li><li>'false' - disabled</li></ul></p>
 	RedundancyGroupSslEnabled *bool `json:"redundancyGroupSslEnabled,omitempty"`
+
+	// SolaceDatadogAgentImage The name of the Datadog agent image.
+	SolaceDatadogAgentImage *string `json:"solaceDatadogAgentImage,omitempty"`
 
 	// TlsStandardDomainCertificateAuthoritiesEnabled Indicates whether TLS Standard Domain Certificate Authorities is enabled.
 	TlsStandardDomainCertificateAuthoritiesEnabled *bool `json:"tlsStandardDomainCertificateAuthoritiesEnabled,omitempty"`
@@ -275,6 +379,26 @@ type BrokerSempProxyErrorMeta struct {
 	Error        *SempError   `json:"error,omitempty"`
 	Request      *SempRequest `json:"request,omitempty"`
 	ResponseCode *int32       `json:"responseCode,omitempty"`
+}
+
+// BrokerState defines model for BrokerState.
+type BrokerState struct {
+	Id *string `json:"id,omitempty"`
+
+	// IsHighAvailability Indicates whether the service is deployed as part of a high-availability group.
+	IsHighAvailability *bool `json:"isHighAvailability,omitempty"`
+
+	// Redundancy The redundancy status of the event broker service, including the high-availability status, redundancy state, active messaging node name, and config-sync status.
+	Redundancy *Redundancy `json:"redundancy,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// BrokerStateResponse defines model for BrokerStateResponse.
+type BrokerStateResponse struct {
+	Data BrokerState                       `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
 // CertificateAuthority The certificate authority.
@@ -724,9 +848,9 @@ type Cluster struct {
 	SupportedAuthenticationMode *[]string `json:"supportedAuthenticationMode,omitempty"`
 }
 
-// ConnectionEndpoint The connection endpoint.
+// ConnectionEndpoint A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
 type ConnectionEndpoint struct {
-	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public Internet (PUBLIC).
+	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
 	AccessType ConnectionEndpointAccessType `json:"accessType"`
 
 	// Description The description for the connection endpoint.
@@ -747,13 +871,15 @@ type ConnectionEndpoint struct {
 	// Name The name of the connection endpoint.
 	Name string `json:"name"`
 
-	// Ports <p>The protocols and port numbers of the connection endpoint. All messaging and management protocols along with the port numbers must be specified in the request.</p>
+	// Ports <p>The protocols and port numbers of the connection endpoint. The serviceManagementTlsListenPort and serviceSmfTlsListenPort protocols
+	// along with the port numbers must be specified in the request.</p>
 	// <p>Connection specific protocols. </p>
 	// <ul>
 	// <li><b>Solace Messaging</b> </li>
 	// <ul>
 	// <li>'serviceSmfPlainTextListenPort'-Use SMF Host (plain-text) over TCP to connect and exchange messages with the event broker service.</li>
-	// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with the event broker service.</li>
+	// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with
+	// the event broker service.</li>
 	// <li>'serviceSmfTlsListenPort'-Use secure SMF using TLS over TCP.</li>
 	// </ul>
 	// <br>
@@ -785,8 +911,10 @@ type ConnectionEndpoint struct {
 	// <br>
 	// <li><b>Management</b></li>
 	// <ul>
-	// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port must be enabled on at least one of the service connection endpoints on the event broker service.</li>
-	// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface (CLI). This port provides you with scope-restricted access to the event broker service.</li>
+	// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port
+	// must be enabled on at least one of the service connection endpoints on the event broker service.</li>
+	// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface
+	// (CLI). This port provides you with scope-restricted access to the event broker service.</li>
 	// </ul>
 	// <ul>
 	Ports []ServiceConnectionEndpointPort `json:"ports"`
@@ -795,11 +923,95 @@ type ConnectionEndpoint struct {
 	Type *string `json:"type,omitempty"`
 }
 
-// ConnectionEndpointAccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public Internet (PUBLIC).
+// ConnectionEndpointAccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
 type ConnectionEndpointAccessType string
 
 // ConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
 type ConnectionEndpointK8sServiceType string
+
+// ConnectionEndpointList The connection endpoint.
+type ConnectionEndpointList struct {
+	Data []GetConnectionEndpoint           `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
+// CreateConnectionEndpoint A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
+type CreateConnectionEndpoint struct {
+	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
+	AccessType CreateConnectionEndpointAccessType `json:"accessType"`
+
+	// Description The description for the connection endpoint.
+	Description *string `json:"description,omitempty"`
+
+	// Id The identifier of the connection endpoint.
+	Id *string `json:"id,omitempty"`
+
+	// K8sServiceId The identifier for the Kubernetes service.
+	K8sServiceId *string `json:"k8sServiceId,omitempty"`
+
+	// K8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
+	K8sServiceType *CreateConnectionEndpointK8sServiceType `json:"k8sServiceType,omitempty"`
+
+	// Name The name of the connection endpoint.
+	Name string `json:"name"`
+
+	// Ports <p>The protocols and port numbers of the connection endpoint. The serviceManagementTlsListenPort and serviceSmfTlsListenPort protocols
+	// along with the port numbers must be specified in the request.</p>
+	// <p>Connection specific protocols. </p>
+	// <ul>
+	// <li><b>Solace Messaging</b> </li>
+	// <ul>
+	// <li>'serviceSmfPlainTextListenPort'-Use SMF Host (plain-text) over TCP to connect and exchange messages with the event broker service.</li>
+	// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with
+	// the event broker service.</li>
+	// <li>'serviceSmfTlsListenPort'-Use secure SMF using TLS over TCP.</li>
+	// </ul>
+	// <br>
+	// <li><b>Solace Web Messaging</b></li>
+	// <ul>
+	// <li>'serviceWebPlainTextListenPort'-Use WebSocket over HTTP (plain-text).</li>
+	// <li>'serviceWebTlsListenPort'-Use WebSocket over secured HTTP.</li>
+	// </ul>
+	// <br>
+	// <li><b>AMQP</b></li>
+	// <ul>
+	// <li>'serviceAmqpPlainTextListenPort'-Use AMQP (plain-text).</li>
+	// <li>'serviceAmqpTlsListenPort'-Use AMQP over a secure TCP connection.</li>
+	// </ul>
+	// <br>
+	// <li><b>MQTT</b></li>
+	// <ul>
+	// <li>'serviceMqttPlainTextListenPort'-Use MQTT (plain-text).</li>
+	// <li>'serviceMqttWebSocketListenPort'-Use MQTT WebSocket (plain-text).</li>
+	// <li>'serviceMqttTlsListenPort'-Use secure MQTT.</li>
+	// <li>'serviceMqttTlsWebSocketListenPort'-Use WebSocket secured MQTT.</li>
+	// </ul>
+	// <br>
+	// <li><b>REST</b></li>
+	// <ul>
+	// <li>'serviceRestIncomingPlainTextListenPort'-Use REST messaging (plain-text).</li>
+	// <li>'serviceRestIncomingTlsListenPort'-Use secure REST messaging.</li>
+	// </ul>
+	// <br>
+	// <li><b>Management</b></li>
+	// <ul>
+	// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port
+	// must be enabled on at least one of the service connection endpoints on the event broker service.</li>
+	// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface
+	// (CLI). This port provides you with scope-restricted access to the event broker service.</li>
+	// </ul>
+	// <ul>
+	Ports []ServiceConnectionEndpointPort `json:"ports"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// CreateConnectionEndpointAccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
+type CreateConnectionEndpointAccessType string
+
+// CreateConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
+type CreateConnectionEndpointK8sServiceType string
 
 // CreateServiceRequest defines model for CreateServiceRequest.
 type CreateServiceRequest struct {
@@ -941,6 +1153,39 @@ type DatacentersResponse struct {
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
+// DnsName Connection endpoint DNS name
+type DnsName struct {
+	// DnsName The DNS name(fully qualified domain name)
+	DnsName *string `json:"dnsName,omitempty"`
+
+	// DnsRecordType The DNS record type
+	DnsRecordType *string `json:"dnsRecordType,omitempty"`
+
+	// DomainType The domain type
+	DomainType *DnsNameDomainType `json:"domainType,omitempty"`
+
+	// Id The DNS name identifier
+	Id *string `json:"id,omitempty"`
+
+	// Type The resource type
+	Type *string `json:"type,omitempty"`
+}
+
+// DnsNameDomainType The domain type
+type DnsNameDomainType string
+
+// DnsNameMoveRequest DNS name move request
+type DnsNameMoveRequest struct {
+	Id *string `json:"id,omitempty"`
+
+	// TargetConnectionEndpointId The unique identifier of the event broker service connection endpoint you want to move the DNS name to. If you don’t specify a value, the value defaults to the target service’s only connection endpoint.
+	TargetConnectionEndpointId *string `json:"targetConnectionEndpointId,omitempty"`
+
+	// TargetServiceId The unique identifier of the event broker service you want to move the DNS connection endpoint name to. If you don’t specify a value, the value defaults to the service id hosting the target connection endpoint.
+	TargetServiceId *string `json:"targetServiceId,omitempty"`
+	Type            *string `json:"type,omitempty"`
+}
+
 // Environment defines model for Environment.
 type Environment struct {
 	// AllowServiceCreationInPublicRegions When this setting is false, it blocks the creation of services in public regions in this environment.
@@ -965,23 +1210,16 @@ type EnvironmentResponse struct {
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
-// Error defines model for Error.
-type Error struct {
-	// ErrorId A universally unique identifier (UUID) is useful for debugging. You can provide this code as part of the information you send to our support team.
-	ErrorId *string `json:"errorId,omitempty"`
-
-	// Message A user-friendly message describing the reason for the error or what went wrong.
-	Message *string `json:"message,omitempty"`
-}
-
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	// ErrorId The UUID (Universally Unique Identifier) that is logged with an appropriate stack trace for a WARN or ERROR log that allows support to better determine what cause the error.
 	ErrorId *string `json:"errorId,omitempty"`
 
 	// Message A user-friendly message that describes the error.
-	Message *string                            `json:"message,omitempty"`
-	Meta    *map[string]map[string]interface{} `json:"meta,omitempty"`
+	Message *string `json:"message,omitempty"`
+
+	// Meta The metadata about the error. This provides additional information about the error that occurred.
+	Meta *map[string]map[string]interface{} `json:"meta,omitempty"`
 
 	// ValidationDetails When applicable, these are the details of issues with the fields provided for the REST call.
 	ValidationDetails *map[string][]string `json:"validationDetails,omitempty"`
@@ -1066,6 +1304,90 @@ type EventBrokerVersionsResponse struct {
 	Data EventBrokerVersions               `json:"data"`
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
+
+// GetAllConnectionEndpointDnsNamesResponse Response containing a list of connection endpoint DNS names
+type GetAllConnectionEndpointDnsNamesResponse struct {
+	Data []DnsName                         `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
+// GetConnectionEndpoint A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
+type GetConnectionEndpoint struct {
+	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
+	AccessType GetConnectionEndpointAccessType `json:"accessType"`
+
+	// Description The description for the connection endpoint.
+	Description *string `json:"description,omitempty"`
+
+	// Id The identifier of the connection endpoint.
+	Id *string `json:"id,omitempty"`
+
+	// K8sServiceId The identifier for the Kubernetes service.
+	K8sServiceId *string `json:"k8sServiceId,omitempty"`
+
+	// K8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
+	K8sServiceType *GetConnectionEndpointK8sServiceType `json:"k8sServiceType,omitempty"`
+
+	// Name The name of the connection endpoint.
+	Name string `json:"name"`
+
+	// Ports <p>The protocols and port numbers of the connection endpoint. The serviceManagementTlsListenPort and serviceSmfTlsListenPort protocols
+	// along with the port numbers must be specified in the request.</p>
+	// <p>Connection specific protocols. </p>
+	// <ul>
+	// <li><b>Solace Messaging</b> </li>
+	// <ul>
+	// <li>'serviceSmfPlainTextListenPort'-Use SMF Host (plain-text) over TCP to connect and exchange messages with the event broker service.</li>
+	// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with
+	// the event broker service.</li>
+	// <li>'serviceSmfTlsListenPort'-Use secure SMF using TLS over TCP.</li>
+	// </ul>
+	// <br>
+	// <li><b>Solace Web Messaging</b></li>
+	// <ul>
+	// <li>'serviceWebPlainTextListenPort'-Use WebSocket over HTTP (plain-text).</li>
+	// <li>'serviceWebTlsListenPort'-Use WebSocket over secured HTTP.</li>
+	// </ul>
+	// <br>
+	// <li><b>AMQP</b></li>
+	// <ul>
+	// <li>'serviceAmqpPlainTextListenPort'-Use AMQP (plain-text).</li>
+	// <li>'serviceAmqpTlsListenPort'-Use AMQP over a secure TCP connection.</li>
+	// </ul>
+	// <br>
+	// <li><b>MQTT</b></li>
+	// <ul>
+	// <li>'serviceMqttPlainTextListenPort'-Use MQTT (plain-text).</li>
+	// <li>'serviceMqttWebSocketListenPort'-Use MQTT WebSocket (plain-text).</li>
+	// <li>'serviceMqttTlsListenPort'-Use secure MQTT.</li>
+	// <li>'serviceMqttTlsWebSocketListenPort'-Use WebSocket secured MQTT.</li>
+	// </ul>
+	// <br>
+	// <li><b>REST</b></li>
+	// <ul>
+	// <li>'serviceRestIncomingPlainTextListenPort'-Use REST messaging (plain-text).</li>
+	// <li>'serviceRestIncomingTlsListenPort'-Use secure REST messaging.</li>
+	// </ul>
+	// <br>
+	// <li><b>Management</b></li>
+	// <ul>
+	// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port
+	// must be enabled on at least one of the service connection endpoints on the event broker service.</li>
+	// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface
+	// (CLI). This port provides you with scope-restricted access to the event broker service.</li>
+	// </ul>
+	// <ul>
+	Ports []ServiceConnectionEndpointPort `json:"ports"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// GetConnectionEndpointAccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
+type GetConnectionEndpointAccessType string
+
+// GetConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
+type GetConnectionEndpointK8sServiceType string
 
 // InfrastructureDetails Infrastructure details per service. Available on expand only.
 type InfrastructureDetails struct {
@@ -1193,13 +1515,24 @@ type MsgVpn struct {
 	// AuthenticationBasicType The authentication type.
 	AuthenticationBasicType *MsgVpnAuthenticationBasicType `json:"authenticationBasicType,omitempty"`
 
+	// AuthenticationClientCertAllowApiProvidedUsernameEnabled <p>Indicates whether the service accepts API provided usernames instead of subject alternative names,
+	// or user identifiers from the certificate. The valid values are:</p>
+	// <ul>
+	//   <li>'true' - enabled</li>
+	//   <li>'false' - disabled</li>
+	// </ul>
+	AuthenticationClientCertAllowApiProvidedUsernameEnabled *bool `json:"authenticationClientCertAllowApiProvidedUsernameEnabled,omitempty"`
+
 	// AuthenticationClientCertEnabled Indicates whether client certificate authentication is enabled.
 	AuthenticationClientCertEnabled *bool `json:"authenticationClientCertEnabled,omitempty"`
+
+	// AuthenticationClientCertUsernameSource The authentication client certificate username configured on the Message VPN.
+	AuthenticationClientCertUsernameSource *string `json:"authenticationClientCertUsernameSource,omitempty"`
 
 	// AuthenticationClientCertValidateDateEnabled Indicates whether the validation of the 'Not Before' and 'Not After' dates in a client certificate is enabled.
 	AuthenticationClientCertValidateDateEnabled *bool `json:"authenticationClientCertValidateDateEnabled,omitempty"`
 
-	// AuthenticationOauthEnabled Indicates whether OAuth authentication is enabled for the Message VPN.
+	// AuthenticationOauthEnabled Indicates whether OAuth authentication is enabled for the Message VPN. It is possible to have OAuth enabled for only the broker, and not the Message VPN.
 	AuthenticationOauthEnabled *bool `json:"authenticationOauthEnabled,omitempty"`
 
 	// ClientProfiles The client profiles configured on the Message VPN.
@@ -1260,6 +1593,40 @@ type MsgVpn struct {
 // MsgVpnAuthenticationBasicType The authentication type.
 type MsgVpnAuthenticationBasicType string
 
+// MultiResourceOperation defines model for MultiResourceOperation.
+type MultiResourceOperation struct {
+	// CompletedTime The completion time, whether it was successful or failed, in ISO 8601 date/time format.
+	CompletedTime *string `json:"completedTime,omitempty"`
+
+	// CreatedBy The unique identifier representing the user who created the operation.
+	CreatedBy *string `json:"createdBy,omitempty"`
+
+	// CreatedTime The time the operation was created, in ISO 8601 date/time format.
+	CreatedTime *string `json:"createdTime,omitempty"`
+
+	// Id Operations requiring time to complete provide an operation identifier so you can query their progress.
+	Id         *string      `json:"id,omitempty"`
+	Operations *[]Operation `json:"operations,omitempty"`
+
+	// OrgId The unique identifier representing the organization of the user who created the operation.
+	OrgId *string `json:"orgId,omitempty"`
+
+	// Status The status of the operation.
+	Status *MultiResourceOperationStatus `json:"status,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// MultiResourceOperationStatus The status of the operation.
+type MultiResourceOperationStatus string
+
+// MultiResourceOperationResponse defines model for MultiResourceOperationResponse.
+type MultiResourceOperationResponse struct {
+	Data MultiResourceOperation            `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
 // Operation defines model for Operation.
 type Operation struct {
 	// CompletedTime The completion time, whether it was successful or failed, in ISO 8601 date/time format.
@@ -1269,14 +1636,15 @@ type Operation struct {
 	CreatedBy *string `json:"createdBy,omitempty"`
 
 	// CreatedTime The time the operation was created, in ISO 8601 date/time format.
-	CreatedTime *string `json:"createdTime,omitempty"`
-	Error       *Error  `json:"error,omitempty"`
+	CreatedTime *string         `json:"createdTime,omitempty"`
+	Error       *OperationError `json:"error,omitempty"`
 
 	// Id Operations requiring time to complete provide an operation identifier so you can query their progress.
 	Id *string `json:"id,omitempty"`
 
 	// OperationType The type of operation against the resource.
-	OperationType *OperationOperationType `json:"operationType,omitempty"`
+	OperationType *JobOperationTypes      `json:"operationType,omitempty"`
+	ProgressLogs  *[]OperationProgressLog `json:"progressLogs,omitempty"`
 
 	// ResourceId The resource ID that the operation belongs to.
 	ResourceId *string `json:"resourceId,omitempty"`
@@ -1291,15 +1659,36 @@ type Operation struct {
 	Type *string `json:"type,omitempty"`
 }
 
-// OperationOperationType The type of operation against the resource.
-type OperationOperationType string
-
 // OperationStatus The status of the operation.
 type OperationStatus string
+
+// OperationError defines model for OperationError.
+type OperationError struct {
+	// ErrorId A universally unique identifier (UUID) is useful for debugging. You can provide this code as part of the information you send to our support team.
+	ErrorId *string `json:"errorId,omitempty"`
+
+	// Message A user-friendly message describing the reason for the error or what went wrong.
+	Message *string `json:"message,omitempty"`
+}
+
+// OperationProgressLog defines model for OperationProgressLog.
+type OperationProgressLog struct {
+	Message   *string `json:"message,omitempty"`
+	Status    *string `json:"status,omitempty"`
+	Step      *string `json:"step,omitempty"`
+	StepId    *string `json:"stepId,omitempty"`
+	Timestamp *string `json:"timestamp,omitempty"`
+}
 
 // OperationResponse defines model for OperationResponse.
 type OperationResponse struct {
 	Data Operation                         `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
+// OperationsResponse defines model for OperationsResponse.
+type OperationsResponse struct {
+	Data []Operation                       `json:"data"`
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
@@ -1312,8 +1701,42 @@ type ProvisionedEndpointSpoolUsageAlertThresholds struct {
 	SetPercent *int32 `json:"setPercent,omitempty"`
 }
 
+// Redundancy The redundancy status of the event broker service, including the high-availability status, redundancy state, active messaging node name, and config-sync status.
+type Redundancy struct {
+	// ActiveNode The name of the currently active messaging node. The active node can be either Primary or Backup.
+	ActiveNode *RedundancyActiveNode `json:"activeNode,omitempty"`
+
+	// ConfigSync Indicates the Config-Sync status of the high-availability group.
+	ConfigSync *RedundancyConfigSync `json:"configSync,omitempty"`
+
+	// Redundancy Indicates the redundancy status of the high-availability group.Redundancy can be either Up or Down.
+	Redundancy *RedundancyRedundancy `json:"redundancy,omitempty"`
+}
+
+// RedundancyActiveNode The name of the currently active messaging node. The active node can be either Primary or Backup.
+type RedundancyActiveNode string
+
+// RedundancyConfigSync Indicates the Config-Sync status of the high-availability group.
+type RedundancyConfigSync string
+
+// RedundancyRedundancy Indicates the redundancy status of the high-availability group.Redundancy can be either Up or Down.
+type RedundancyRedundancy string
+
 // ReleaseChannel "The release channel indicates the type of release, either Production or Preview. The release types offer differing support and upgrade paths. See the documentation for more information.
 type ReleaseChannel string
+
+// Replication defines model for Replication.
+type Replication struct {
+	// ActiveServiceId The identifier of the active event broker service in a replication pair.
+	ActiveServiceId string  `json:"activeServiceId"`
+	Id              *string `json:"id,omitempty"`
+
+	// StandbyServiceId The identifier of the standby event broker service in a replication pair.
+	StandbyServiceId string `json:"standbyServiceId"`
+
+	// Type The type of object for informational purposes
+	Type *string `json:"type,omitempty"`
+}
 
 // SEMPOverMsgBus Indicates whether SEMP-Over-Message-Bus attributes is enabled.
 type SEMPOverMsgBus struct {
@@ -1553,13 +1976,15 @@ type ServiceCloneAttributes struct {
 // ServiceCloneAttributesComponents defines model for ServiceCloneAttributes.Components.
 type ServiceCloneAttributesComponents string
 
-// ServiceConnectionEndpointPort <p>The protocols and port numbers of the connection endpoint. All messaging and management protocols along with the port numbers must be specified in the request.</p>
+// ServiceConnectionEndpointPort <p>The protocols and port numbers of the connection endpoint. The serviceManagementTlsListenPort and serviceSmfTlsListenPort protocols
+// along with the port numbers must be specified in the request.</p>
 // <p>Connection specific protocols. </p>
 // <ul>
 // <li><b>Solace Messaging</b> </li>
 // <ul>
 // <li>'serviceSmfPlainTextListenPort'-Use SMF Host (plain-text) over TCP to connect and exchange messages with the event broker service.</li>
-// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with the event broker service.</li>
+// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with
+// the event broker service.</li>
 // <li>'serviceSmfTlsListenPort'-Use secure SMF using TLS over TCP.</li>
 // </ul>
 // <br>
@@ -1591,8 +2016,10 @@ type ServiceCloneAttributesComponents string
 // <br>
 // <li><b>Management</b></li>
 // <ul>
-// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port must be enabled on at least one of the service connection endpoints on the event broker service.</li>
-// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface (CLI). This port provides you with scope-restricted access to the event broker service.</li>
+// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port
+// must be enabled on at least one of the service connection endpoints on the event broker service.</li>
+// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface
+// (CLI). This port provides you with scope-restricted access to the event broker service.</li>
 // </ul>
 // <ul>
 type ServiceConnectionEndpointPort struct {
@@ -1710,6 +2137,85 @@ type SpoolScaleUpCapabilityInfo struct {
 	SpoolScaleUpTestTimestamp *time.Time `json:"spoolScaleUpTestTimestamp,omitempty"`
 }
 
+// UpdateConnectionEndpoint A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
+type UpdateConnectionEndpoint struct {
+	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
+	AccessType *UpdateConnectionEndpointAccessType `json:"accessType,omitempty"`
+
+	// Description The description for the connection endpoint. Optional for updates.
+	Description *string `json:"description,omitempty"`
+
+	// Id The identifier of the connection endpoint.
+	Id *string `json:"id,omitempty"`
+
+	// K8sServiceId The identifier for the Kubernetes service.
+	K8sServiceId *string `json:"k8sServiceId,omitempty"`
+
+	// K8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
+	K8sServiceType *UpdateConnectionEndpointK8sServiceType `json:"k8sServiceType,omitempty"`
+
+	// Name The name of the connection endpoint. Optional for updates.
+	Name string `json:"name"`
+
+	// Ports <p>The protocols and port numbers of the connection endpoint. The serviceManagementTlsListenPort and serviceSmfTlsListenPort protocols
+	// along with the port numbers must be specified in the request.</p>
+	// <p>Connection specific protocols. </p>
+	// <ul>
+	// <li><b>Solace Messaging</b> </li>
+	// <ul>
+	// <li>'serviceSmfPlainTextListenPort'-Use SMF Host (plain-text) over TCP to connect and exchange messages with the event broker service.</li>
+	// <li>'serviceSmfCompressedListenPort'-Use SMF (plain-text) in a compressed format over TCP to connect and exchange messages with
+	// the event broker service.</li>
+	// <li>'serviceSmfTlsListenPort'-Use secure SMF using TLS over TCP.</li>
+	// </ul>
+	// <br>
+	// <li><b>Solace Web Messaging</b></li>
+	// <ul>
+	// <li>'serviceWebPlainTextListenPort'-Use WebSocket over HTTP (plain-text).</li>
+	// <li>'serviceWebTlsListenPort'-Use WebSocket over secured HTTP.</li>
+	// </ul>
+	// <br>
+	// <li><b>AMQP</b></li>
+	// <ul>
+	// <li>'serviceAmqpPlainTextListenPort'-Use AMQP (plain-text).</li>
+	// <li>'serviceAmqpTlsListenPort'-Use AMQP over a secure TCP connection.</li>
+	// </ul>
+	// <br>
+	// <li><b>MQTT</b></li>
+	// <ul>
+	// <li>'serviceMqttPlainTextListenPort'-Use MQTT (plain-text).</li>
+	// <li>'serviceMqttWebSocketListenPort'-Use MQTT WebSocket (plain-text).</li>
+	// <li>'serviceMqttTlsListenPort'-Use secure MQTT.</li>
+	// <li>'serviceMqttTlsWebSocketListenPort'-Use WebSocket secured MQTT.</li>
+	// </ul>
+	// <br>
+	// <li><b>REST</b></li>
+	// <ul>
+	// <li>'serviceRestIncomingPlainTextListenPort'-Use REST messaging (plain-text).</li>
+	// <li>'serviceRestIncomingTlsListenPort'-Use secure REST messaging.</li>
+	// </ul>
+	// <br>
+	// <li><b>Management</b></li>
+	// <ul>
+	// <li>'serviceManagementTlsListenPort'-Use the secured management connection, which uses SEMP to manage the event broker. This port
+	// must be enabled on at least one of the service connection endpoints on the event broker service.</li>
+	// <li>'managementSshTlsListenPort'-Use a secure port to connect to the event broker service to issue Solace Command Line Interface
+	// (CLI). This port provides you with scope-restricted access to the event broker service.</li>
+	// </ul>
+	// <ul>
+	//  Optional for updates - only provided ports will be modified.
+	Ports []ServiceConnectionEndpointPort `json:"ports"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// UpdateConnectionEndpointAccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
+type UpdateConnectionEndpointAccessType string
+
+// UpdateConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
+type UpdateConnectionEndpointK8sServiceType string
+
 // UpdateServiceRequest defines model for UpdateServiceRequest.
 type UpdateServiceRequest struct {
 	// Locked Indicates whether the event broker service has deletion protection enabled. The valid values are 'true' (enabled) or 'false' (disabled). The default is 'false'.
@@ -1727,6 +2233,24 @@ type UploadCertificateRequest struct {
 	Certificate string `json:"certificate"`
 	PrivateKey  string `json:"privateKey"`
 }
+
+// DnsNameCreateRequest DNS name creation request
+type DnsNameCreateRequest struct {
+	// DnsName <p>The FQDN to use for the DNS name for the connection endpoint. The dnsName you enter:</p>
+	// <p>must contain only alphanumeric characters (a-z, 0-9), hyphens (-), or dots (.)</p>
+	// <p>cannot end with a hyphen or dot</p>
+	// <p>must have each portion of the FQDN (label) be between 1-63 characters</p>
+	// <p>must have an entire length no longer than 230 characters.</p>
+	DnsName string  `json:"dnsName"`
+	Id      *string `json:"id,omitempty"`
+	Type    *string `json:"type,omitempty"`
+}
+
+// JobOperationTypes The type of operation against the resource.
+type JobOperationTypes string
+
+// OperationTypesFilter defines model for operationTypesFilter.
+type OperationTypesFilter string
 
 // GetDatacentersParams defines parameters for GetDatacenters.
 type GetDatacentersParams struct {
@@ -1782,6 +2306,34 @@ type GetDatacentersParamsDatacenterType string
 
 // GetDatacentersParamsProvider defines parameters for GetDatacenters.
 type GetDatacentersParamsProvider string
+
+// GetEventBrokerServiceVersionsParams defines parameters for GetEventBrokerServiceVersions.
+type GetEventBrokerServiceVersionsParams struct {
+	// Recommended <p>Choose to show only recommended or unrecommended event broker versions for service creation.
+	// The default value for this field is blank, which returns all event broker versions,
+	//  recommended and unrecommended. You can sort the responses by selecting:</p>
+	//  <ul><li><code>true</code> - Show only recommended event broker versions.</li>
+	//  <li><code>false</code> - Show only unrecommended event broker versions.</li></ul>
+	Recommended *bool `form:"recommended,omitempty" json:"recommended,omitempty"`
+
+	// ReleaseChannel <p>The release channel shows the type of broker release. The release types offer differing support and upgrade paths. For more information, seesee <a href="https://docs.solace.com/Cloud/understand-event-broker-releases.htm">Version Adoption</a> in the Solace documentation.</p><p>The filtering options include:</p><ul><li><code>Preview</code> - A pre-10.25 version release for previewing new features.</li><li><code>Production</code> - A pre-10.25 version production release.</li><li><code>Production_LTS</code> - A pre-10.25 version long term support production release.</li><li><code>LTS</code> - A 10.25 version and later, annual production release with two-years of support and maintenance releases.</li><li><code>Rolling</code> - A 10.25 version and later, bi-weekly production release for introducing new features. Rolling releases have two years of support with no maintenance releases.</li><li><code>Declined</code> - Unsupported versions, available for testing.</li></ul>
+	ReleaseChannel *GetEventBrokerServiceVersionsParamsReleaseChannel `form:"releaseChannel,omitempty" json:"releaseChannel,omitempty"`
+
+	// FamilyVersion Filter the responses by the family version number. The family version number differs based on the version and is generally the two first to digits of the version number, for example, 10.25. For more information, see <a href="https://docs.solace.com/Cloud/broker-version-conventions.htm">Release and Versioning Scheme of Event Broker Services</a> in the Solace documentation.
+	FamilyVersion *float32 `form:"familyVersion,omitempty" json:"familyVersion,omitempty"`
+
+	// PageNumber The page number for pagination.
+	PageNumber *int `form:"pageNumber,omitempty" json:"pageNumber,omitempty"`
+
+	// PageSize The number of items per page.
+	PageSize *int `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+
+	// Sort The sorting criteria for the returned results. You can sort the results by query parameter in ascending or descending order. Define the sort order using the following string: fieldname:asc/desc
+	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
+}
+
+// GetEventBrokerServiceVersionsParamsReleaseChannel defines parameters for GetEventBrokerServiceVersions.
+type GetEventBrokerServiceVersionsParamsReleaseChannel string
 
 // GetServicesParams defines parameters for GetServices.
 type GetServicesParams struct {
@@ -1839,6 +2391,13 @@ type GetServicesParams struct {
 	PageSize *int `form:"pageSize,omitempty" json:"pageSize,omitempty"`
 }
 
+// GetMultiResourceOperationParams defines parameters for GetMultiResourceOperation.
+type GetMultiResourceOperationParams struct {
+	// Expand Additional information to retrieve about the in-progress operations for the event broker services. The supported values are: <li><code>operations</code></li>
+	// The returned <code>operations</code> may include information about the detail information of each single operation.
+	Expand *string `form:"expand,omitempty" json:"expand,omitempty"`
+}
+
 // GetServiceParams defines parameters for GetService.
 type GetServiceParams struct {
 	// Expand You can request additional information about the event broker service by selecting expand parameters, including connection endpoint information, broker details including version, allowed actions you can perform on the service, and message spool details.
@@ -1877,6 +2436,25 @@ type GetClientProfilesParams struct {
 	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
 }
 
+// GetServiceOperationsParams defines parameters for GetServiceOperations.
+type GetServiceOperationsParams struct {
+	// OperationTypes Filter the returned query results by the type of operation being performed on the event broker service. The filtering options include: <li><code>haSwitchover</code> - A high-availability switchover operation.</li>
+	OperationTypes *[]OperationTypesFilter `form:"operationTypes,omitempty" json:"operationTypes,omitempty"`
+
+	// PageNumber The page number to retrieve.
+	PageNumber *int `form:"pageNumber,omitempty" json:"pageNumber,omitempty"`
+
+	// PageSize The number of operations to return per page.
+	PageSize *int `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+}
+
+// GetServiceOperationParams defines parameters for GetServiceOperation.
+type GetServiceOperationParams struct {
+	// Expand Additional information to retrieve about the in-progress operation for the event broker service. The supported values are: <li><code>progressLogs</code></li>
+	// The returned <code>progressLogs</code> may include information about the state of in-progress multi-stage operations for an event broker service, for example, high-availability switchovers.
+	Expand *string `form:"expand,omitempty" json:"expand,omitempty"`
+}
+
 // GetServiceClassesParams defines parameters for GetServiceClasses.
 type GetServiceClassesParams struct {
 	// BrokerFamilyVersion The version of the broker family. For example 10.6
@@ -1901,6 +2479,9 @@ type PatchEnvironmentJSONRequestBody = EnvironmentRequest
 // CreateServiceJSONRequestBody defines body for CreateService for application/json ContentType.
 type CreateServiceJSONRequestBody = CreateServiceRequest
 
+// InitiateReplicationPSKJSONRequestBody defines body for InitiateReplicationPSK for application/json ContentType.
+type InitiateReplicationPSKJSONRequestBody = Replication
+
 // UpdateServiceJSONRequestBody defines body for UpdateService for application/json ContentType.
 type UpdateServiceJSONRequestBody = UpdateServiceRequest
 
@@ -1924,6 +2505,18 @@ type UpdateClientProfileJSONRequestBody = ClientProfileRequest
 
 // ReplaceClientProfileJSONRequestBody defines body for ReplaceClientProfile for application/json ContentType.
 type ReplaceClientProfileJSONRequestBody = ClientProfileRequest
+
+// CreateConnectionEndpointJSONRequestBody defines body for CreateConnectionEndpoint for application/json ContentType.
+type CreateConnectionEndpointJSONRequestBody = CreateConnectionEndpoint
+
+// UpdateConnectionEndpointJSONRequestBody defines body for UpdateConnectionEndpoint for application/json ContentType.
+type UpdateConnectionEndpointJSONRequestBody = UpdateConnectionEndpoint
+
+// CreateConnectionEndpointDnsNameJSONRequestBody defines body for CreateConnectionEndpointDnsName for application/json ContentType.
+type CreateConnectionEndpointDnsNameJSONRequestBody = DnsNameCreateRequest
+
+// MoveConnectionEndpointDnsNameJSONRequestBody defines body for MoveConnectionEndpointDnsName for application/json ContentType.
+type MoveConnectionEndpointDnsNameJSONRequestBody = DnsNameMoveRequest
 
 // UpdateMessageSpoolJSONRequestBody defines body for UpdateMessageSpool for application/json ContentType.
 type UpdateMessageSpoolJSONRequestBody = MessageSpool
@@ -2021,8 +2614,8 @@ type ClientInterface interface {
 
 	UpdateDatacenter(ctx context.Context, id string, body UpdateDatacenterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetEventBrokerServiceVersions request
-	GetEventBrokerServiceVersions(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetEventBrokerServiceVersionsByDatacenter request
+	GetEventBrokerServiceVersionsByDatacenter(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetVersions request
 	GetVersions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2035,6 +2628,9 @@ type ClientInterface interface {
 
 	PatchEnvironment(ctx context.Context, id string, body PatchEnvironmentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetEventBrokerServiceVersions request
+	GetEventBrokerServiceVersions(ctx context.Context, params *GetEventBrokerServiceVersionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetServices request
 	GetServices(ctx context.Context, params *GetServicesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2042,6 +2638,14 @@ type ClientInterface interface {
 	CreateServiceWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateService(ctx context.Context, body CreateServiceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMultiResourceOperation request
+	GetMultiResourceOperation(ctx context.Context, operationId string, params *GetMultiResourceOperationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InitiateReplicationPSKWithBody request with any body
+	InitiateReplicationPSKWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	InitiateReplicationPSK(ctx context.Context, body InitiateReplicationPSKJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteService request
 	DeleteService(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2080,6 +2684,9 @@ type ClientInterface interface {
 
 	ReplaceResource(ctx context.Context, serviceId string, resourcePath string, body ReplaceResourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetBrokerStateByServiceId request
+	GetBrokerStateByServiceId(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetClientProfiles request
 	GetClientProfiles(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2104,13 +2711,51 @@ type ClientInterface interface {
 
 	ReplaceClientProfile(ctx context.Context, serviceId string, name string, body ReplaceClientProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetConnectionEndpoints request
+	GetConnectionEndpoints(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateConnectionEndpointWithBody request with any body
+	CreateConnectionEndpointWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateConnectionEndpoint(ctx context.Context, serviceId string, body CreateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteConnectionEndpoint request
+	DeleteConnectionEndpoint(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetConnectionEndpoint request
+	GetConnectionEndpoint(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateConnectionEndpointWithBody request with any body
+	UpdateConnectionEndpointWithBody(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateConnectionEndpoint(ctx context.Context, serviceId string, connectionEndpointId string, body UpdateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetConnectionEndpointDnsNames request
+	GetConnectionEndpointDnsNames(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateConnectionEndpointDnsNameWithBody request with any body
+	CreateConnectionEndpointDnsNameWithBody(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, body CreateConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteConnectionEndpointDnsName request
+	DeleteConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// MoveConnectionEndpointDnsNameWithBody request with any body
+	MoveConnectionEndpointDnsNameWithBody(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UpdateMessageSpoolWithBody request with any body
 	UpdateMessageSpoolWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateMessageSpool(ctx context.Context, serviceId string, body UpdateMessageSpoolJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetServiceOperations request
+	GetServiceOperations(ctx context.Context, serviceId string, params *GetServiceOperationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetServiceOperation request
-	GetServiceOperation(ctx context.Context, serviceId string, operationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetServiceOperation(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DisableOrEnableWithBody request with any body
 	DisableOrEnableWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2135,6 +2780,9 @@ type ClientInterface interface {
 	InstallServerCertificateWithBody(ctx context.Context, serviceId string, certificateId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	InstallServerCertificate(ctx context.Context, serviceId string, certificateId string, body InstallServerCertificateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SwitchoverBroker request
+	SwitchoverBroker(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetLimits request
 	GetLimits(ctx context.Context, orgId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2194,8 +2842,8 @@ func (c *Client) UpdateDatacenter(ctx context.Context, id string, body UpdateDat
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetEventBrokerServiceVersions(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetEventBrokerServiceVersionsRequest(c.Server, id)
+func (c *Client) GetEventBrokerServiceVersionsByDatacenter(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetEventBrokerServiceVersionsByDatacenterRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -2254,6 +2902,18 @@ func (c *Client) PatchEnvironment(ctx context.Context, id string, body PatchEnvi
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetEventBrokerServiceVersions(ctx context.Context, params *GetEventBrokerServiceVersionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetEventBrokerServiceVersionsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetServices(ctx context.Context, params *GetServicesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetServicesRequest(c.Server, params)
 	if err != nil {
@@ -2280,6 +2940,42 @@ func (c *Client) CreateServiceWithBody(ctx context.Context, contentType string, 
 
 func (c *Client) CreateService(ctx context.Context, body CreateServiceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateServiceRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMultiResourceOperation(ctx context.Context, operationId string, params *GetMultiResourceOperationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMultiResourceOperationRequest(c.Server, operationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InitiateReplicationPSKWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInitiateReplicationPSKRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InitiateReplicationPSK(ctx context.Context, body InitiateReplicationPSKJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInitiateReplicationPSKRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2458,6 +3154,18 @@ func (c *Client) ReplaceResource(ctx context.Context, serviceId string, resource
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetBrokerStateByServiceId(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetBrokerStateByServiceIdRequest(c.Server, serviceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetClientProfiles(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClientProfilesRequest(c.Server, serviceId, params)
 	if err != nil {
@@ -2566,6 +3274,162 @@ func (c *Client) ReplaceClientProfile(ctx context.Context, serviceId string, nam
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetConnectionEndpoints(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetConnectionEndpointsRequest(c.Server, serviceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateConnectionEndpointWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateConnectionEndpointRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateConnectionEndpoint(ctx context.Context, serviceId string, body CreateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateConnectionEndpointRequest(c.Server, serviceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteConnectionEndpoint(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteConnectionEndpointRequest(c.Server, serviceId, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetConnectionEndpoint(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetConnectionEndpointRequest(c.Server, serviceId, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateConnectionEndpointWithBody(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateConnectionEndpointRequestWithBody(c.Server, serviceId, connectionEndpointId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateConnectionEndpoint(ctx context.Context, serviceId string, connectionEndpointId string, body UpdateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateConnectionEndpointRequest(c.Server, serviceId, connectionEndpointId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetConnectionEndpointDnsNames(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetConnectionEndpointDnsNamesRequest(c.Server, serviceId, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateConnectionEndpointDnsNameWithBody(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateConnectionEndpointDnsNameRequestWithBody(c.Server, serviceId, connectionEndpointId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, body CreateConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateConnectionEndpointDnsNameRequest(c.Server, serviceId, connectionEndpointId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteConnectionEndpointDnsNameRequest(c.Server, serviceId, connectionEndpointId, dnsName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) MoveConnectionEndpointDnsNameWithBody(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMoveConnectionEndpointDnsNameRequestWithBody(c.Server, serviceId, connectionEndpointId, dnsName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMoveConnectionEndpointDnsNameRequest(c.Server, serviceId, connectionEndpointId, dnsName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) UpdateMessageSpoolWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateMessageSpoolRequestWithBody(c.Server, serviceId, contentType, body)
 	if err != nil {
@@ -2590,8 +3454,20 @@ func (c *Client) UpdateMessageSpool(ctx context.Context, serviceId string, body 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetServiceOperation(ctx context.Context, serviceId string, operationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetServiceOperationRequest(c.Server, serviceId, operationId)
+func (c *Client) GetServiceOperations(ctx context.Context, serviceId string, params *GetServiceOperationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetServiceOperationsRequest(c.Server, serviceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetServiceOperation(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetServiceOperationRequest(c.Server, serviceId, operationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -2700,6 +3576,18 @@ func (c *Client) InstallServerCertificateWithBody(ctx context.Context, serviceId
 
 func (c *Client) InstallServerCertificate(ctx context.Context, serviceId string, certificateId string, body InstallServerCertificateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInstallServerCertificateRequest(c.Server, serviceId, certificateId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SwitchoverBroker(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSwitchoverBrokerRequest(c.Server, serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -2956,8 +3844,8 @@ func NewUpdateDatacenterRequestWithBody(server string, id string, contentType st
 	return req, nil
 }
 
-// NewGetEventBrokerServiceVersionsRequest generates requests for GetEventBrokerServiceVersions
-func NewGetEventBrokerServiceVersionsRequest(server string, id string) (*http.Request, error) {
+// NewGetEventBrokerServiceVersionsByDatacenterRequest generates requests for GetEventBrokerServiceVersionsByDatacenter
+func NewGetEventBrokerServiceVersionsByDatacenterRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3098,6 +3986,135 @@ func NewPatchEnvironmentRequestWithBody(server string, id string, contentType st
 	return req, nil
 }
 
+// NewGetEventBrokerServiceVersionsRequest generates requests for GetEventBrokerServiceVersions
+func NewGetEventBrokerServiceVersionsRequest(server string, params *GetEventBrokerServiceVersionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServiceVersions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Recommended != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "recommended", runtime.ParamLocationQuery, *params.Recommended); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ReleaseChannel != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", false, "releaseChannel", runtime.ParamLocationQuery, *params.ReleaseChannel); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.FamilyVersion != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "familyVersion", runtime.ParamLocationQuery, *params.FamilyVersion); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageNumber != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageNumber", runtime.ParamLocationQuery, *params.PageNumber); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageSize != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageSize", runtime.ParamLocationQuery, *params.PageSize); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Sort != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort", runtime.ParamLocationQuery, *params.Sort); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetServicesRequest generates requests for GetServices
 func NewGetServicesRequest(server string, params *GetServicesParams) (*http.Request, error) {
 	var err error
@@ -3232,6 +4249,102 @@ func NewCreateServiceRequestWithBody(server string, contentType string, body io.
 	}
 
 	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetMultiResourceOperationRequest generates requests for GetMultiResourceOperation
+func NewGetMultiResourceOperationRequest(server string, operationId string, params *GetMultiResourceOperationParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "operationId", runtime.ParamLocationPath, operationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/multiResourceOperations/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Expand != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "expand", runtime.ParamLocationQuery, *params.Expand); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInitiateReplicationPSKRequest calls the generic InitiateReplicationPSK builder with application/json body
+func NewInitiateReplicationPSKRequest(server string, body InitiateReplicationPSKJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewInitiateReplicationPSKRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewInitiateReplicationPSKRequestWithBody generates requests for InitiateReplicationPSK with any type of body
+func NewInitiateReplicationPSKRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/replication/rotatePSK")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -3701,6 +4814,40 @@ func NewReplaceResourceRequestWithBody(server string, serviceId string, resource
 	return req, nil
 }
 
+// NewGetBrokerStateByServiceIdRequest generates requests for GetBrokerStateByServiceId
+func NewGetBrokerStateByServiceIdRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/brokerState", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetClientProfilesRequest generates requests for GetClientProfiles
 func NewGetClientProfilesRequest(server string, serviceId string, params *GetClientProfilesParams) (*http.Request, error) {
 	var err error
@@ -4026,6 +5173,427 @@ func NewReplaceClientProfileRequestWithBody(server string, serviceId string, nam
 	return req, nil
 }
 
+// NewGetConnectionEndpointsRequest generates requests for GetConnectionEndpoints
+func NewGetConnectionEndpointsRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateConnectionEndpointRequest calls the generic CreateConnectionEndpoint builder with application/json body
+func NewCreateConnectionEndpointRequest(server string, serviceId string, body CreateConnectionEndpointJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateConnectionEndpointRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewCreateConnectionEndpointRequestWithBody generates requests for CreateConnectionEndpoint with any type of body
+func NewCreateConnectionEndpointRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteConnectionEndpointRequest generates requests for DeleteConnectionEndpoint
+func NewDeleteConnectionEndpointRequest(server string, serviceId string, connectionEndpointId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetConnectionEndpointRequest generates requests for GetConnectionEndpoint
+func NewGetConnectionEndpointRequest(server string, serviceId string, connectionEndpointId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateConnectionEndpointRequest calls the generic UpdateConnectionEndpoint builder with application/json body
+func NewUpdateConnectionEndpointRequest(server string, serviceId string, connectionEndpointId string, body UpdateConnectionEndpointJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateConnectionEndpointRequestWithBody(server, serviceId, connectionEndpointId, "application/json", bodyReader)
+}
+
+// NewUpdateConnectionEndpointRequestWithBody generates requests for UpdateConnectionEndpoint with any type of body
+func NewUpdateConnectionEndpointRequestWithBody(server string, serviceId string, connectionEndpointId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetConnectionEndpointDnsNamesRequest generates requests for GetConnectionEndpointDnsNames
+func NewGetConnectionEndpointDnsNamesRequest(server string, serviceId string, connectionEndpointId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s/dnsNames", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateConnectionEndpointDnsNameRequest calls the generic CreateConnectionEndpointDnsName builder with application/json body
+func NewCreateConnectionEndpointDnsNameRequest(server string, serviceId string, connectionEndpointId string, body CreateConnectionEndpointDnsNameJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateConnectionEndpointDnsNameRequestWithBody(server, serviceId, connectionEndpointId, "application/json", bodyReader)
+}
+
+// NewCreateConnectionEndpointDnsNameRequestWithBody generates requests for CreateConnectionEndpointDnsName with any type of body
+func NewCreateConnectionEndpointDnsNameRequestWithBody(server string, serviceId string, connectionEndpointId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s/dnsNames", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteConnectionEndpointDnsNameRequest generates requests for DeleteConnectionEndpointDnsName
+func NewDeleteConnectionEndpointDnsNameRequest(server string, serviceId string, connectionEndpointId string, dnsName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "dnsName", runtime.ParamLocationPath, dnsName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s/dnsNames/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewMoveConnectionEndpointDnsNameRequest calls the generic MoveConnectionEndpointDnsName builder with application/json body
+func NewMoveConnectionEndpointDnsNameRequest(server string, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewMoveConnectionEndpointDnsNameRequestWithBody(server, serviceId, connectionEndpointId, dnsName, "application/json", bodyReader)
+}
+
+// NewMoveConnectionEndpointDnsNameRequestWithBody generates requests for MoveConnectionEndpointDnsName with any type of body
+func NewMoveConnectionEndpointDnsNameRequestWithBody(server string, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "connectionEndpointId", runtime.ParamLocationPath, connectionEndpointId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "dnsName", runtime.ParamLocationPath, dnsName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/connectionEndpoints/%s/dnsNames/%s/move", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewUpdateMessageSpoolRequest calls the generic UpdateMessageSpool builder with application/json body
 func NewUpdateMessageSpoolRequest(server string, serviceId string, body UpdateMessageSpoolJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -4073,8 +5641,96 @@ func NewUpdateMessageSpoolRequestWithBody(server string, serviceId string, conte
 	return req, nil
 }
 
+// NewGetServiceOperationsRequest generates requests for GetServiceOperations
+func NewGetServiceOperationsRequest(server string, serviceId string, params *GetServiceOperationsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/operations", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.OperationTypes != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "operationTypes", runtime.ParamLocationQuery, *params.OperationTypes); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageNumber != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageNumber", runtime.ParamLocationQuery, *params.PageNumber); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageSize != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageSize", runtime.ParamLocationQuery, *params.PageSize); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetServiceOperationRequest generates requests for GetServiceOperation
-func NewGetServiceOperationRequest(server string, serviceId string, operationId string) (*http.Request, error) {
+func NewGetServiceOperationRequest(server string, serviceId string, operationId string, params *GetServiceOperationParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4104,6 +5760,28 @@ func NewGetServiceOperationRequest(server string, serviceId string, operationId 
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Expand != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "expand", runtime.ParamLocationQuery, *params.Expand); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -4378,6 +6056,40 @@ func NewInstallServerCertificateRequestWithBody(server string, serviceId string,
 	return req, nil
 }
 
+// NewSwitchoverBrokerRequest generates requests for SwitchoverBroker
+func NewSwitchoverBrokerRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/switchover", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetLimitsRequest generates requests for GetLimits
 func NewGetLimitsRequest(server string, orgId string) (*http.Request, error) {
 	var err error
@@ -4571,8 +6283,8 @@ type ClientWithResponsesInterface interface {
 
 	UpdateDatacenterWithResponse(ctx context.Context, id string, body UpdateDatacenterJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateDatacenterResponse, error)
 
-	// GetEventBrokerServiceVersionsWithResponse request
-	GetEventBrokerServiceVersionsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetEventBrokerServiceVersionsResponse, error)
+	// GetEventBrokerServiceVersionsByDatacenterWithResponse request
+	GetEventBrokerServiceVersionsByDatacenterWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetEventBrokerServiceVersionsByDatacenterResponse, error)
 
 	// GetVersionsWithResponse request
 	GetVersionsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetVersionsResponse, error)
@@ -4585,6 +6297,9 @@ type ClientWithResponsesInterface interface {
 
 	PatchEnvironmentWithResponse(ctx context.Context, id string, body PatchEnvironmentJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchEnvironmentResponse, error)
 
+	// GetEventBrokerServiceVersionsWithResponse request
+	GetEventBrokerServiceVersionsWithResponse(ctx context.Context, params *GetEventBrokerServiceVersionsParams, reqEditors ...RequestEditorFn) (*GetEventBrokerServiceVersionsResponse, error)
+
 	// GetServicesWithResponse request
 	GetServicesWithResponse(ctx context.Context, params *GetServicesParams, reqEditors ...RequestEditorFn) (*GetServicesResponse, error)
 
@@ -4592,6 +6307,14 @@ type ClientWithResponsesInterface interface {
 	CreateServiceWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateServiceResponse, error)
 
 	CreateServiceWithResponse(ctx context.Context, body CreateServiceJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateServiceResponse, error)
+
+	// GetMultiResourceOperationWithResponse request
+	GetMultiResourceOperationWithResponse(ctx context.Context, operationId string, params *GetMultiResourceOperationParams, reqEditors ...RequestEditorFn) (*GetMultiResourceOperationResponse, error)
+
+	// InitiateReplicationPSKWithBodyWithResponse request with any body
+	InitiateReplicationPSKWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InitiateReplicationPSKResponse, error)
+
+	InitiateReplicationPSKWithResponse(ctx context.Context, body InitiateReplicationPSKJSONRequestBody, reqEditors ...RequestEditorFn) (*InitiateReplicationPSKResponse, error)
 
 	// DeleteServiceWithResponse request
 	DeleteServiceWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteServiceResponse, error)
@@ -4630,6 +6353,9 @@ type ClientWithResponsesInterface interface {
 
 	ReplaceResourceWithResponse(ctx context.Context, serviceId string, resourcePath string, body ReplaceResourceJSONRequestBody, reqEditors ...RequestEditorFn) (*ReplaceResourceResponse, error)
 
+	// GetBrokerStateByServiceIdWithResponse request
+	GetBrokerStateByServiceIdWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetBrokerStateByServiceIdResponse, error)
+
 	// GetClientProfilesWithResponse request
 	GetClientProfilesWithResponse(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*GetClientProfilesResponse, error)
 
@@ -4654,13 +6380,51 @@ type ClientWithResponsesInterface interface {
 
 	ReplaceClientProfileWithResponse(ctx context.Context, serviceId string, name string, body ReplaceClientProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*ReplaceClientProfileResponse, error)
 
+	// GetConnectionEndpointsWithResponse request
+	GetConnectionEndpointsWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetConnectionEndpointsResponse, error)
+
+	// CreateConnectionEndpointWithBodyWithResponse request with any body
+	CreateConnectionEndpointWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointResponse, error)
+
+	CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body CreateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointResponse, error)
+
+	// DeleteConnectionEndpointWithResponse request
+	DeleteConnectionEndpointWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*DeleteConnectionEndpointResponse, error)
+
+	// GetConnectionEndpointWithResponse request
+	GetConnectionEndpointWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*GetConnectionEndpointResponse, error)
+
+	// UpdateConnectionEndpointWithBodyWithResponse request with any body
+	UpdateConnectionEndpointWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateConnectionEndpointResponse, error)
+
+	UpdateConnectionEndpointWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, body UpdateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateConnectionEndpointResponse, error)
+
+	// GetConnectionEndpointDnsNamesWithResponse request
+	GetConnectionEndpointDnsNamesWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*GetConnectionEndpointDnsNamesResponse, error)
+
+	// CreateConnectionEndpointDnsNameWithBodyWithResponse request with any body
+	CreateConnectionEndpointDnsNameWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointDnsNameResponse, error)
+
+	CreateConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, body CreateConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointDnsNameResponse, error)
+
+	// DeleteConnectionEndpointDnsNameWithResponse request
+	DeleteConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, reqEditors ...RequestEditorFn) (*DeleteConnectionEndpointDnsNameResponse, error)
+
+	// MoveConnectionEndpointDnsNameWithBodyWithResponse request with any body
+	MoveConnectionEndpointDnsNameWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
+
+	MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
+
 	// UpdateMessageSpoolWithBodyWithResponse request with any body
 	UpdateMessageSpoolWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateMessageSpoolResponse, error)
 
 	UpdateMessageSpoolWithResponse(ctx context.Context, serviceId string, body UpdateMessageSpoolJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateMessageSpoolResponse, error)
 
+	// GetServiceOperationsWithResponse request
+	GetServiceOperationsWithResponse(ctx context.Context, serviceId string, params *GetServiceOperationsParams, reqEditors ...RequestEditorFn) (*GetServiceOperationsResponse, error)
+
 	// GetServiceOperationWithResponse request
-	GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, reqEditors ...RequestEditorFn) (*GetServiceOperationResponse, error)
+	GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*GetServiceOperationResponse, error)
 
 	// DisableOrEnableWithBodyWithResponse request with any body
 	DisableOrEnableWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DisableOrEnableResponse, error)
@@ -4685,6 +6449,9 @@ type ClientWithResponsesInterface interface {
 	InstallServerCertificateWithBodyWithResponse(ctx context.Context, serviceId string, certificateId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InstallServerCertificateResponse, error)
 
 	InstallServerCertificateWithResponse(ctx context.Context, serviceId string, certificateId string, body InstallServerCertificateJSONRequestBody, reqEditors ...RequestEditorFn) (*InstallServerCertificateResponse, error)
+
+	// SwitchoverBrokerWithResponse request
+	SwitchoverBrokerWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*SwitchoverBrokerResponse, error)
 
 	// GetLimitsWithResponse request
 	GetLimitsWithResponse(ctx context.Context, orgId string, reqEditors ...RequestEditorFn) (*GetLimitsResponse, error)
@@ -4773,7 +6540,7 @@ func (r UpdateDatacenterResponse) StatusCode() int {
 	return 0
 }
 
-type GetEventBrokerServiceVersionsResponse struct {
+type GetEventBrokerServiceVersionsByDatacenterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *EventBrokerServiceVersionsResponse
@@ -4783,7 +6550,7 @@ type GetEventBrokerServiceVersionsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetEventBrokerServiceVersionsResponse) Status() string {
+func (r GetEventBrokerServiceVersionsByDatacenterResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -4791,7 +6558,7 @@ func (r GetEventBrokerServiceVersionsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetEventBrokerServiceVersionsResponse) StatusCode() int {
+func (r GetEventBrokerServiceVersionsByDatacenterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4874,6 +6641,31 @@ func (r PatchEnvironmentResponse) StatusCode() int {
 	return 0
 }
 
+type GetEventBrokerServiceVersionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *EventBrokerServiceVersionsResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetEventBrokerServiceVersionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetEventBrokerServiceVersionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetServicesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -4919,6 +6711,57 @@ func (r CreateServiceResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateServiceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMultiResourceOperationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMultiResourceOperationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMultiResourceOperationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type InitiateReplicationPSKResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InitiateReplicationPSKResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InitiateReplicationPSKResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5154,6 +6997,33 @@ func (r ReplaceResourceResponse) StatusCode() int {
 	return 0
 }
 
+type GetBrokerStateByServiceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *BrokerStateResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetBrokerStateByServiceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetBrokerStateByServiceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetClientProfilesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5311,6 +7181,253 @@ func (r ReplaceClientProfileResponse) StatusCode() int {
 	return 0
 }
 
+type GetConnectionEndpointsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ConnectionEndpointList
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetConnectionEndpointsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetConnectionEndpointsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateConnectionEndpointResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *Operation
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateConnectionEndpointResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateConnectionEndpointResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteConnectionEndpointResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *Operation
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteConnectionEndpointResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteConnectionEndpointResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetConnectionEndpointResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetConnectionEndpoint
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetConnectionEndpointResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetConnectionEndpointResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateConnectionEndpointResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *Operation
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateConnectionEndpointResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateConnectionEndpointResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetConnectionEndpointDnsNamesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetAllConnectionEndpointDnsNamesResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetConnectionEndpointDnsNamesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetConnectionEndpointDnsNamesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateConnectionEndpointDnsNameResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateConnectionEndpointDnsNameResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateConnectionEndpointDnsNameResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteConnectionEndpointDnsNameResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteConnectionEndpointDnsNameResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteConnectionEndpointDnsNameResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type MoveConnectionEndpointDnsNameResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r MoveConnectionEndpointDnsNameResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r MoveConnectionEndpointDnsNameResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type UpdateMessageSpoolResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5332,6 +7449,32 @@ func (r UpdateMessageSpoolResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r UpdateMessageSpoolResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetServiceOperationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *OperationsResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetServiceOperationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetServiceOperationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5518,6 +7661,32 @@ func (r InstallServerCertificateResponse) StatusCode() int {
 	return 0
 }
 
+type SwitchoverBrokerResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r SwitchoverBrokerResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SwitchoverBrokerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetLimitsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5631,13 +7800,13 @@ func (c *ClientWithResponses) UpdateDatacenterWithResponse(ctx context.Context, 
 	return ParseUpdateDatacenterResponse(rsp)
 }
 
-// GetEventBrokerServiceVersionsWithResponse request returning *GetEventBrokerServiceVersionsResponse
-func (c *ClientWithResponses) GetEventBrokerServiceVersionsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetEventBrokerServiceVersionsResponse, error) {
-	rsp, err := c.GetEventBrokerServiceVersions(ctx, id, reqEditors...)
+// GetEventBrokerServiceVersionsByDatacenterWithResponse request returning *GetEventBrokerServiceVersionsByDatacenterResponse
+func (c *ClientWithResponses) GetEventBrokerServiceVersionsByDatacenterWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetEventBrokerServiceVersionsByDatacenterResponse, error) {
+	rsp, err := c.GetEventBrokerServiceVersionsByDatacenter(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetEventBrokerServiceVersionsResponse(rsp)
+	return ParseGetEventBrokerServiceVersionsByDatacenterResponse(rsp)
 }
 
 // GetVersionsWithResponse request returning *GetVersionsResponse
@@ -5675,6 +7844,15 @@ func (c *ClientWithResponses) PatchEnvironmentWithResponse(ctx context.Context, 
 	return ParsePatchEnvironmentResponse(rsp)
 }
 
+// GetEventBrokerServiceVersionsWithResponse request returning *GetEventBrokerServiceVersionsResponse
+func (c *ClientWithResponses) GetEventBrokerServiceVersionsWithResponse(ctx context.Context, params *GetEventBrokerServiceVersionsParams, reqEditors ...RequestEditorFn) (*GetEventBrokerServiceVersionsResponse, error) {
+	rsp, err := c.GetEventBrokerServiceVersions(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetEventBrokerServiceVersionsResponse(rsp)
+}
+
 // GetServicesWithResponse request returning *GetServicesResponse
 func (c *ClientWithResponses) GetServicesWithResponse(ctx context.Context, params *GetServicesParams, reqEditors ...RequestEditorFn) (*GetServicesResponse, error) {
 	rsp, err := c.GetServices(ctx, params, reqEditors...)
@@ -5699,6 +7877,32 @@ func (c *ClientWithResponses) CreateServiceWithResponse(ctx context.Context, bod
 		return nil, err
 	}
 	return ParseCreateServiceResponse(rsp)
+}
+
+// GetMultiResourceOperationWithResponse request returning *GetMultiResourceOperationResponse
+func (c *ClientWithResponses) GetMultiResourceOperationWithResponse(ctx context.Context, operationId string, params *GetMultiResourceOperationParams, reqEditors ...RequestEditorFn) (*GetMultiResourceOperationResponse, error) {
+	rsp, err := c.GetMultiResourceOperation(ctx, operationId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMultiResourceOperationResponse(rsp)
+}
+
+// InitiateReplicationPSKWithBodyWithResponse request with arbitrary body returning *InitiateReplicationPSKResponse
+func (c *ClientWithResponses) InitiateReplicationPSKWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InitiateReplicationPSKResponse, error) {
+	rsp, err := c.InitiateReplicationPSKWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInitiateReplicationPSKResponse(rsp)
+}
+
+func (c *ClientWithResponses) InitiateReplicationPSKWithResponse(ctx context.Context, body InitiateReplicationPSKJSONRequestBody, reqEditors ...RequestEditorFn) (*InitiateReplicationPSKResponse, error) {
+	rsp, err := c.InitiateReplicationPSK(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInitiateReplicationPSKResponse(rsp)
 }
 
 // DeleteServiceWithResponse request returning *DeleteServiceResponse
@@ -5822,6 +8026,15 @@ func (c *ClientWithResponses) ReplaceResourceWithResponse(ctx context.Context, s
 	return ParseReplaceResourceResponse(rsp)
 }
 
+// GetBrokerStateByServiceIdWithResponse request returning *GetBrokerStateByServiceIdResponse
+func (c *ClientWithResponses) GetBrokerStateByServiceIdWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetBrokerStateByServiceIdResponse, error) {
+	rsp, err := c.GetBrokerStateByServiceId(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetBrokerStateByServiceIdResponse(rsp)
+}
+
 // GetClientProfilesWithResponse request returning *GetClientProfilesResponse
 func (c *ClientWithResponses) GetClientProfilesWithResponse(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*GetClientProfilesResponse, error) {
 	rsp, err := c.GetClientProfiles(ctx, serviceId, params, reqEditors...)
@@ -5900,6 +8113,119 @@ func (c *ClientWithResponses) ReplaceClientProfileWithResponse(ctx context.Conte
 	return ParseReplaceClientProfileResponse(rsp)
 }
 
+// GetConnectionEndpointsWithResponse request returning *GetConnectionEndpointsResponse
+func (c *ClientWithResponses) GetConnectionEndpointsWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetConnectionEndpointsResponse, error) {
+	rsp, err := c.GetConnectionEndpoints(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetConnectionEndpointsResponse(rsp)
+}
+
+// CreateConnectionEndpointWithBodyWithResponse request with arbitrary body returning *CreateConnectionEndpointResponse
+func (c *ClientWithResponses) CreateConnectionEndpointWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointResponse, error) {
+	rsp, err := c.CreateConnectionEndpointWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateConnectionEndpointResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body CreateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointResponse, error) {
+	rsp, err := c.CreateConnectionEndpoint(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateConnectionEndpointResponse(rsp)
+}
+
+// DeleteConnectionEndpointWithResponse request returning *DeleteConnectionEndpointResponse
+func (c *ClientWithResponses) DeleteConnectionEndpointWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*DeleteConnectionEndpointResponse, error) {
+	rsp, err := c.DeleteConnectionEndpoint(ctx, serviceId, connectionEndpointId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteConnectionEndpointResponse(rsp)
+}
+
+// GetConnectionEndpointWithResponse request returning *GetConnectionEndpointResponse
+func (c *ClientWithResponses) GetConnectionEndpointWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*GetConnectionEndpointResponse, error) {
+	rsp, err := c.GetConnectionEndpoint(ctx, serviceId, connectionEndpointId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetConnectionEndpointResponse(rsp)
+}
+
+// UpdateConnectionEndpointWithBodyWithResponse request with arbitrary body returning *UpdateConnectionEndpointResponse
+func (c *ClientWithResponses) UpdateConnectionEndpointWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateConnectionEndpointResponse, error) {
+	rsp, err := c.UpdateConnectionEndpointWithBody(ctx, serviceId, connectionEndpointId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateConnectionEndpointResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateConnectionEndpointWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, body UpdateConnectionEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateConnectionEndpointResponse, error) {
+	rsp, err := c.UpdateConnectionEndpoint(ctx, serviceId, connectionEndpointId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateConnectionEndpointResponse(rsp)
+}
+
+// GetConnectionEndpointDnsNamesWithResponse request returning *GetConnectionEndpointDnsNamesResponse
+func (c *ClientWithResponses) GetConnectionEndpointDnsNamesWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, reqEditors ...RequestEditorFn) (*GetConnectionEndpointDnsNamesResponse, error) {
+	rsp, err := c.GetConnectionEndpointDnsNames(ctx, serviceId, connectionEndpointId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetConnectionEndpointDnsNamesResponse(rsp)
+}
+
+// CreateConnectionEndpointDnsNameWithBodyWithResponse request with arbitrary body returning *CreateConnectionEndpointDnsNameResponse
+func (c *ClientWithResponses) CreateConnectionEndpointDnsNameWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointDnsNameResponse, error) {
+	rsp, err := c.CreateConnectionEndpointDnsNameWithBody(ctx, serviceId, connectionEndpointId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateConnectionEndpointDnsNameResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, body CreateConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateConnectionEndpointDnsNameResponse, error) {
+	rsp, err := c.CreateConnectionEndpointDnsName(ctx, serviceId, connectionEndpointId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateConnectionEndpointDnsNameResponse(rsp)
+}
+
+// DeleteConnectionEndpointDnsNameWithResponse request returning *DeleteConnectionEndpointDnsNameResponse
+func (c *ClientWithResponses) DeleteConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, reqEditors ...RequestEditorFn) (*DeleteConnectionEndpointDnsNameResponse, error) {
+	rsp, err := c.DeleteConnectionEndpointDnsName(ctx, serviceId, connectionEndpointId, dnsName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteConnectionEndpointDnsNameResponse(rsp)
+}
+
+// MoveConnectionEndpointDnsNameWithBodyWithResponse request with arbitrary body returning *MoveConnectionEndpointDnsNameResponse
+func (c *ClientWithResponses) MoveConnectionEndpointDnsNameWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error) {
+	rsp, err := c.MoveConnectionEndpointDnsNameWithBody(ctx, serviceId, connectionEndpointId, dnsName, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMoveConnectionEndpointDnsNameResponse(rsp)
+}
+
+func (c *ClientWithResponses) MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error) {
+	rsp, err := c.MoveConnectionEndpointDnsName(ctx, serviceId, connectionEndpointId, dnsName, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMoveConnectionEndpointDnsNameResponse(rsp)
+}
+
 // UpdateMessageSpoolWithBodyWithResponse request with arbitrary body returning *UpdateMessageSpoolResponse
 func (c *ClientWithResponses) UpdateMessageSpoolWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateMessageSpoolResponse, error) {
 	rsp, err := c.UpdateMessageSpoolWithBody(ctx, serviceId, contentType, body, reqEditors...)
@@ -5917,9 +8243,18 @@ func (c *ClientWithResponses) UpdateMessageSpoolWithResponse(ctx context.Context
 	return ParseUpdateMessageSpoolResponse(rsp)
 }
 
+// GetServiceOperationsWithResponse request returning *GetServiceOperationsResponse
+func (c *ClientWithResponses) GetServiceOperationsWithResponse(ctx context.Context, serviceId string, params *GetServiceOperationsParams, reqEditors ...RequestEditorFn) (*GetServiceOperationsResponse, error) {
+	rsp, err := c.GetServiceOperations(ctx, serviceId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetServiceOperationsResponse(rsp)
+}
+
 // GetServiceOperationWithResponse request returning *GetServiceOperationResponse
-func (c *ClientWithResponses) GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, reqEditors ...RequestEditorFn) (*GetServiceOperationResponse, error) {
-	rsp, err := c.GetServiceOperation(ctx, serviceId, operationId, reqEditors...)
+func (c *ClientWithResponses) GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*GetServiceOperationResponse, error) {
+	rsp, err := c.GetServiceOperation(ctx, serviceId, operationId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -6002,6 +8337,15 @@ func (c *ClientWithResponses) InstallServerCertificateWithResponse(ctx context.C
 		return nil, err
 	}
 	return ParseInstallServerCertificateResponse(rsp)
+}
+
+// SwitchoverBrokerWithResponse request returning *SwitchoverBrokerResponse
+func (c *ClientWithResponses) SwitchoverBrokerWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*SwitchoverBrokerResponse, error) {
+	rsp, err := c.SwitchoverBroker(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSwitchoverBrokerResponse(rsp)
 }
 
 // GetLimitsWithResponse request returning *GetLimitsResponse
@@ -6186,15 +8530,15 @@ func ParseUpdateDatacenterResponse(rsp *http.Response) (*UpdateDatacenterRespons
 	return response, nil
 }
 
-// ParseGetEventBrokerServiceVersionsResponse parses an HTTP response from a GetEventBrokerServiceVersionsWithResponse call
-func ParseGetEventBrokerServiceVersionsResponse(rsp *http.Response) (*GetEventBrokerServiceVersionsResponse, error) {
+// ParseGetEventBrokerServiceVersionsByDatacenterResponse parses an HTTP response from a GetEventBrokerServiceVersionsByDatacenterWithResponse call
+func ParseGetEventBrokerServiceVersionsByDatacenterResponse(rsp *http.Response) (*GetEventBrokerServiceVersionsByDatacenterResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetEventBrokerServiceVersionsResponse{
+	response := &GetEventBrokerServiceVersionsByDatacenterResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -6282,9 +8626,6 @@ func ParseGetVersionsResponse(rsp *http.Response) (*GetVersionsResponse, error) 
 		}
 		response.JSON503 = &dest
 
-	case rsp.StatusCode == 400:
-		// Content-type (*/*) unsupported
-
 	}
 
 	return response, nil
@@ -6371,6 +8712,53 @@ func ParsePatchEnvironmentResponse(rsp *http.Response) (*PatchEnvironmentRespons
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetEventBrokerServiceVersionsResponse parses an HTTP response from a GetEventBrokerServiceVersionsWithResponse call
+func ParseGetEventBrokerServiceVersionsResponse(rsp *http.Response) (*GetEventBrokerServiceVersionsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetEventBrokerServiceVersionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest EventBrokerServiceVersionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
 		var dest ErrorResponse
@@ -6479,6 +8867,107 @@ func ParseCreateServiceResponse(rsp *http.Response) (*CreateServiceResponse, err
 			return nil, err
 		}
 		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMultiResourceOperationResponse parses an HTTP response from a GetMultiResourceOperationWithResponse call
+func ParseGetMultiResourceOperationResponse(rsp *http.Response) (*GetMultiResourceOperationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMultiResourceOperationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInitiateReplicationPSKResponse parses an HTTP response from a InitiateReplicationPSKWithResponse call
+func ParseInitiateReplicationPSKResponse(rsp *http.Response) (*InitiateReplicationPSKResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InitiateReplicationPSKResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -6936,6 +9425,67 @@ func ParseReplaceResourceResponse(rsp *http.Response) (*ReplaceResourceResponse,
 	return response, nil
 }
 
+// ParseGetBrokerStateByServiceIdResponse parses an HTTP response from a GetBrokerStateByServiceIdWithResponse call
+func ParseGetBrokerStateByServiceIdResponse(rsp *http.Response) (*GetBrokerStateByServiceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetBrokerStateByServiceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BrokerStateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetClientProfilesResponse parses an HTTP response from a GetClientProfilesWithResponse call
 func ParseGetClientProfilesResponse(rsp *http.Response) (*GetClientProfilesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -7267,6 +9817,583 @@ func ParseReplaceClientProfileResponse(rsp *http.Response) (*ReplaceClientProfil
 	return response, nil
 }
 
+// ParseGetConnectionEndpointsResponse parses an HTTP response from a GetConnectionEndpointsWithResponse call
+func ParseGetConnectionEndpointsResponse(rsp *http.Response) (*GetConnectionEndpointsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetConnectionEndpointsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ConnectionEndpointList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateConnectionEndpointResponse parses an HTTP response from a CreateConnectionEndpointWithResponse call
+func ParseCreateConnectionEndpointResponse(rsp *http.Response) (*CreateConnectionEndpointResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateConnectionEndpointResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest Operation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteConnectionEndpointResponse parses an HTTP response from a DeleteConnectionEndpointWithResponse call
+func ParseDeleteConnectionEndpointResponse(rsp *http.Response) (*DeleteConnectionEndpointResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteConnectionEndpointResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest Operation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetConnectionEndpointResponse parses an HTTP response from a GetConnectionEndpointWithResponse call
+func ParseGetConnectionEndpointResponse(rsp *http.Response) (*GetConnectionEndpointResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetConnectionEndpointResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetConnectionEndpoint
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateConnectionEndpointResponse parses an HTTP response from a UpdateConnectionEndpointWithResponse call
+func ParseUpdateConnectionEndpointResponse(rsp *http.Response) (*UpdateConnectionEndpointResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateConnectionEndpointResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest Operation
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetConnectionEndpointDnsNamesResponse parses an HTTP response from a GetConnectionEndpointDnsNamesWithResponse call
+func ParseGetConnectionEndpointDnsNamesResponse(rsp *http.Response) (*GetConnectionEndpointDnsNamesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetConnectionEndpointDnsNamesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetAllConnectionEndpointDnsNamesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateConnectionEndpointDnsNameResponse parses an HTTP response from a CreateConnectionEndpointDnsNameWithResponse call
+func ParseCreateConnectionEndpointDnsNameResponse(rsp *http.Response) (*CreateConnectionEndpointDnsNameResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateConnectionEndpointDnsNameResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteConnectionEndpointDnsNameResponse parses an HTTP response from a DeleteConnectionEndpointDnsNameWithResponse call
+func ParseDeleteConnectionEndpointDnsNameResponse(rsp *http.Response) (*DeleteConnectionEndpointDnsNameResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteConnectionEndpointDnsNameResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseMoveConnectionEndpointDnsNameResponse parses an HTTP response from a MoveConnectionEndpointDnsNameWithResponse call
+func ParseMoveConnectionEndpointDnsNameResponse(rsp *http.Response) (*MoveConnectionEndpointDnsNameResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &MoveConnectionEndpointDnsNameResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseUpdateMessageSpoolResponse parses an HTTP response from a UpdateMessageSpoolWithResponse call
 func ParseUpdateMessageSpoolResponse(rsp *http.Response) (*UpdateMessageSpoolResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -7294,6 +10421,60 @@ func ParseUpdateMessageSpoolResponse(rsp *http.Response) (*UpdateMessageSpoolRes
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetServiceOperationsResponse parses an HTTP response from a GetServiceOperationsWithResponse call
+func ParseGetServiceOperationsResponse(rsp *http.Response) (*GetServiceOperationsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetServiceOperationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest OperationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest ErrorResponse
@@ -7692,6 +10873,60 @@ func ParseInstallServerCertificateResponse(rsp *http.Response) (*InstallServerCe
 	return response, nil
 }
 
+// ParseSwitchoverBrokerResponse parses an HTTP response from a SwitchoverBrokerWithResponse call
+func ParseSwitchoverBrokerResponse(rsp *http.Response) (*SwitchoverBrokerResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SwitchoverBrokerResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetLimitsResponse parses an HTTP response from a GetLimitsWithResponse call
 func ParseGetLimitsResponse(rsp *http.Response) (*GetLimitsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -7740,9 +10975,6 @@ func ParseGetLimitsResponse(rsp *http.Response) (*GetLimitsResponse, error) {
 			return nil, err
 		}
 		response.JSON503 = &dest
-
-	case rsp.StatusCode == 400:
-		// Content-type (*/*) unsupported
 
 	}
 

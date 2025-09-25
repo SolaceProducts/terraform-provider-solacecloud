@@ -2,7 +2,7 @@ package provider_test
 
 import (
 	"terraform-provider-solacecloud/internal/provider"
-	
+
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
