@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"terraform-provider-solacecloud/internal/provider/service"
+	"terraform-provider-solacecloud/internal/provider/dnsName"
 
 	"terraform-provider-solacecloud/internal/provider/environment"
 	"terraform-provider-solacecloud/internal/shared"
@@ -226,18 +228,15 @@ func (p *solaceCloudProvider) Configure(ctx context.Context, req provider.Config
 func (p *solaceCloudProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		environment.NewEnvironmentDataSource,
+		dnsName.NewDnsNamesDataSource,
 	}
 }
 
 // Resources defines the resources implemented in the provider.
 func (p *solaceCloudProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewServiceResource,
+		service.NewServiceResource,
+		dnsName.NewDnsNameResource,
+		dnsName.NewDnsNameMoveResource,
 	}
-
-	// SCService....
-	// Nameconst
-	// Regionconst
-	// Typeconst
-
 }
