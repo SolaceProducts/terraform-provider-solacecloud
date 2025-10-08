@@ -163,17 +163,28 @@ After a service is created, you can access various attributes for use in other r
 
 ### Accessing Connection Endpoints
 
+To access connection endpoint information, use the `solacecloud_connection_endpoints` data source and `solacecloud_connection_endpoint_dns_names` data source:
+
 ```hcl
+data "solacecloud_connection_endpoints" "endpoints" {
+  service_id = solacecloud_service.broker_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns" {
+  service_id             = solacecloud_service.broker_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints.endpoints[0].id
+}
+
 output "smf_host" {
-  value = solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]
+  value = data.solacecloud_connection_endpoint_dns_names.dns.dns_names[0].dns_name
 }
 
 output "smf_port" {
-  value = solacecloud_service.broker_service.connection_endpoints[0].ports.smf.port
+  value = data.solacecloud_connection_endpoints.endpoints.endpoints[0].ports.smf.port
 }
 
 output "web_messaging_url" {
-  value = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.web_tls.port}"
+  value = "https://${data.solacecloud_connection_endpoint_dns_names.dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints.endpoints[0].ports.web_tls.port}"
 }
 ```
 
@@ -239,7 +250,16 @@ output "service_id" {
   value = solacecloud_service.ha_service.id
 }
 
+data "solacecloud_connection_endpoints" "ha_endpoints" {
+  service_id = solacecloud_service.ha_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "ha_dns" {
+  service_id             = solacecloud_service.ha_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.ha_endpoints.endpoints[0].id
+}
+
 output "management_url" {
-  value = "https://${solacecloud_service.ha_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.ha_service.connection_endpoints[0].ports.management_tls.port}"
+  value = "https://${data.solacecloud_connection_endpoint_dns_names.ha_dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.ha_endpoints.endpoints[0].ports.management_tls.port}"
 }
 ```

@@ -8,5 +8,5 @@ output "broker_password" {
 }
 
 output "broker_semp_url" {
-  value = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  value = "https://${data.solacecloud_connection_endpoint_dns_names.broker1_dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.broker1_endpoints.endpoints[0].ports.management_tls.port}"
 }

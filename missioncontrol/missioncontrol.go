@@ -1176,6 +1176,7 @@ type DnsNameDomainType string
 
 // DnsNameMoveRequest DNS name move request
 type DnsNameMoveRequest struct {
+	// Id The DNS name identifier
 	Id *string `json:"id,omitempty"`
 
 	// TargetConnectionEndpointId The unique identifier of the event broker service connection endpoint you want to move the DNS name to. If you don’t specify a value, the value defaults to the target service’s only connection endpoint.
@@ -1183,7 +1184,9 @@ type DnsNameMoveRequest struct {
 
 	// TargetServiceId The unique identifier of the event broker service you want to move the DNS connection endpoint name to. If you don’t specify a value, the value defaults to the service id hosting the target connection endpoint.
 	TargetServiceId *string `json:"targetServiceId,omitempty"`
-	Type            *string `json:"type,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
 }
 
 // Environment defines model for Environment.
@@ -1388,6 +1391,13 @@ type GetConnectionEndpointAccessType string
 
 // GetConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
 type GetConnectionEndpointK8sServiceType string
+
+// GetConnectionEndpointResponseInternal defines model for GetConnectionEndpointResponseInternal.
+type GetConnectionEndpointResponseInternal struct {
+	// Data A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
+	Data GetConnectionEndpoint             `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
 
 // InfrastructureDetails Infrastructure details per service. Available on expand only.
 type InfrastructureDetails struct {
@@ -1643,8 +1653,10 @@ type Operation struct {
 	Id *string `json:"id,omitempty"`
 
 	// OperationType The type of operation against the resource.
-	OperationType *JobOperationTypes      `json:"operationType,omitempty"`
-	ProgressLogs  *[]OperationProgressLog `json:"progressLogs,omitempty"`
+	OperationType *JobOperationTypes `json:"operationType,omitempty"`
+
+	// ProgressLogs The progress logs for the operation, if available. Not all operations provide progress logs. If the operation provides progress logs, you will see them listed below.
+	ProgressLogs *[]OperationProgressLog `json:"progressLogs,omitempty"`
 
 	// ResourceId The resource ID that the operation belongs to.
 	ResourceId *string `json:"resourceId,omitempty"`
@@ -1671,7 +1683,7 @@ type OperationError struct {
 	Message *string `json:"message,omitempty"`
 }
 
-// OperationProgressLog defines model for OperationProgressLog.
+// OperationProgressLog The progress logs for the operation, if available. Not all operations provide progress logs. If the operation provides progress logs, you will see them listed below.
 type OperationProgressLog struct {
 	Message   *string `json:"message,omitempty"`
 	Status    *string `json:"status,omitempty"`
@@ -2237,13 +2249,17 @@ type UploadCertificateRequest struct {
 // DnsNameCreateRequest DNS name creation request
 type DnsNameCreateRequest struct {
 	// DnsName <p>The FQDN to use for the DNS name for the connection endpoint. The dnsName you enter:</p>
-	// <p>must contain only alphanumeric characters (a-z, 0-9), hyphens (-), or dots (.)</p>
-	// <p>cannot end with a hyphen or dot</p>
-	// <p>must have each portion of the FQDN (label) be between 1-63 characters</p>
-	// <p>must have an entire length no longer than 230 characters.</p>
-	DnsName string  `json:"dnsName"`
-	Id      *string `json:"id,omitempty"`
-	Type    *string `json:"type,omitempty"`
+	// <p>• must contain only lowercase alphanumeric characters (a-z, 0-9), hyphens (-), or dots (.)</p>
+	// <p>• cannot end with a hyphen or dot</p>
+	// <p>• must have each portion of the FQDN (label) be between 1-63 characters</p>
+	// <p>• must have an entire length no longer than 230 characters.</p>
+	DnsName string `json:"dnsName"`
+
+	// Id The DNS name identifier
+	Id *string `json:"id,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
 }
 
 // JobOperationTypes The type of operation against the resource.
@@ -2306,6 +2322,12 @@ type GetDatacentersParamsDatacenterType string
 
 // GetDatacentersParamsProvider defines parameters for GetDatacenters.
 type GetDatacentersParamsProvider string
+
+// GetEnvironmentParams defines parameters for GetEnvironment.
+type GetEnvironmentParams struct {
+	// Expand Populate additional hidden attributes
+	Expand *[]string `form:"expand,omitempty" json:"expand,omitempty"`
+}
 
 // GetEventBrokerServiceVersionsParams defines parameters for GetEventBrokerServiceVersions.
 type GetEventBrokerServiceVersionsParams struct {
@@ -2621,7 +2643,7 @@ type ClientInterface interface {
 	GetVersions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetEnvironment request
-	GetEnvironment(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetEnvironment(ctx context.Context, id string, params *GetEnvironmentParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PatchEnvironmentWithBody request with any body
 	PatchEnvironmentWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2866,8 +2888,8 @@ func (c *Client) GetVersions(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetEnvironment(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetEnvironmentRequest(c.Server, id)
+func (c *Client) GetEnvironment(ctx context.Context, id string, params *GetEnvironmentParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetEnvironmentRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3906,7 +3928,7 @@ func NewGetVersionsRequest(server string) (*http.Request, error) {
 }
 
 // NewGetEnvironmentRequest generates requests for GetEnvironment
-func NewGetEnvironmentRequest(server string, id string) (*http.Request, error) {
+func NewGetEnvironmentRequest(server string, id string, params *GetEnvironmentParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3929,6 +3951,28 @@ func NewGetEnvironmentRequest(server string, id string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Expand != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "expand", runtime.ParamLocationQuery, *params.Expand); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -6290,7 +6334,7 @@ type ClientWithResponsesInterface interface {
 	GetVersionsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetVersionsResponse, error)
 
 	// GetEnvironmentWithResponse request
-	GetEnvironmentWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetEnvironmentResponse, error)
+	GetEnvironmentWithResponse(ctx context.Context, id string, params *GetEnvironmentParams, reqEditors ...RequestEditorFn) (*GetEnvironmentResponse, error)
 
 	// PatchEnvironmentWithBodyWithResponse request with any body
 	PatchEnvironmentWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchEnvironmentResponse, error)
@@ -7211,7 +7255,7 @@ func (r GetConnectionEndpointsResponse) StatusCode() int {
 type CreateConnectionEndpointResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON202      *Operation
+	JSON202      *OperationResponse
 	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 	JSON403      *ErrorResponse
@@ -7239,7 +7283,7 @@ func (r CreateConnectionEndpointResponse) StatusCode() int {
 type DeleteConnectionEndpointResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON202      *Operation
+	JSON202      *OperationResponse
 	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 	JSON403      *ErrorResponse
@@ -7267,7 +7311,7 @@ func (r DeleteConnectionEndpointResponse) StatusCode() int {
 type GetConnectionEndpointResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *GetConnectionEndpoint
+	JSON200      *GetConnectionEndpointResponseInternal
 	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 	JSON403      *ErrorResponse
@@ -7295,7 +7339,7 @@ func (r GetConnectionEndpointResponse) StatusCode() int {
 type UpdateConnectionEndpointResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON202      *Operation
+	JSON202      *OperationResponse
 	JSON400      *ErrorResponse
 	JSON401      *ErrorResponse
 	JSON403      *ErrorResponse
@@ -7819,8 +7863,8 @@ func (c *ClientWithResponses) GetVersionsWithResponse(ctx context.Context, reqEd
 }
 
 // GetEnvironmentWithResponse request returning *GetEnvironmentResponse
-func (c *ClientWithResponses) GetEnvironmentWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetEnvironmentResponse, error) {
-	rsp, err := c.GetEnvironment(ctx, id, reqEditors...)
+func (c *ClientWithResponses) GetEnvironmentWithResponse(ctx context.Context, id string, params *GetEnvironmentParams, reqEditors ...RequestEditorFn) (*GetEnvironmentResponse, error) {
+	rsp, err := c.GetEnvironment(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -9893,7 +9937,7 @@ func ParseCreateConnectionEndpointResponse(rsp *http.Response) (*CreateConnectio
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
-		var dest Operation
+		var dest OperationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9961,7 +10005,7 @@ func ParseDeleteConnectionEndpointResponse(rsp *http.Response) (*DeleteConnectio
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
-		var dest Operation
+		var dest OperationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10029,7 +10073,7 @@ func ParseGetConnectionEndpointResponse(rsp *http.Response) (*GetConnectionEndpo
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest GetConnectionEndpoint
+		var dest GetConnectionEndpointResponseInternal
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10097,7 +10141,7 @@ func ParseUpdateConnectionEndpointResponse(rsp *http.Response) (*UpdateConnectio
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
-		var dest Operation
+		var dest OperationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -14,6 +14,7 @@ export PATH=${PATH}:$GOPATH/bin
 
 Then, install the OpenAPI Generator CLI tool if you haven't already:
 See [OAPI Codegen Github](https://github.com/oapi-codegen/oapi-codegen)
+Use version v2.4.1
 
 ```shell
 # for the binary install

@@ -175,7 +175,8 @@ func (h *ErrorResponseAdaptor) HandleError(diagnostics *diag.Diagnostics) bool {
 		} else {
 			diagnostics.AddError("Bad Request", "Received HTTP 400 Bad Request. "+
 				"This usually indicates a malformed request or missing required parameters. "+
-				"Check your request body and parameters.")
+				"Check your request body and parameters.",
+			)
 		}
 	case http.StatusForbidden:
 		if h.JSON403 != nil && h.JSON403.GetMessage() != "" {

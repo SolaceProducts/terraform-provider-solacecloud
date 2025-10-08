@@ -150,7 +150,7 @@ Some features of the Solace Cloud V2 API are not currently implemented in the Te
 
 6. **Service Plugins**: The API supports managing service plugins, but this is not exposed in the provider.
 
-7. **Service Backup and Restore**: While the API supports backup and restore operations, the provider does not directly implement these. Instead, you can use the Solace Broker Provider to implement backup and restore functionality as described in the [Importing Services](./importing_services.md) guide.
+7. **Service Backup and Restore**: While the API supports backup and restore operations, the provider does not directly implement these. Instead, you can use the Solace Broker Provider to implement backup and restore functionality as described in the [Importing Services](importing_services.md) guide.
 
 ## Best Practices for Service Lifecycle Management
 

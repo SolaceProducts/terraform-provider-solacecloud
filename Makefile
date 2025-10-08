@@ -14,7 +14,7 @@ test:
 
 # Needs to be run with a SOLACECLOUD_API_TOKEN
 testacc:
-	SOLACE_BASE_URL=$(SOLACE_BASE_URL) TF_ACC=$(TF_ACC) go test -v ./... -parallel 10
+	SOLACE_BASE_URL=$(SOLACE_BASE_URL) TF_ACC=$(TF_ACC) go test -v ./... -parallel 10 -timeout 30m
 
 autorun_full_build: 
 	nodemon  -e 'go' --signal SIGTERM --exec 'make' build_and_test

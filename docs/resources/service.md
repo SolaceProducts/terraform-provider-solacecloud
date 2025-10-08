@@ -61,19 +61,28 @@ terraform {
 
 resource "solacecloud_service" "broker_service" {
   name             = "my-broker-service"
-  datacenter_id    = "eks-eu-central-1a"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "ENTERPRISE_1K_STANDALONE"
 }
 
+data "solacecloud_connection_endpoints" "endpoints" {
+  service_id = solacecloud_service.broker_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns" {
+  service_id             = solacecloud_service.broker_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints.endpoints[0].id
+}
+
 provider "solacebroker" {
-  url      = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  url      = "https://${data.solacecloud_connection_endpoint_dns_names.dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints.endpoints[0].ports.management_tls.port}"
   username = solacecloud_service.broker_service.message_vpn.manager_management_credential.username
   password = solacecloud_service.broker_service.message_vpn.manager_management_credential.password
 }
 
 resource "solacebroker_msg_vpn_queue" "queue1" {
-  queue_name     = "my-queue"
-  msg_vpn_name   = "msgvpn-${solacecloud_service.broker_service.id}"
+  queue_name      = "my-queue"
+  msg_vpn_name    = "msgvpn-${solacecloud_service.broker_service.id}"
   ingress_enabled = true
   egress_enabled  = true
   max_msg_size    = 10000
@@ -159,33 +168,14 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
     * `username` - The username.
     * `password` - The password (sensitive).
 
-* `connection_endpoints` - The list of Connection Endpoints for this service. Each connection endpoint has the following attributes:
-  * `id` - The identifier of the connection endpoint.
-  * `name` - The name of the connection endpoint.
-  * `description` - The description for the connection endpoint.
-  * `access_type` - The connectivity for the connection endpoint. Either "PRIVATE" (private IP) or "PUBLIC" (public Internet IP).
-  * `k8s_service_type` - The connectivity configuration that is used in the Kubernetes cluster. One of: "NodePort", "LoadBalancer", "ClusterIP".
-  * `k8s_service_id` - The identifier for the Kubernetes service.
-  * `hostnames` - The hostnames assigned to the connection endpoint.
-  * `ports` - The protocols and port numbers of the connection endpoint. This is a complex object with the following possible attributes:
-    * `web` - WebSocket over HTTP (plain-text).
-    * `web_tls` - WebSocket over secured HTTP.
-    * `management_tls` - Secured management connection using SEMP.
-    * `rest_incoming_tls` - Secure REST messaging.
-    * `amqp` - AMQP (plain-text).
-    * `mqtt_websocket` - MQTT WebSocket (plain-text).
-    * `rest_incoming` - REST messaging (plain-text).
-    * `smf_compressed` - SMF (plain-text) in a compressed format over TCP.
-    * `mqtt` - MQTT (plain-text).
-    * `smf` - SMF Host (plain-text) over TCP.
-    * `amqp_tls` - AMQP over a secure TCP connection.
-    * `mqtt_tls` - Secure MQTT.
-    * `smf_tls` - Secure SMF using TLS over TCP.
-    * `mqtt_websocket_tls` - WebSocket secured MQTT.
-    * `ssh_tls` - Secure port for Solace Command Line Interface (CLI).
+* `connection_endpoint` - (Optional) Optional default connection endpoint configuration. If specified, creates one connection endpoint with the provided settings during service creation/update. This is a create/update-only field (not read back from state). This is a complex object with the following attributes:
+  * `name` - (Required) The name of the connection endpoint. Must be between 1 and 50 characters.
+  * `description` - (Optional) The description for the connection endpoint. Maximum 255 characters.
+  * `access_type` - (Required) The connectivity for the connection endpoint. Valid values: `PRIVATE` (private IP) or `PUBLIC` (public Internet IP).
+  * `ports` - (Optional) Port configuration for the connection endpoint protocols.
 
-    Each protocol, when enabled, contains:
-    * `port` - The port number for the protocol.
+**Note:** To read connection endpoint information, use the `solacecloud_connection_endpoints` data source. To manage connection endpoints independently, use the `solacecloud_connection_endpoint` resource.
+
 
 * `dmr_cluster` - The DMR cluster details. This is a complex object with the following attributes:
   * `name` - The name of the DMR cluster.

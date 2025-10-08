@@ -2,6 +2,8 @@ package internal
 
 import (
 	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/http"
 	"os"
 	"strconv"
@@ -43,7 +45,8 @@ func (provider *TestInstance) Init(params ConfigurableParams) {
 	baseUrl := os.Getenv("SOLACE_BASE_URL")
 	provider.baseUrl = baseUrl
 	if baseUrl == "" {
-		provider.baseUrl = "http://" + random.String(9) + ".com"
+		provider.baseUrl = "http://" + random.String(15) + ".com"
+		tflog.Info(context.Background(), fmt.Sprintf("Base Url Assigned: %s", provider.baseUrl))
 		provider.mockedApi = true
 		httpmock.Activate()
 		provider.SetupDefaultMocks(params)
@@ -85,18 +88,18 @@ func JsonResponder(status int, body string) httpmock.Responder {
 }
 
 type ConfigurableParams struct {
-	ServiceName      string
-	ServiceClass     string
-	ServiceId        string
-	Locked           bool
-	MaxSpoolUsage    int
-	OwnerId          string
-	CustomRouterName string
-	// DNS Name specific params
-	DnsName            string
+	ServiceName          string
+	ServiceClass         string
+	ServiceId            string
+	Locked               bool
+	MaxSpoolUsage        int
+	OwnerId              string
+	CustomRouterName     string
+	SshTlsPort           int
+	DnsName              string
 	ConnectionEndpointId string
 	// DNS Name move specific params
-	TargetServiceId           string
+	TargetServiceId            string
 	TargetConnectionEndpointId string
 }
 
@@ -110,6 +113,10 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
 
 	if params.OwnerId == "" {
 		params.OwnerId = "67tr8tkuel"
+	}
+
+	if params.SshTlsPort == 0 {
+		params.SshTlsPort = 22
 	}
 
 	httpmock.RegisterResponder(
@@ -136,6 +143,9 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
 	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"?expand=broker,serviceConnectionEndpoints,allowedActions,messageSpoolDetails",
 		JsonResponder(200, CreateGetServiceResponse(params)))
 
+	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints",
+		JsonResponder(200, CreateGetConnectionEndpointsResponse(params)))
+
 	httpmock.RegisterResponder("DELETE", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
 		JsonResponder(202, `
 {
@@ -153,6 +163,8 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
     }
 }`))
 
+	httpmock.RegisterResponder("GET", provider.GetBaseURL()+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/80dx8er674q",
+		JsonResponder(200, provider.createGetConnectionEndpointResponse(params)))
 }
 
 func CreateGetServiceResponse(params ConfigurableParams) string {
@@ -258,7 +270,7 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
                     },
                     {
                         "protocol": "managementSshTlsListenPort",
-                        "port": 22
+                        "port": ` + strconv.Itoa(params.SshTlsPort) + `
                     }
                 ]
             }
@@ -348,12 +360,99 @@ func determineRouterName(s string) string {
 	}
 }
 
+func CreateGetConnectionEndpointsResponse(params ConfigurableParams) string {
+	return `
+{
+    "data": [
+        {
+            "id": "80dx8er674q",
+            "type": "serviceConnectionEndpoint",
+            "name": "Default Public",
+            "description": "",
+            "accessType": "PUBLIC",
+            "k8sServiceType": "LOADBALANCER",
+            "k8sServiceId": "kilo-sa-production-80dx8er674q-solace",
+            "hostNames": [
+                "mr-connection-80dx8er674q.messaging.solace.cloud"
+            ],
+            "ports": [
+                {
+                    "protocol": "serviceWebPlainTextListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceManagementTlsListenPort",
+                    "port": 943
+                },
+                {
+                    "protocol": "serviceRestIncomingTlsListenPort",
+                    "port": 9443
+                },
+                {
+                    "protocol": "serviceAmqpPlainTextListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceMqttWebSocketListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceRestIncomingPlainTextListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceWebTlsListenPort",
+                    "port": 443
+                },
+                {
+                    "protocol": "serviceSmfCompressedListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceMqttPlainTextListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceSmfPlainTextListenPort",
+                    "port": 0
+                },
+                {
+                    "protocol": "serviceAmqpTlsListenPort",
+                    "port": 5671
+                },
+                {
+                    "protocol": "serviceMqttTlsListenPort",
+                    "port": 8883
+                },
+                {
+                    "protocol": "serviceSmfTlsListenPort",
+                    "port": 55443
+                },
+                {
+                    "protocol": "serviceMqttTlsWebSocketListenPort",
+                    "port": 8443
+                },
+                {
+                    "protocol": "managementSshTlsListenPort",
+                    "port": ` + strconv.Itoa(params.SshTlsPort) + `
+                }
+            ]
+        }
+    ],
+    "meta": {
+        "pagination": {
+            "count": 1
+        }
+    }
+}`
+}
+
 func (provider *TestInstance) GetBaseHcl() string {
 	if provider.mockedApi {
 		return `
 provider "solacecloud" {
   base_url             = "` + provider.baseUrl + `"
-  api_polling_interval = 1
+  api_polling_interval = 10
   api_token            = "mocked_api_token"
 }
 `
@@ -361,9 +460,41 @@ provider "solacecloud" {
 	return `
 provider "solacecloud" {
   base_url             = "` + provider.baseUrl + `"
-  api_polling_interval = 1
+  api_polling_interval = 10
 }
 `
+}
+
+func (provider *TestInstance) createGetConnectionEndpointResponse(params ConfigurableParams) string {
+
+	return `{
+	"data": {
+		"id": "80dx8er674q",
+			"type": "serviceConnectionEndpoint",
+			"name": "Default Public",
+			"description": "",
+			"accessType": "PUBLIC",
+			"k8sServiceType": "LOADBALANCER",
+			"k8sServiceId": "kilo-sa-production-80dx8er674q-solace",
+			"ports": [
+	{"protocol": "serviceWebPlainTextListenPort", "port": 0},
+	{"protocol": "serviceManagementTlsListenPort", "port": 943},
+	{"protocol": "serviceRestIncomingTlsListenPort", "port": 9443},
+	{"protocol": "serviceAmqpPlainTextListenPort", "port": 0},
+	{"protocol": "serviceMqttWebSocketListenPort", "port": 0},
+	{"protocol": "serviceRestIncomingPlainTextListenPort", "port": 0},
+	{"protocol": "serviceWebTlsListenPort", "port": 443},
+	{"protocol": "serviceSmfCompressedListenPort", "port": 0},
+	{"protocol": "serviceMqttPlainTextListenPort", "port": 0},
+	{"protocol": "serviceSmfPlainTextListenPort", "port": 0},
+	{"protocol": "serviceAmqpTlsListenPort", "port": 5671},
+	{"protocol": "serviceMqttTlsListenPort", "port": 8883},
+	{"protocol": "serviceSmfTlsListenPort", "port": 55443},
+	{"protocol": "serviceMqttTlsWebSocketListenPort", "port": 8443},
+	{"protocol": "managementSshTlsListenPort", "port": ` + strconv.Itoa(params.SshTlsPort) + `}
+]
+	}
+}`
 }
 
 // SetupDnsNameMocks sets up DNS name-specific HTTP mocks

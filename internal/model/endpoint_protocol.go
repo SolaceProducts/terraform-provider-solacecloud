@@ -34,6 +34,19 @@ func EndpointProtocolModelType() schema.SingleNestedAttribute {
 	}
 }
 
+// ConnectionEndpointProtocolModelType returns a configurable (optional) endpoint protocol schema
+// for use in connection endpoint resources where ports can be configured by the user
+func ConnectionEndpointProtocolModelType() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"port": schema.Int64Attribute{
+				Required: true,
+			},
+		},
+	}
+}
+
 func (m EndpointProtocolModel) ToObjectValue() (basetypes.ObjectValue, diag.Diagnostics) {
 	return types.ObjectValue(
 		map[string]attr.Type{

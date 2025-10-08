@@ -9,6 +9,7 @@ import (
 	"strings"
 	"terraform-provider-solacecloud/internal/model"
 	"terraform-provider-solacecloud/internal/provider/apiclient"
+	"terraform-provider-solacecloud/internal/provider/connectionendpoint"
 	"terraform-provider-solacecloud/internal/provider/validators"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -34,25 +35,26 @@ type ServiceResource struct {
 	APIClient          *apiclient.RetryableClientWithResponses
 	APIPollingInterval int
 	APIToken           string
+	endpointManager    *connectionendpoint.EndpointManager
 }
 
 type ServiceResourceModel struct {
-	Id                  types.String          `tfsdk:"id"`
-	Name                types.String          `tfsdk:"name"`
-	EventBrokerVersion  types.String          `tfsdk:"event_broker_version"`
-	MessageVpnName      types.String          `tfsdk:"message_vpn_name"`
-	MaxSpoolUsage       types.Int64           `tfsdk:"max_spool_usage"`
-	ServiceClassId      types.String          `tfsdk:"service_class_id"`
-	DatacenterId        types.String          `tfsdk:"datacenter_id"`
-	ClusterName         types.String          `tfsdk:"cluster_name"`
-	OwnedBy             types.String          `tfsdk:"owned_by"`
-	Locked              types.Bool            `tfsdk:"locked"`
-	MateLinkEncryption  types.Bool            `tfsdk:"mate_link_encryption"`
-	ConnectionEndpoints types.List            `tfsdk:"connection_endpoints"`
-	CustomRouterName    types.String          `tfsdk:"custom_router_name"`
-	EnvironmentId       types.String          `tfsdk:"environment_id"`
-	MessageVpn          basetypes.ObjectValue `tfsdk:"message_vpn"`
-	DmrClusterInfo      basetypes.ObjectValue `tfsdk:"dmr_cluster"`
+	Id                 types.String          `tfsdk:"id"`
+	Name               types.String          `tfsdk:"name"`
+	EventBrokerVersion types.String          `tfsdk:"event_broker_version"`
+	MessageVpnName     types.String          `tfsdk:"message_vpn_name"`
+	MaxSpoolUsage      types.Int64           `tfsdk:"max_spool_usage"`
+	ServiceClassId     types.String          `tfsdk:"service_class_id"`
+	DatacenterId       types.String          `tfsdk:"datacenter_id"`
+	ClusterName        types.String          `tfsdk:"cluster_name"`
+	OwnedBy            types.String          `tfsdk:"owned_by"`
+	Locked             types.Bool            `tfsdk:"locked"`
+	MateLinkEncryption types.Bool            `tfsdk:"mate_link_encryption"`
+	ConnectionEndpoint basetypes.ObjectValue `tfsdk:"connection_endpoint"`
+	CustomRouterName   types.String          `tfsdk:"custom_router_name"`
+	EnvironmentId      types.String          `tfsdk:"environment_id"`
+	MessageVpn         basetypes.ObjectValue `tfsdk:"message_vpn"`
+	DmrClusterInfo     basetypes.ObjectValue `tfsdk:"dmr_cluster"`
 }
 
 type NameNotDefaultValidator struct{}
@@ -225,7 +227,11 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"connection_endpoints": model.ConnectionEndpointListSchema(),
+			"connection_endpoint": schema.SingleNestedAttribute{
+				MarkdownDescription: "Optional default connection endpoint configuration. If specified, the service will create and manage one connection endpoint with the provided settings.",
+				Optional:            true,
+				Attributes:          nestedConnectionEndpointSchema(),
+			},
 			"custom_router_name": schema.StringAttribute{
 				MarkdownDescription: "The unique prefix for the name of the router for the event broker service. " +
 					"If left undefined, the service ID will be used.  Defining this is useful when replacing a " +
@@ -257,5 +263,67 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"message_vpn": model.MessageVpnAttributeSchema(),
 			"dmr_cluster": model.DmrClusterInfoAttributeSchema(),
 		},
+	}
+}
+
+func nestedConnectionEndpointSchema() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			MarkdownDescription: "The identifier of the connection endpoint.",
+			Computed:            true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"service_id": schema.StringAttribute{
+			MarkdownDescription: "The ID of the service this endpoint belongs to.",
+			Computed:            true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"name": schema.StringAttribute{
+			MarkdownDescription: "The name of the connection endpoint.",
+			Required:            true,
+			Validators: []validator.String{
+				stringvalidator.LengthBetween(1, 50),
+			},
+		},
+		"description": schema.StringAttribute{
+			MarkdownDescription: "The description for the connection endpoint.",
+			Optional:            true,
+			Computed:            true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+			Validators: []validator.String{
+				stringvalidator.LengthAtMost(255),
+			},
+		},
+		"access_type": schema.StringAttribute{
+			MarkdownDescription: "The connectivity for the connection endpoint. This can be either PRIVATE (private IP) or PUBLIC (public Internet IP)",
+			Required:            true,
+			Validators: []validator.String{
+				stringvalidator.OneOf(
+					"PRIVATE",
+					"PUBLIC",
+				),
+			},
+		},
+		"k8s_service_type": schema.StringAttribute{
+			MarkdownDescription: "The connectivity configuration that is used in the Kubernetes cluster.",
+			Computed:            true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"k8s_service_id": schema.StringAttribute{
+			MarkdownDescription: "The identifier for the Kubernetes service.",
+			Computed:            true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"ports": model.ConnectionEndpointProtocolSchema(),
 	}
 }
