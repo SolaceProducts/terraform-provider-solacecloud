@@ -75,8 +75,17 @@ output "service_id" {
   value = solacecloud_service.broker_service.id
 }
 
+data "solacecloud_connection_endpoints" "endpoints" {
+  service_id = solacecloud_service.broker_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns" {
+  service_id             = solacecloud_service.broker_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints.endpoints[0].id
+}
+
 output "service_management_url" {
-  value = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  value = "https://${data.solacecloud_connection_endpoint_dns_names.dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints.endpoints[0].ports.management_tls.port}"
 }
 ```
 
@@ -135,9 +144,9 @@ When prompted, confirm the action by typing `yes`.
 Now that you've created your first Solace Cloud service with Terraform, you can:
 
 1. Explore the [Solace Cloud Provider documentation](../index.md) for more details on available resources and data sources.
-2. Learn how to [configure your service](./service_configuration.md) with advanced options.
-3. Set up [multiple services](./multiple_services.md) across different environments.
-4. Integrate with the [Solace Broker Provider](./broker_integration.md) to configure messaging resources within your service.
+2. Learn how to [configure your service](services/service_configuration.md) with advanced options.
+3. Set up [multiple services](services/multiple_services.md) across different environments.
+4. Integrate with the [Solace Broker Provider](services/broker_integration.md) to configure messaging resources within your service.
 
 ## Troubleshooting
 

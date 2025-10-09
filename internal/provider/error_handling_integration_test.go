@@ -24,9 +24,12 @@ func TestErrorHandling_ServiceCreation_AuthenticationFailure(t *testing.T) {
 	}
 	instance.Init(params)
 
+	if !instance.IsMocked() {
+		t.Skip()
+	}
+
 	// Setup mock to return 401 Unauthorized
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder(
 		"POST",
@@ -61,10 +64,12 @@ func TestErrorHandling_ServiceCreation_BadRequest(t *testing.T) {
 		ServiceName:  "Bad_Request_Service_" + randomName,
 	}
 	instance.Init(params)
+	if !instance.IsMocked() {
+		t.Skip()
+	}
 
 	// Setup mock to return 400 Bad Request
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder(
 		"POST",
@@ -106,10 +111,12 @@ func TestErrorHandling_ServiceCreation_ServiceUnavailable(t *testing.T) {
 		ServiceName:  "Unavailable_Service_" + randomName,
 	}
 	instance.Init(params)
+	if !instance.IsMocked() {
+		t.Skip()
+	}
 
 	// Setup mock to return 503 Service Unavailable
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder(
 		"POST",
@@ -144,10 +151,12 @@ func TestErrorHandling_UnexpectedStatusCode(t *testing.T) {
 		ServiceName:  "Unexpected_Error_Service_" + randomName,
 	}
 	instance.Init(params)
+	if !instance.IsMocked() {
+		t.Skip()
+	}
 
 	// Setup mock to return 500 Internal Server Error
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder(
 		"POST",

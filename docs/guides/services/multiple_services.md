@@ -165,9 +165,6 @@ output "message_vpn" {
   sensitive = true
 }
 
-output "connection_endpoints" {
-  value = solacecloud_service.service.connection_endpoints
-}
 ```
 
 **main.tf**:
@@ -247,17 +244,35 @@ resource "solacecloud_service" "prod_service" {
 When managing multiple services, it's important to handle credentials securely. You can output the credentials for each service:
 
 ```hcl
+data "solacecloud_connection_endpoints" "dev_endpoints" {
+  service_id = solacecloud_service.dev_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dev_dns" {
+  service_id             = solacecloud_service.dev_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.dev_endpoints.endpoints[0].id
+}
+
+data "solacecloud_connection_endpoints" "prod_endpoints" {
+  service_id = solacecloud_service.prod_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "prod_dns" {
+  service_id             = solacecloud_service.prod_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.prod_endpoints.endpoints[0].id
+}
+
 output "service_credentials" {
   value = {
     dev_service = {
-      management_url     = "https://${solacecloud_service.dev_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.dev_service.connection_endpoints[0].ports.management_tls.port}"
+      management_url     = "https://${data.solacecloud_connection_endpoint_dns_names.dev_dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.dev_endpoints.endpoints[0].ports.management_tls.port}"
       manager_username   = solacecloud_service.dev_service.message_vpn.editor_management_credential.username
       manager_password   = solacecloud_service.dev_service.message_vpn.editor_management_credential.password
       messaging_username = solacecloud_service.dev_service.message_vpn.messaging_client_credential.username
       messaging_password = solacecloud_service.dev_service.message_vpn.messaging_client_credential.password
     },
     prod_service = {
-      management_url     = "https://${solacecloud_service.prod_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.prod_service.connection_endpoints[0].ports.management_tls.port}"
+      management_url     = "https://${data.solacecloud_connection_endpoint_dns_names.prod_dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.prod_endpoints.endpoints[0].ports.management_tls.port}"
       manager_username   = solacecloud_service.prod_service.message_vpn.editor_management_credential.username
       manager_password   = solacecloud_service.prod_service.message_vpn.editor_management_credential.password
       messaging_username = solacecloud_service.prod_service.message_vpn.messaging_client_credential.username
