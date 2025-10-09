@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"net/http"
+	"terraform-provider-solacecloud/internal/model"
+	"terraform-provider-solacecloud/internal/provider/connectionendpoint"
 	"terraform-provider-solacecloud/internal/shared"
+	"terraform-provider-solacecloud/internal/util"
 	"terraform-provider-solacecloud/missioncontrol"
 	"time"
 
@@ -33,10 +36,12 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, r.readDataToStruct(ctx, state.Id))...)
+	r.readDataInternal(ctx, &state, &plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) diag.Diagnostics {
+	// create new empty diagnostics
 	var diags diag.Diagnostics
 
 	// check if
@@ -72,8 +77,53 @@ func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceReso
 			return diags
 		}
 	}
+	diags = r.updateDefaultConnectionEndpoint(ctx, state, plan)
+	return diags
+}
+
+func (r *ServiceResource) updateDefaultConnectionEndpoint(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	// on delete case. Where connection endpoint is removed from plan. Do nothing
+	if util.IsKnown(state.ConnectionEndpoint) && !util.IsKnown(plan.ConnectionEndpoint) {
+		return diags
+	}
+
+	if util.IsKnown(state.ConnectionEndpoint) {
+		var connectionEndpointResourceModel model.NestedConnectionEndpointModel
+		state.ConnectionEndpoint.As(ctx, &connectionEndpointResourceModel, basetypes.ObjectAsOptions{})
+		var connectionEndpointPlan model.NestedConnectionEndpointModel
+		plan.ConnectionEndpoint.As(ctx, &connectionEndpointPlan, basetypes.ObjectAsOptions{})
+		// log ports for debugging
+		tflog.Info(ctx, fmt.Sprintf("Current ports: %+v", connectionEndpointResourceModel.Ports.Attributes()))
+		tflog.Info(ctx, fmt.Sprintf("Planned ports: %+v", connectionEndpointPlan.Ports.Attributes()))
+
+		endpointChanged := connectionEndpointResourceModel.Name != connectionEndpointPlan.Name ||
+			connectionEndpointResourceModel.Description != connectionEndpointPlan.Description ||
+			!connectionEndpointResourceModel.Ports.Equal(connectionEndpointPlan.Ports)
+		if !endpointChanged {
+			return diags
+		}
+
+		req := r.buildConnectionEndpointRequest(ctx, plan)
+
+		patchRequest := connectionendpoint.EndpointConfig{
+			Name:        connectionEndpointPlan.Name.ValueString(),
+			Description: connectionEndpointPlan.Description.ValueStringPointer(),
+		}
+		if req.Ports != nil {
+			tflog.Debug(ctx, fmt.Sprintf("Sending %d ports in update request", len(req.Ports)))
+			for i, port := range req.Ports {
+				tflog.Debug(ctx, fmt.Sprintf("Port[%d]: protocol=%s, port=%d", i, port.Protocol, *port.Port))
+			}
+			patchRequest.Ports = req.Ports
+		}
+
+		r.endpointManager.UpdateEndpoint(ctx, state.Id.ValueString(), connectionEndpointResourceModel.Id.ValueString(), patchRequest, &diags)
+	}
 
 	return diags
+
 }
 
 func (r *ServiceResource) patchService(ctx context.Context, state *ServiceResourceModel, updateRequest *missioncontrol.UpdateServiceRequest) diag.Diagnostics {
@@ -113,13 +163,6 @@ func (r *ServiceResource) patchService(ctx context.Context, state *ServiceResour
 	}
 
 	return diags
-}
-
-func (r *ServiceResource) readDataToStruct(ctx context.Context, serviceId basetypes.StringValue) ServiceResourceModel {
-	var state ServiceResourceModel
-	state.Id = serviceId
-	r.readDataInternal(ctx, &state)
-	return state
 }
 
 func (r *ServiceResource) updateStorageSize(ctx context.Context, state ServiceResourceModel, plan ServiceResourceModel) *diag.Diagnostics {

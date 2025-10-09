@@ -94,6 +94,86 @@ func EndpointProtocolSchema() schema.Attribute {
 	}
 }
 
+// ConnectionEndpointProtocolSchema defines the schema for connection endpoint ports (required, not computed)
+func ConnectionEndpointProtocolSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		MarkdownDescription: "<p>The protocols and port numbers of the connection endpoint. " +
+			"All messaging and management protocols along with the port numbers must be specified in the request." +
+			"</p>\n" +
+			"<p>Connection specific protocols. </p>\n" +
+			"<ul>\n" +
+			"  <li><b>Solace Messaging</b>\n" +
+			"    <ul>\n" +
+			"      <li>'smf' - Use SMF Host (plain-text) over TCP to connect and exchange " +
+			"           messages with the event broker service.</li>\n" +
+			"      <li>'smf_compressed' - Use SMF (plain-text) in a compressed format over TCP to " +
+			"           connect and exchange messages with the event broker service.</li>\n" +
+			"      <li>'smf_tls' - Use secure SMF using TLS over TCP.</li>\n" +
+			"    </ul>\n" +
+			"  </li>\n" +
+			"  <br>\n" +
+			"  <li><b>Solace Web Messaging</b>\n" +
+			"    <ul>\n" +
+			"      <li>'web' - Use WebSocket over HTTP (plain-text).</li>\n" +
+			"      <li>'web_tls' - Use WebSocket over secured HTTP.</li>\n" +
+			"    </ul>\n" +
+			"  </li>\n" +
+			"  <br>\n" +
+			"  <li><b>AMQP</b>\n" +
+			"    <ul>\n" +
+			"      <li>'amqp' - Use AMQP (plain-text).</li>\n" +
+			"      <li>'amqp_tls' - Use AMQP over a secure TCP connection.</li>\n" +
+			"    </ul>\n" +
+			"  </li>\n" +
+			"  <br>\n" +
+			"  <li><b>MQTT</b>\n" +
+			"    <ul>\n" +
+			"      <li>'mqtt' - Use MQTT (plain-text).</li>\n" +
+			"      <li>'mqtt_websocket' - Use MQTT WebSocket (plain-text).</li>\n" +
+			"      <li>'mqtt_tls' - Use secure MQTT.</li>\n" +
+			"      <li>'mqtt_websocket_tls' - Use WebSocket secured MQTT.</li>\n" +
+			"    </ul>\n" +
+			"  </li>\n" +
+			"  <br>\n" +
+			"  <li><b>REST</b>\n" +
+			"    <ul>\n" +
+			"      <li>'rest_incoming' - Use REST messaging (plain-text).</li>\n" +
+			"      <li>'rest_incoming_tls' - Use secure REST messaging.</li>\n" +
+			"    </ul>\n" +
+			"  </li>\n" +
+			"  <br>\n" +
+			"  <li><b>Management</b>\n" +
+			"    <ul>\n" +
+			"      <li>'management_tls' - Use the secured management connection, which uses SEMP to " +
+			"           manage the event broker. This port must be enabled on at least one of the service connection " +
+			"           endpoints on the event broker service.</li>\n" +
+			"      <li>'ssh_tls' - Use a secure port to connect to the event broker service to issue " +
+			"           Solace Command Line Interface (CLI). This port provides you with scope-restricted access to the " +
+			"           event broker service.</li>\n" +
+			"    </ul>\n" +
+			"  </li>\n" +
+			"</ul>",
+		Required: true,
+		Attributes: map[string]schema.Attribute{
+			"web":                ConnectionEndpointProtocolModelType(),
+			"management_tls":     ConnectionEndpointProtocolModelType(),
+			"rest_incoming_tls":  ConnectionEndpointProtocolModelType(),
+			"amqp":               ConnectionEndpointProtocolModelType(),
+			"mqtt_websocket":     ConnectionEndpointProtocolModelType(),
+			"rest_incoming":      ConnectionEndpointProtocolModelType(),
+			"web_tls":            ConnectionEndpointProtocolModelType(),
+			"smf_compressed":     ConnectionEndpointProtocolModelType(),
+			"mqtt":               ConnectionEndpointProtocolModelType(),
+			"smf":                ConnectionEndpointProtocolModelType(),
+			"amqp_tls":           ConnectionEndpointProtocolModelType(),
+			"mqtt_tls":           ConnectionEndpointProtocolModelType(),
+			"smf_tls":            ConnectionEndpointProtocolModelType(),
+			"mqtt_websocket_tls": ConnectionEndpointProtocolModelType(),
+			"ssh_tls":            ConnectionEndpointProtocolModelType(),
+		},
+	}
+}
+
 func EndpointProtocolsTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"web":                EndpointProtocolModelType().GetType(),
@@ -111,6 +191,27 @@ func EndpointProtocolsTypes() map[string]attr.Type {
 		"smf_tls":            EndpointProtocolModelType().GetType(),
 		"mqtt_websocket_tls": EndpointProtocolModelType().GetType(),
 		"ssh_tls":            EndpointProtocolModelType().GetType(),
+	}
+}
+
+// ConnectionEndpointProtocolsTypes returns the types for connection endpoint protocols
+func ConnectionEndpointProtocolsTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"web":                ConnectionEndpointProtocolModelType().GetType(),
+		"management_tls":     ConnectionEndpointProtocolModelType().GetType(),
+		"rest_incoming_tls":  ConnectionEndpointProtocolModelType().GetType(),
+		"amqp":               ConnectionEndpointProtocolModelType().GetType(),
+		"mqtt_websocket":     ConnectionEndpointProtocolModelType().GetType(),
+		"rest_incoming":      ConnectionEndpointProtocolModelType().GetType(),
+		"web_tls":            ConnectionEndpointProtocolModelType().GetType(),
+		"smf_compressed":     ConnectionEndpointProtocolModelType().GetType(),
+		"mqtt":               ConnectionEndpointProtocolModelType().GetType(),
+		"smf":                ConnectionEndpointProtocolModelType().GetType(),
+		"amqp_tls":           ConnectionEndpointProtocolModelType().GetType(),
+		"mqtt_tls":           ConnectionEndpointProtocolModelType().GetType(),
+		"smf_tls":            ConnectionEndpointProtocolModelType().GetType(),
+		"mqtt_websocket_tls": ConnectionEndpointProtocolModelType().GetType(),
+		"ssh_tls":            ConnectionEndpointProtocolModelType().GetType(),
 	}
 }
 
@@ -177,4 +278,33 @@ func ToObjectValue(Ports []missioncontrol.ServiceConnectionEndpointPort) (basety
 		EndpointProtocolsTypes(),
 		values,
 	)
+}
+
+// GetAPIProtocolName returns the API protocol name for a given Terraform attribute name
+// This is the reverse of the attributeMapping used in ToObjectValue
+func GetAPIProtocolName(terraformAttrName string) string {
+	// Reverse mapping from Terraform attribute names to API protocol names
+	reverseMapping := map[string]string{
+		"web":                "serviceWebPlainTextListenPort",
+		"management_tls":     "serviceManagementTlsListenPort",
+		"rest_incoming_tls":  "serviceRestIncomingTlsListenPort",
+		"amqp":               "serviceAmqpPlainTextListenPort",
+		"mqtt_websocket":     "serviceMqttWebSocketListenPort",
+		"rest_incoming":      "serviceRestIncomingPlainTextListenPort",
+		"web_tls":            "serviceWebTlsListenPort",
+		"smf_compressed":     "serviceSmfCompressedListenPort",
+		"mqtt":               "serviceMqttPlainTextListenPort",
+		"smf":                "serviceSmfPlainTextListenPort",
+		"amqp_tls":           "serviceAmqpTlsListenPort",
+		"mqtt_tls":           "serviceMqttTlsListenPort",
+		"smf_tls":            "serviceSmfTlsListenPort",
+		"mqtt_websocket_tls": "serviceMqttTlsWebSocketListenPort",
+		"ssh_tls":            "managementSshTlsListenPort",
+	}
+
+	if apiName, exists := reverseMapping[terraformAttrName]; exists {
+		return apiName
+	}
+	// Fallback to the original name if not found (shouldn't happen with valid schema)
+	return terraformAttrName
 }

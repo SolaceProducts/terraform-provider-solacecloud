@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"terraform-provider-solacecloud/internal/provider/service"
 	"terraform-provider-solacecloud/internal/provider/dnsName"
+	"terraform-provider-solacecloud/internal/provider/service"
 
+	"terraform-provider-solacecloud/internal/provider/connectionendpoint"
 	"terraform-provider-solacecloud/internal/provider/environment"
 	"terraform-provider-solacecloud/internal/shared"
 	"terraform-provider-solacecloud/missioncontrol"
@@ -228,6 +229,7 @@ func (p *solaceCloudProvider) Configure(ctx context.Context, req provider.Config
 func (p *solaceCloudProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		environment.NewEnvironmentDataSource,
+		connectionendpoint.NewConnectionEndpointDataSource,
 		dnsName.NewDnsNamesDataSource,
 	}
 }
@@ -238,5 +240,6 @@ func (p *solaceCloudProvider) Resources(_ context.Context) []func() resource.Res
 		service.NewServiceResource,
 		dnsName.NewDnsNameResource,
 		dnsName.NewDnsNameMoveResource,
+		connectionendpoint.NewConnectionEndpointResource,
 	}
 }

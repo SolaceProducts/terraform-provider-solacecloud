@@ -40,9 +40,18 @@ provider "solacecloud" {
   api_token = var.solace_api_token
 }
 
+data "solacecloud_connection_endpoints" "endpoints" {
+  service_id = solacecloud_service.broker_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns" {
+  service_id             = solacecloud_service.broker_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints.endpoints[0].id
+}
+
 provider "solacebroker" {
   alias    = "broker1"
-  url      = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  url      = "https://${data.solacecloud_connection_endpoint_dns_names.dns.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints.endpoints[0].ports.management_tls.port}"
   username = solacecloud_service.broker_service.message_vpn.manager_management_credential.username
   password = solacecloud_service.broker_service.message_vpn.manager_management_credential.password
 }
@@ -67,10 +76,29 @@ resource "solacecloud_service" "broker_service2" {
   service_class_id = "ENTERPRISE_1K_STANDALONE"
 }
 
+# Get connection endpoints for both services
+data "solacecloud_connection_endpoints" "endpoints1" {
+  service_id = solacecloud_service.broker_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns1" {
+  service_id             = solacecloud_service.broker_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints1.endpoints[0].id
+}
+
+data "solacecloud_connection_endpoints" "endpoints2" {
+  service_id = solacecloud_service.broker_service2.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns2" {
+  service_id             = solacecloud_service.broker_service2.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints2.endpoints[0].id
+}
+
 # Configure Solace Broker Provider for the first service
 provider "solacebroker" {
   alias    = "broker1"
-  url      = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  url      = "https://${data.solacecloud_connection_endpoint_dns_names.dns1.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints1.endpoints[0].ports.management_tls.port}"
   username = solacecloud_service.broker_service.message_vpn.manager_management_credential.username
   password = solacecloud_service.broker_service.message_vpn.manager_management_credential.password
 }
@@ -78,7 +106,7 @@ provider "solacebroker" {
 # Configure Solace Broker Provider for the second service
 provider "solacebroker" {
   alias    = "broker2"
-  url      = "https://${solacecloud_service.broker_service2.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service2.connection_endpoints[0].ports.management_tls.port}"
+  url      = "https://${data.solacecloud_connection_endpoint_dns_names.dns2.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints2.endpoints[0].ports.management_tls.port}"
   username = solacecloud_service.broker_service2.message_vpn.manager_management_credential.username
   password = solacecloud_service.broker_service2.message_vpn.manager_management_credential.password
 }
@@ -145,7 +173,7 @@ provider "solacecloud" {
   api_token = var.solace_api_token
 }
 
-# Create a Solace Cloud service
+# Create Solace Cloud services
 resource "solacecloud_service" "broker_service" {
   name             = "my-service"
   datacenter_id    = "eks-eu-central-1a"
@@ -158,17 +186,36 @@ resource "solacecloud_service" "broker_service2" {
   service_class_id = "ENTERPRISE_1K_STANDALONE"
 }
 
+# Get connection endpoints
+data "solacecloud_connection_endpoints" "endpoints1" {
+  service_id = solacecloud_service.broker_service.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns1" {
+  service_id             = solacecloud_service.broker_service.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints1.endpoints[0].id
+}
+
+data "solacecloud_connection_endpoints" "endpoints2" {
+  service_id = solacecloud_service.broker_service2.id
+}
+
+data "solacecloud_connection_endpoint_dns_names" "dns2" {
+  service_id             = solacecloud_service.broker_service2.id
+  connection_endpoint_id = data.solacecloud_connection_endpoints.endpoints2.endpoints[0].id
+}
+
 # Configure the Solace Broker Provider
 provider "solacebroker" {
   alias    = "broker1"
-  url      = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  url      = "https://${data.solacecloud_connection_endpoint_dns_names.dns1.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints1.endpoints[0].ports.management_tls.port}"
   username = solacecloud_service.broker_service.message_vpn.manager_management_credential.username
   password = solacecloud_service.broker_service.message_vpn.manager_management_credential.password
 }
 
 provider "solacebroker" {
   alias    = "broker2"
-  url      = "https://${solacecloud_service.broker_service2.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service2.connection_endpoints[0].ports.management_tls.port}"
+  url      = "https://${data.solacecloud_connection_endpoint_dns_names.dns2.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints2.endpoints[0].ports.management_tls.port}"
   username = solacecloud_service.broker_service2.message_vpn.manager_management_credential.username
   password = solacecloud_service.broker_service2.message_vpn.manager_management_credential.password
 }
@@ -215,7 +262,7 @@ output "broker_password" {
 }
 
 output "broker_semp_url" {
-  value = "https://${solacecloud_service.broker_service.connection_endpoints[0].hostnames[0]}:${solacecloud_service.broker_service.connection_endpoints[0].ports.management_tls.port}"
+  value = "https://${data.solacecloud_connection_endpoint_dns_names.dns1.dns_names[0].dns_name}:${data.solacecloud_connection_endpoints.endpoints1.endpoints[0].ports.management_tls.port}"
 }
 ```
 
@@ -248,4 +295,4 @@ If you encounter issues with the integration between the Solace Cloud Provider a
 
 5. **Provider Versions**: Check that you are using compatible versions of both providers.
 
-For more detailed troubleshooting information, refer to the [Troubleshooting Guide](../troubleshooting.md).
+For more detailed troubleshooting information, refer to the [Troubleshooting Guide](../../troubleshooting.md).
