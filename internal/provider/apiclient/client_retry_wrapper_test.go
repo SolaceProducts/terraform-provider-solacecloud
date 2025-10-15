@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net/http"
 	"strings"
 	mc "terraform-provider-solacecloud/missioncontrol"
 	"testing"
@@ -23,6 +24,16 @@ func (m MockApiError) Error() string {
 }
 
 func (m MockApiError) StatusCode() int {
+	return m.statusCode
+}
+
+// MockResponse implements the ApiError interface for testing responses
+type MockResponse struct {
+	statusCode int
+	data       string
+}
+
+func (m *MockResponse) StatusCode() int {
 	return m.statusCode
 }
 
@@ -225,7 +236,8 @@ func TestIsRetryableError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := isRetryableError(tt.err)
+			ctx := context.Background()
+			result := isRetryableError(ctx, tt.err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -235,13 +247,15 @@ func TestRetry_Success(t *testing.T) {
 	ctx := context.Background()
 	callCount := 0
 
-	result, err := retry(ctx, func() (string, error) {
+	result, err := retry(ctx, func() (*MockResponse, error) {
 		callCount++
-		return "success", nil
+		return &MockResponse{statusCode: 200, data: "success"}, nil
 	}, 3, 0)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "success", result)
+	assert.NotNil(t, result)
+	assert.Equal(t, 200, result.StatusCode())
+	assert.Equal(t, "success", result.data)
 	assert.Equal(t, 1, callCount) // Should succeed on first attempt
 }
 
@@ -249,48 +263,48 @@ func TestRetry_SuccessAfterRetries(t *testing.T) {
 	ctx := context.Background()
 	callCount := 0
 
-	result, err := retry(ctx, func() (string, error) {
+	result, err := retry(ctx, func() (*MockResponse, error) {
 		callCount++
 		if callCount < 3 {
-			return "", MockApiError{statusCode: 500}
+			return &MockResponse{statusCode: 500}, nil
 		}
-		return "success", nil
+		return &MockResponse{statusCode: 200, data: "success"}, nil
 	}, 3, 0) // waitSec = 0 for faster test
 
 	assert.NoError(t, err)
-	assert.Equal(t, "success", result)
+	assert.NotNil(t, result)
+	assert.Equal(t, 200, result.StatusCode())
+	assert.Equal(t, "success", result.data)
 	assert.Equal(t, 3, callCount) // Should succeed on third attempt
 }
 
 func TestRetry_ExhaustRetries(t *testing.T) {
 	ctx := context.Background()
 	callCount := 0
-	expectedErr := MockApiError{statusCode: 500}
 
-	result, err := retry(ctx, func() (string, error) {
+	result, err := retry(ctx, func() (*MockResponse, error) {
 		callCount++
-		return "", expectedErr
+		return &MockResponse{statusCode: 500}, nil
 	}, 3, 0)
 
-	assert.Error(t, err)
-	assert.Equal(t, expectedErr, err)
-	assert.Equal(t, "", result)
+	assert.NoError(t, err) // No error from function itself
+	assert.NotNil(t, result)
+	assert.Equal(t, 500, result.StatusCode())
 	assert.Equal(t, 3, callCount) // Should attempt all retries
 }
 
 func TestRetry_NonRetryableError(t *testing.T) {
 	ctx := context.Background()
 	callCount := 0
-	expectedErr := MockApiError{statusCode: 400}
 
-	result, err := retry(ctx, func() (string, error) {
+	result, err := retry(ctx, func() (*MockResponse, error) {
 		callCount++
-		return "", expectedErr
+		return &MockResponse{statusCode: 400}, nil
 	}, 3, 0)
 
-	assert.Error(t, err)
-	assert.Equal(t, expectedErr, err)
-	assert.Equal(t, "", result)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 400, result.StatusCode())
 	assert.Equal(t, 1, callCount) // Should not retry for 4xx errors
 }
 
@@ -299,17 +313,18 @@ func TestRetry_ContextCancellation(t *testing.T) {
 	callCount := 0
 
 	// Cancel context after first call
-	result, err := retry(ctx, func() (string, error) {
+	result, err := retry(ctx, func() (*MockResponse, error) {
 		callCount++
 		if callCount == 1 {
 			cancel()
 		}
-		return "", MockApiError{statusCode: 500}
+		return &MockResponse{statusCode: 500}, nil
 	}, 3, 1) // waitSec = 1 to allow context cancellation to take effect
 
 	assert.Error(t, err)
 	assert.Equal(t, context.Canceled, err)
-	assert.Equal(t, "", result)
+	assert.NotNil(t, result)
+	assert.Equal(t, 500, result.StatusCode())
 	assert.Equal(t, 1, callCount) // Should stop after context cancellation
 }
 
@@ -337,10 +352,14 @@ func TestRetryableClient_CreateServiceWithResponse_RetryableError(t *testing.T) 
 	ctx := context.Background()
 	body := mc.CreateServiceJSONRequestBody{}
 	expectedResponse := &mc.CreateServiceResponse{}
-	retryableErr := MockApiError{statusCode: 500}
 
-	// First call fails, second succeeds
-	mockApi.On("CreateServiceWithResponse", ctx, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(nil, retryableErr).Once()
+	// Create a response with a retryable status code (500)
+	retryableResponse := &mc.CreateServiceResponse{
+		HTTPResponse: &http.Response{StatusCode: 500},
+	}
+
+	// First call returns 500, second succeeds
+	mockApi.On("CreateServiceWithResponse", ctx, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(retryableResponse, nil).Once()
 	mockApi.On("CreateServiceWithResponse", ctx, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil).Once()
 
 	result, err := client.CreateServiceWithResponse(ctx, body)
@@ -469,10 +488,14 @@ func TestRetryableClient_CreateConnectionEndpointWithResponse_RetryableError(t *
 	serviceId := "test-service-id"
 	body := mc.CreateConnectionEndpointJSONRequestBody{}
 	expectedResponse := &mc.CreateConnectionEndpointResponse{}
-	retryableErr := MockApiError{statusCode: 503}
 
-	// First call fails, second succeeds
-	mockApi.On("CreateConnectionEndpointWithResponse", ctx, serviceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(nil, retryableErr).Once()
+	// Create a response with a retryable status code (503)
+	retryableResponse := &mc.CreateConnectionEndpointResponse{
+		HTTPResponse: &http.Response{StatusCode: 503},
+	}
+
+	// First call returns 503, second succeeds
+	mockApi.On("CreateConnectionEndpointWithResponse", ctx, serviceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(retryableResponse, nil).Once()
 	mockApi.On("CreateConnectionEndpointWithResponse", ctx, serviceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil).Once()
 
 	result, err := client.CreateConnectionEndpointWithResponse(ctx, serviceId, body)
@@ -578,14 +601,16 @@ func TestRetry_TimingBehavior(t *testing.T) {
 	callCount := 0
 	start := time.Now()
 
-	_, err := retry(ctx, func() (string, error) {
+	result, err := retry(ctx, func() (*MockResponse, error) {
 		callCount++
-		return "", MockApiError{statusCode: 500}
+		return &MockResponse{statusCode: 500}, nil
 	}, 2, 0) // waitSec = 0 for fast test
 
 	duration := time.Since(start)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 500, result.StatusCode())
 	assert.Equal(t, 2, callCount)
 	// Should complete quickly since waitSec = 0
 	assert.Less(t, duration, 100*time.Millisecond)
@@ -696,9 +721,13 @@ func TestRetryableClient_GetConnectionEndpointDnsNamesWithResponse_RetryableErro
 	retryableClient := NewRetryableClient(mockClient, 2, 1)
 	ctx := context.Background()
 
-	// First call fails with retryable error
-	retryableErr := MockApiError{statusCode: 503}
-	mockClient.On("GetConnectionEndpointDnsNamesWithResponse", ctx, "service123", "endpoint456", mock.Anything).Return(nil, retryableErr).Once()
+	// Create a response with a retryable status code (503)
+	retryableResponse := &mc.GetConnectionEndpointDnsNamesResponse{
+		HTTPResponse: &http.Response{StatusCode: 503},
+	}
+
+	// First call returns 503, second succeeds
+	mockClient.On("GetConnectionEndpointDnsNamesWithResponse", ctx, "service123", "endpoint456", mock.Anything).Return(retryableResponse, nil).Once()
 
 	// Second call succeeds
 	expectedResponse := &mc.GetConnectionEndpointDnsNamesResponse{}
@@ -720,9 +749,13 @@ func TestRetryableClient_CreateConnectionEndpointDnsNameWithResponse_RetryableEr
 		DnsName: "api.example.com",
 	}
 
-	// First call fails with retryable error
-	retryableErr := MockApiError{statusCode: 502}
-	mockClient.On("CreateConnectionEndpointDnsNameWithResponse", ctx, "service123", "endpoint456", body, mock.Anything).Return(nil, retryableErr).Once()
+	// Create a response with a retryable status code (502)
+	retryableResponse := &mc.CreateConnectionEndpointDnsNameResponse{
+		HTTPResponse: &http.Response{StatusCode: 502},
+	}
+
+	// First call returns 502, second succeeds
+	mockClient.On("CreateConnectionEndpointDnsNameWithResponse", ctx, "service123", "endpoint456", body, mock.Anything).Return(retryableResponse, nil).Once()
 
 	// Second call succeeds
 	expectedResponse := &mc.CreateConnectionEndpointDnsNameResponse{}
