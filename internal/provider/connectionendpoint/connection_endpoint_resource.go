@@ -50,7 +50,8 @@ func (r *ConnectionEndpointResource) Configure(ctx context.Context, req resource
 	}
 
 	providerConfig := req.ProviderData.(shared.ProviderConfig)
-	r.APIClient = apiclient.NewRetryableClient(providerConfig.APIClient, 3, 10)
+	// has more retries to handle collisions
+	r.APIClient = apiclient.NewRetryableClient(providerConfig.APIClient, 10, 10)
 	r.APIPollingInterval = providerConfig.APIPollingInterval
 	r.endpointManager = NewEndpointManager(r.APIClient, r.APIPollingInterval)
 }

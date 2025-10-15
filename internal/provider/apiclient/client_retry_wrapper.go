@@ -3,7 +3,10 @@ package apiclient
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
+	"reflect"
 	mc "terraform-provider-solacecloud/missioncontrol"
 	"time"
 )
@@ -25,7 +28,7 @@ type CRUDClientWithResponses interface {
 	UpdateServiceWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...mc.RequestEditorFn) (*mc.UpdateServiceResponse, error)
 	UpdateMessageSpoolWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMessageSpoolResponse, error)
 	GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error)
-	
+
 	// Connection Endpoint operations
 	CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body mc.CreateConnectionEndpointJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointResponse, error)
 	GetConnectionEndpointsWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.GetConnectionEndpointsResponse, error)
@@ -38,42 +41,68 @@ type CRUDClientWithResponses interface {
 	CreateConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, body mc.CreateConnectionEndpointDnsNameJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointDnsNameResponse, error)
 	DeleteConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteConnectionEndpointDnsNameResponse, error)
 	MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body mc.MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.MoveConnectionEndpointDnsNameResponse, error)
-
 }
-
 
 func NewRetryableClient(api CRUDClientWithResponses, maxRetries, waitSeconds int) *RetryableClientWithResponses {
 	return &RetryableClientWithResponses{api, maxRetries, waitSeconds}
 }
 
-func isRetryableError(err error) bool {
+func isRetryableError(ctx context.Context, err error) bool {
+	tflog.Info(ctx, "Checking if error is retryable", map[string]interface{}{
+		"error":          err.Error(),
+		"error_type":     fmt.Sprintf("%T", err),
+		"error_detailed": fmt.Sprintf("%+v", err),
+		"error_struct":   fmt.Sprintf("%#v", err),
+	})
+
 	var apiErr ApiError
 	if errors.As(err, &apiErr) {
-		return apiErr.StatusCode() >= 500 && apiErr.StatusCode() < 600
+		statusCode := apiErr.StatusCode()
+		// retry on 500 or conflict
+		return (statusCode >= 500 && statusCode < 600) || statusCode == 409
 	}
+	tflog.Info(ctx, "Error is not ApiError, not retrying")
 	return false
 }
 
-func retry[T any](ctx context.Context, fn func() (T, error), maxRetries, waitSec int) (T, error) {
+func isRetryableResponse(resp ApiError) bool {
+	if resp == nil {
+		return false
+	}
+	// Check if the underlying value is nil (not just the interface)
+	// This handles the case where we have a typed nil pointer
+	// this should never happen but it happens witH mocks sometimes
+	v := reflect.ValueOf(resp)
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return false
+	}
+	statusCode := resp.StatusCode()
+	// Existing retry logic for 5xx and 409
+	return statusCode >= 500 && statusCode < 600
+}
+
+func retry[T ApiError](ctx context.Context, fn func() (T, error), maxRetries, waitSec int) (T, error) {
 	var lastErr error
-	var zero T
+	var lastRequest T
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		var result T
 		result, err := fn()
-		if err == nil || !isRetryableError(err) {
+		lastErr = err
+		lastRequest = result
+		if !isRetryableResponse(result) {
 			return result, err
 		}
-		lastErr = err
 		if attempt < maxRetries-1 {
 			select {
 			case <-ctx.Done():
-				return zero, ctx.Err()
+				return lastRequest, ctx.Err()
 			case <-time.After(time.Duration(waitSec) * time.Second):
+				tflog.Info(ctx, "Failed once, Retrying...", map[string]interface{}{})
 				// retry
 			}
 		}
 	}
-	return zero, lastErr
+	// should never happen
+	return lastRequest, lastErr
 }
 
 func (w *RetryableClientWithResponses) CreateServiceWithResponse(ctx context.Context, body mc.CreateServiceJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateServiceResponse, error) {

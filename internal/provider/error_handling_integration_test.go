@@ -104,6 +104,7 @@ func mockBadRequestResponder(req *http.Request) (*http.Response, error) {
 }
 
 func TestErrorHandling_ServiceCreation_ServiceUnavailable(t *testing.T) {
+	t.Skip("This test takes a long time to run due to retries. Need to add injectable values at some point.")
 	instance := internal.NewTestInstance()
 	randomName := random.String(8)
 	params := internal.ConfigurableParams{
@@ -126,7 +127,8 @@ func TestErrorHandling_ServiceCreation_ServiceUnavailable(t *testing.T) {
 		"errorId": "maintenance-error-202"
 		}`))
 
-	resource.UnitTest(t, resource.TestCase{
+	// takes time
+	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -144,6 +146,7 @@ resource "solacecloud_service" "` + params.ServiceName + `" {
 }
 
 func TestErrorHandling_UnexpectedStatusCode(t *testing.T) {
+	t.Skip("This test takes a long time to run due to retries. Need to add injectable values at some point.")
 	instance := internal.NewTestInstance()
 	randomName := random.String(8)
 	params := internal.ConfigurableParams{

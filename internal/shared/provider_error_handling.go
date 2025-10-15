@@ -12,6 +12,7 @@ import (
 type ErrorResponseProvider interface {
 	GetMessage() string
 	GetErrorId() string
+	GetFirstValidationDetail() string
 }
 
 // MissionControlErrorResponse adapts missioncontrol.ErrorResponse to ErrorResponseProvider
@@ -33,6 +34,18 @@ func (m *MissionControlErrorResponse) GetErrorId() string {
 	return ""
 }
 
+// GetFirstValidationDetail returns the first validation detail message if available as field name: message
+func (m *MissionControlErrorResponse) GetFirstValidationDetail() string {
+	if m.ErrorResponse != nil && m.ErrorResponse.ValidationDetails != nil {
+		for field, messages := range *m.ErrorResponse.ValidationDetails {
+			if len(messages) > 0 {
+				return field + ": " + messages[0]
+			}
+		}
+	}
+	return ""
+}
+
 // PlatformErrorResponse adapts platform.ErrorResponse to ErrorResponseProvider
 type PlatformErrorResponse struct {
 	ErrorResponse *platform.ErrorResponse
@@ -48,6 +61,17 @@ func (p *PlatformErrorResponse) GetMessage() string {
 func (p *PlatformErrorResponse) GetErrorId() string {
 	if p.ErrorResponse != nil && p.ErrorResponse.ErrorId != nil {
 		return *p.ErrorResponse.ErrorId
+	}
+	return ""
+}
+
+func (p *PlatformErrorResponse) GetFirstValidationDetail() string {
+	if p.ErrorResponse != nil && p.ErrorResponse.ValidationDetails != nil {
+		for field, messages := range *p.ErrorResponse.ValidationDetails {
+			if len(messages) > 0 {
+				return field + ": " + messages[0]
+			}
+		}
 	}
 	return ""
 }
@@ -155,60 +179,102 @@ func (h *ErrorResponseAdaptor) HandleError(diagnostics *diag.Diagnostics) bool {
 
 	switch h.StatusCode() {
 	case http.StatusUnauthorized:
-		diagnostics.AddError(
-			"Authentication Failed",
-			"Received HTTP 401 Unauthorized. Please check your authentication configuration:\n\n"+
-				"1. Verify your API token is correct and not expired\n"+
-				"2. Set the api_token in your provider configuration or use the SOLACECLOUD_API_TOKEN environment variable\n"+
-				"3. Ensure your API token has the necessary permissions to delete services\n"+
-				"4. Check that the base_url is correct for your Solace Cloud region\n\n"+
-				"Example provider configuration:\n"+
-				"provider \"solacecloud\" {\n"+
-				"  base_url  = \"https://api.solace.cloud/\"\n"+
-				"  api_token = \"your-api-token-here\"\n"+
-				"}\n\n"+
-				"Or set environment variable: export SOLACECLOUD_API_TOKEN=\"your-api-token-here\"",
-		)
+		addUnauthorizedDiagnostics(diagnostics)
 	case http.StatusBadRequest:
-		if h.JSON400 != nil && h.JSON400.GetMessage() != "" {
-			diagnostics.AddError("Bad Request", h.JSON400.GetMessage())
-		} else {
-			diagnostics.AddError("Bad Request", "Received HTTP 400 Bad Request. "+
-				"This usually indicates a malformed request or missing required parameters. "+
-				"Check your request body and parameters.",
-			)
-		}
+		h.addBadRequestDiagnostics(diagnostics)
 	case http.StatusForbidden:
-		if h.JSON403 != nil && h.JSON403.GetMessage() != "" {
-			diagnostics.AddError("Forbidden", h.JSON403.GetMessage())
-		} else {
-			diagnostics.AddError("Forbidden", "Received HTTP 403 Forbidden. "+
-				"This usually indicates that your API token does not have the necessary permissions to perform this action. "+
-				"Check your API token's permissions and ensure it has access to the requested resource.")
-		}
+		h.addForbiddenDiagnostics(diagnostics)
 	case http.StatusNotFound:
-		if h.JSON404 != nil && h.JSON404.GetMessage() != "" {
-			diagnostics.AddError("Not Found", h.JSON404.GetMessage())
-		} else {
-			diagnostics.AddError("Not Found", "Received HTTP 404 Not Found. "+
-				"This usually indicates that the requested resource does not exist or has already been deleted. "+
-				"Check the resource ID and ensure it is correct.")
-		}
+		h.addNotFoundDiagnostics(diagnostics)
 	case http.StatusServiceUnavailable:
-		if h.JSON503 != nil && h.JSON503.GetMessage() != "" {
-			diagnostics.AddError("Service Unavailable", h.JSON503.GetMessage())
-		} else {
-			diagnostics.AddError("Service Unavailable", "Received HTTP 503 Service Unavailable. "+
-				"This usually indicates that the Solace Cloud API is temporarily unavailable. "+
-				"Try again later.")
-		}
+		h.addServiceUnavailableDiagnostics(diagnostics)
 	case http.StatusConflict:
-		diagnostics.AddError("Resource Conflict", "Received HTTP 409 Conflict. "+
-			"This usually indicates that a resource with the same name already exists. "+
-			string(h.Body))
+		h.addConflictDiagnostics(diagnostics)
 	default:
-		diagnostics.AddError(string(h.Body), "Unexpected Error")
+		h.addUnexpectedErrorDiagnostics(diagnostics)
 	}
 
 	return true // Error occurred
+}
+
+func addUnauthorizedDiagnostics(diagnostics *diag.Diagnostics) {
+	diagnostics.AddError(
+		"Authentication Failed",
+		"Received HTTP 401 Unauthorized. Please check your authentication configuration:\n\n"+
+			"1. Verify your API token is correct and not expired\n"+
+			"2. Set the api_token in your provider configuration or use the SOLACECLOUD_API_TOKEN environment variable\n"+
+			"3. Ensure your API token has the necessary permissions to delete services\n"+
+			"4. Check that the base_url is correct for your Solace Cloud region\n\n"+
+			"Example provider configuration:\n"+
+			"provider \"solacecloud\" {\n"+
+			"  base_url  = \"https://api.solace.cloud/\"\n"+
+			"  api_token = \"your-api-token-here\"\n"+
+			"}\n\n"+
+			"Or set environment variable: export SOLACECLOUD_API_TOKEN=\"your-api-token-here\"",
+	)
+}
+
+func (h *ErrorResponseAdaptor) addBadRequestDiagnostics(diagnostics *diag.Diagnostics) {
+	if h.JSON400 != nil {
+		details := h.JSON400.GetFirstValidationDetail()
+		const badRequest = "Bad Request"
+		if details != "" {
+			diagnostics.AddError(badRequest, details)
+		}
+		if h.JSON400.GetMessage() != "" {
+			diagnostics.AddError(badRequest, h.JSON400.GetMessage())
+		}
+		if h.JSON400.GetMessage() == "" && details == "" {
+			addBadRequestError(diagnostics)
+		}
+	} else {
+		addBadRequestError(diagnostics)
+	}
+}
+
+func (h *ErrorResponseAdaptor) addForbiddenDiagnostics(diagnostics *diag.Diagnostics) {
+	if h.JSON403 != nil && h.JSON403.GetMessage() != "" {
+		diagnostics.AddError("Forbidden", h.JSON403.GetMessage())
+	} else {
+		diagnostics.AddError("Forbidden", "Received HTTP 403 Forbidden. "+
+			"This usually indicates that your API token does not have the necessary permissions to perform this action. "+
+			"Check your API token's permissions and ensure it has access to the requested resource.")
+	}
+}
+
+func (h *ErrorResponseAdaptor) addNotFoundDiagnostics(diagnostics *diag.Diagnostics) {
+	if h.JSON404 != nil && h.JSON404.GetMessage() != "" {
+		diagnostics.AddError("Not Found", h.JSON404.GetMessage())
+	} else {
+		diagnostics.AddError("Not Found", "Received HTTP 404 Not Found. "+
+			"This usually indicates that the requested resource does not exist or has already been deleted. "+
+			"Check the resource ID and ensure it is correct.")
+	}
+}
+
+func (h *ErrorResponseAdaptor) addServiceUnavailableDiagnostics(diagnostics *diag.Diagnostics) {
+	if h.JSON503 != nil && h.JSON503.GetMessage() != "" {
+		diagnostics.AddError("Service Unavailable", h.JSON503.GetMessage())
+	} else {
+		diagnostics.AddError("Service Unavailable", "Received HTTP 503 Service Unavailable. "+
+			"This usually indicates that the Solace Cloud API is temporarily unavailable. "+
+			"Try again later.")
+	}
+}
+
+func (h *ErrorResponseAdaptor) addConflictDiagnostics(diagnostics *diag.Diagnostics) {
+	diagnostics.AddError("Resource Conflict", "Received HTTP 409 Conflict. "+
+		"This usually indicates that a resource with the same name already exists. "+
+		string(h.Body))
+}
+
+func (h *ErrorResponseAdaptor) addUnexpectedErrorDiagnostics(diagnostics *diag.Diagnostics) {
+	diagnostics.AddError(string(h.Body), "Unexpected Error")
+}
+
+func addBadRequestError(diagnostics *diag.Diagnostics) {
+	diagnostics.AddError("Bad Request", "Received HTTP 400 Bad Request. "+
+		"This usually indicates a malformed request or missing required parameters. "+
+		"Check your request body and parameters.",
+	)
 }

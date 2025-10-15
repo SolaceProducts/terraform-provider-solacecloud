@@ -165,6 +165,11 @@ func (em *EndpointManager) UpdateEndpoint(ctx context.Context, serviceId string,
 		)
 		return
 	}
+	if apiClientUpdateResp.JSON400 != nil && apiClientUpdateResp.JSON400.Message != nil &&
+		*apiClientUpdateResp.JSON400.Message == "No changes were detected." {
+		tflog.Info(ctx, "No changes detected in the update request, skipping operation wait.")
+		return
+	}
 
 	em.handleAsyncOperation(ctx, &AsyncOperationParams{
 		ServiceId:     serviceId,
