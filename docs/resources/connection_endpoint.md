@@ -9,7 +9,7 @@ This resource allows you to create and manage connection endpoints for a Solace 
 ```hcl
 resource "solacecloud_connection_endpoint" "endpoint" {
   service_id  = "myserviceid"
-  access_type = "PRIVATE"
+  access_type = "PUBLIC"
   name        = "Public Endpoint2"
   description = "MyCoolEndpoint"
 
@@ -139,7 +139,7 @@ import {
 
 resource "solacecloud_connection_endpoint" "endpoint" {
   service_id  = "myserviceid"
-  access_type = "PRIVATE"
+  access_type = "PUBLIC"
   name        = "Public Endpoint2"
   description = "MyCoolEndpoint"
 
