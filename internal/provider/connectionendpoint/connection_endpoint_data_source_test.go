@@ -181,7 +181,7 @@ func TestAccConnectionEndpointDataSource_Real(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
@@ -194,7 +194,7 @@ resource "solacecloud_service" "%s" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -215,7 +215,7 @@ data "solacecloud_connection_endpoints" "all" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 

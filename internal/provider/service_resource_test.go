@@ -34,7 +34,7 @@ func TestOrderResource(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -62,7 +62,7 @@ func TestResourceDeletedExternally(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -114,7 +114,7 @@ resource "solacecloud_service" "` + params.ServiceName + `" {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -159,7 +159,7 @@ func TestServiceResourceImport(t *testing.T) {
 	baseConfig := instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
   custom_router_name = "%s"
 }
@@ -314,7 +314,7 @@ func TestAccServiceResource_Delete(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -353,7 +353,7 @@ func TestAccServiceResource_DeleteLockedFails(t *testing.T) {
 			"name": "`+params.ServiceName+`",
 			"locked": false,
 			"serviceClassId": "`+params.ServiceClass+`",
-			"datacenterId": "eks-us-east-1"
+			"datacenterId": "gke-gcp-us-central1-a"
 		}`)(r)
 			},
 		)
@@ -373,7 +373,7 @@ func TestAccServiceResource_DeleteLockedFails(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
  resource "solacecloud_service" "` + params.ServiceName + `" {
    name             = "` + params.ServiceName + `"
-   datacenter_id    = "eks-us-east-1"
+   datacenter_id    = "gke-gcp-us-central1-a"
    service_class_id = "` + params.ServiceClass + `"
    locked           = true
  }
@@ -387,7 +387,7 @@ func TestAccServiceResource_DeleteLockedFails(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
  resource "solacecloud_service" "` + params.ServiceName + `" {
    name             = "` + params.ServiceName + `"
-   datacenter_id    = "eks-us-east-1"
+   datacenter_id    = "gke-gcp-us-central1-a"
    service_class_id = "` + params.ServiceClass + `"
    locked           = false
  }

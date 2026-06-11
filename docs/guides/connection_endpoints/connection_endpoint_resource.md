@@ -47,7 +47,7 @@ These protocols can be mapped to the REST API protocols as follows:
 
 ```hcl
 resource "solacecloud_connection_endpoint" "endpoint" {
-  access_type = "PRIVATE"
+  access_type = "PUBLIC"
   name        = "Public Endpoint2"
   service_id  = "myserviceid" 
   description = "MyCoolEndpoint"
@@ -83,7 +83,7 @@ import {
 }
 
 resource "solacecloud_connection_endpoint" "endpoint" {
-  access_type = "PRIVATE"
+  access_type = "PUBLIC"
   name        = "Public Endpoint2"
   service_id  = "myserviceid" 
   description = "MyCoolEndpoint"
