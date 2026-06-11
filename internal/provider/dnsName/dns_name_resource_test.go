@@ -48,7 +48,7 @@ func TestDnsNameCreationSuccess(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -96,7 +96,7 @@ func TestDnsNameValidation(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -141,7 +141,7 @@ func TestDnsNameImport(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -310,7 +310,7 @@ func TestDnsNameCapacityExceeded(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -373,7 +373,7 @@ func TestDnsNamesDataSource(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -424,7 +424,7 @@ func TestDnsNameUpdateNotSupported(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -444,7 +444,7 @@ resource "solacecloud_connection_endpoint_dns_name" "test" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -534,7 +534,7 @@ func TestDnsNameDeleteDefaultHostname(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -587,7 +587,7 @@ func TestDnsNameErrorHandling(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -661,7 +661,7 @@ func TestDnsNameReadNotFound(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -703,7 +703,7 @@ func TestDnsNameInvalidImportFormat(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -769,7 +769,7 @@ func TestDnsNameDuplicateCreation(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -938,7 +938,7 @@ func TestDnsNamesDataSourceEmpty(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -991,7 +991,7 @@ func TestDnsNamesDataSourceError(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -1162,7 +1162,7 @@ func TestDnsNameCreationPollingTimeout(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -1206,7 +1206,7 @@ func TestDnsNameMoveImportInvalidFormat(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -1256,7 +1256,7 @@ func TestDnsNameCreationRealAPI(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 

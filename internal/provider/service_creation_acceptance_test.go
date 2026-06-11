@@ -30,7 +30,7 @@ func TestServiceCreationSuccess(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
@@ -38,7 +38,7 @@ resource "solacecloud_service" "%s" {
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "id"),
 					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "name", params.ServiceName),
 					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "service_class_id", params.ServiceClass),
-					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "datacenter_id", "eks-us-east-1"),
+					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "datacenter_id", "gke-gcp-us-central1-a"),
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "event_broker_version"),
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "message_vpn_name"),
 				),
@@ -67,7 +67,7 @@ func TestServiceCreationValidationFailure(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
@@ -99,7 +99,7 @@ func TestServiceCreationValidationBrokerVersionFailure(t *testing.T) {
 	}{
 		{"10.11", "major.minor format", true},
 		{"10.11.1", "major.minor.patch format", true},
-		{"10.10.1.112-3", "major.minor.patch-build format", false},
+		{"10.25.0.276-48", "major.minor.patch-build format", false},
 		{"9.12.0", "older version format", true},
 		{"11.0", "newer major version", true},
 		{"10.11.1-rc1", "release candidate format", true},
@@ -136,7 +136,7 @@ func TestServiceCreationValidationBrokerVersionFailure(t *testing.T) {
 						Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name                    = "%s"
-  datacenter_id          = "eks-us-east-1"
+  datacenter_id          = "gke-gcp-us-central1-a"
   service_class_id       = "%s"
   event_broker_version   = "%s"
 }
@@ -186,7 +186,7 @@ func TestServiceCreationAsyncPattern(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
@@ -223,7 +223,7 @@ func TestServiceCreationRateLimit(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
@@ -259,7 +259,7 @@ func TestServiceCreationConflict(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
@@ -292,7 +292,7 @@ func TestServiceCreationPartialFailure(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),

@@ -106,7 +106,7 @@ func TestAccConnectionEndpointResource_Create(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "test" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 
@@ -238,7 +238,7 @@ resource "solacecloud_service" "broker_service" {
   name                 = "%s"
   datacenter_id        = "pcorg-jacks-special-dc"
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
-  event_broker_version = "10.25.0.63-9"
+  event_broker_version = "10.25.0.276-48"
   locked               = false
   connection_endpoint = {
     name        = "main-endpoint"
@@ -283,7 +283,7 @@ resource "solacecloud_service" "broker_service" {
   name                 = "%s"
   datacenter_id        = "pcorg-jacks-special-dc"
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
-  event_broker_version = "10.25.0.63-9"
+  event_broker_version = "10.25.0.276-48"
   locked               = false
   connection_endpoint = {
     name        = "main-endpoint"
@@ -506,9 +506,9 @@ func TestCRUDUnit(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "broker_service" {
   name                 = "%s"
-  datacenter_id        = "eks-us-east-1"
+  datacenter_id        = "gke-gcp-us-central1-a"
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
-  event_broker_version = "10.10.1.112-3"
+  event_broker_version = "10.25.0.276-48"
   locked               = false
   connection_endpoint = {
     name        = "main-endpoint"
@@ -550,9 +550,9 @@ resource "solacecloud_connection_endpoint" "myendpoint" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "broker_service" {
   name                 = "%s"
-  datacenter_id        = "eks-us-east-1"
+  datacenter_id        = "gke-gcp-us-central1-a"
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
-  event_broker_version = "10.10.1.112-3"
+  event_broker_version = "10.25.0.276-48"
   locked               = false
   connection_endpoint = {
     name        = "main-endpoint"

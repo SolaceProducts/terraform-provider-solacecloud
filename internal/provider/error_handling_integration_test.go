@@ -46,7 +46,7 @@ func TestErrorHandling_ServiceCreation_AuthenticationFailure(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
 	name             = "` + params.ServiceName + `"
-	datacenter_id    = "eks-us-east-1"
+	datacenter_id    = "gke-gcp-us-central1-a"
 	service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -84,7 +84,7 @@ func TestErrorHandling_ServiceCreation_BadRequest(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
 	name             = "` + params.ServiceName + `"
-	datacenter_id    = "eks-us-east-1"
+	datacenter_id    = "gke-gcp-us-central1-a"
 	service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -135,7 +135,7 @@ func TestErrorHandling_ServiceCreation_ServiceUnavailable(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
 	name             = "` + params.ServiceName + `"
-	datacenter_id    = "eks-us-east-1"
+	datacenter_id    = "gke-gcp-us-central1-a"
 	service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -173,7 +173,7 @@ func TestErrorHandling_UnexpectedStatusCode(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
 	name             = "` + params.ServiceName + `"
-	datacenter_id    = "eks-us-east-1"
+	datacenter_id    = "gke-gcp-us-central1-a"
 	service_class_id = "` + params.ServiceClass + `"
 }
 `,

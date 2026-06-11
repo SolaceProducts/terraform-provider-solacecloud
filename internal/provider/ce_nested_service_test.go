@@ -32,7 +32,7 @@ func TestServiceCreationSceSuccess(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
   connection_endpoint = {
     name        = "Default Public"
@@ -55,7 +55,7 @@ resource "solacecloud_service" "%s" {
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "id"),
 					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "name", params.ServiceName),
 					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "service_class_id", params.ServiceClass),
-					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "datacenter_id", "eks-us-east-1"),
+					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "datacenter_id", "gke-gcp-us-central1-a"),
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "event_broker_version"),
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "message_vpn_name"),
 					// check the default connection endpoint
@@ -140,7 +140,7 @@ func TestServiceCRUDSceSuccess(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
   connection_endpoint = {
     name        = "Default Public"
@@ -163,7 +163,7 @@ resource "solacecloud_service" "%s" {
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "id"),
 					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "name", params.ServiceName),
 					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "service_class_id", params.ServiceClass),
-					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "datacenter_id", "eks-us-east-1"),
+					resource.TestCheckResourceAttr("solacecloud_service."+params.ServiceName, "datacenter_id", "gke-gcp-us-central1-a"),
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "event_broker_version"),
 					resource.TestCheckResourceAttrSet("solacecloud_service."+params.ServiceName, "message_vpn_name"),
 				),
@@ -172,7 +172,7 @@ resource "solacecloud_service" "%s" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
   connection_endpoint = {
     name        = "Default Public"
@@ -202,7 +202,7 @@ resource "solacecloud_service" "%s" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "eks-us-east-1"
+  datacenter_id    = "gke-gcp-us-central1-a"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass),
