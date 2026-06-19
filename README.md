@@ -55,6 +55,10 @@ Then commit the changes to `go.mod` and `go.sum`.
 
 Fill this in for each provider
 
+## Release Process
+
+The release process for this provider — and how its CI/release workflows integrate with FOSSA and Guardian for vulnerability tracking — is documented centrally in the [`cicd-processes-docs`](https://github.com/SolaceDev/cicd-processes-docs) repository: [processes/release/terraform-provider-solacecloud.md](https://github.com/SolaceDev/cicd-processes-docs/blob/main/processes/release/terraform-provider-solacecloud.md).
+
 ## Developing the Provider
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
