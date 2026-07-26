@@ -1,0 +1,25 @@
+version: 3
+
+project:
+  locator: SolaceProducts_terraform-provider-solacecloud
+  id: SolaceProducts_terraform-provider-solacecloud
+  name: terraform-provider-solacecloud
+  teams: []
+  labels:
+    - go
+
+vendoredDependencies:
+  forceRescans: false
+  scanMethod: CLILicenseScan
+  licenseScanPathFilters:
+    exclude:
+      - "./.git"
+      - "./.github"
+
+paths:
+  exclude:
+    - ./.git
+    - ./.github
+
+telemetry:
+  scope: full
