@@ -155,6 +155,7 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						"ENTERPRISE_1K_HIGHAVAILABILITY",
 						"ENTERPRISE_50K_HIGHAVAILABILITY",
 						"ENTERPRISE_100K_HIGHAVAILABILITY",
+						"ENTERPRISE_200K_HIGHAVAILABILITY",
 						"ENTERPRISE_5K_HIGHAVAILABILITY",
 						"ENTERPRISE_10K_HIGHAVAILABILITY",
 						"ENTERPRISE_250_STANDALONE",
@@ -163,6 +164,7 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						"ENTERPRISE_10K_STANDALONE",
 						"ENTERPRISE_50K_STANDALONE",
 						"ENTERPRISE_100K_STANDALONE",
+						"ENTERPRISE_200K_STANDALONE",
 					),
 				},
 				PlanModifiers: []planmodifier.String{

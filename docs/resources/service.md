@@ -105,6 +105,7 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
   * `ENTERPRISE_1K_HIGHAVAILABILITY`
   * `ENTERPRISE_50K_HIGHAVAILABILITY`
   * `ENTERPRISE_100K_HIGHAVAILABILITY`
+  * `ENTERPRISE_200K_HIGHAVAILABILITY`
   * `ENTERPRISE_5K_HIGHAVAILABILITY`
   * `ENTERPRISE_10K_HIGHAVAILABILITY`
   * `ENTERPRISE_250_STANDALONE`
@@ -113,6 +114,7 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
   * `ENTERPRISE_10K_STANDALONE`
   * `ENTERPRISE_50K_STANDALONE`
   * `ENTERPRISE_100K_STANDALONE`
+  * `ENTERPRISE_200K_STANDALONE`
 
 * `event_broker_version` - (Optional) The event broker version. A default version is provided when this is not specified. The format is release.year or release.year.release type.build number-revision. For more information, see [Release and Versioning Scheme for Event Broker Services](https://docs.solace.com/Cloud/broker-version-conventions.htm).
 
