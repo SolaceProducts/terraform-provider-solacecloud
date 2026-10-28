@@ -14,7 +14,7 @@ func service200KHcl(instance *internal.TestInstance, params internal.Configurabl
 	return instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 `, params.ServiceName, params.ServiceName, params.ServiceClass)
@@ -49,7 +49,7 @@ func TestServiceCreationWith200KServiceClasses(t *testing.T) {
 							resource.TestCheckResourceAttrSet(resourceName, "id"),
 							resource.TestCheckResourceAttr(resourceName, "name", params.ServiceName),
 							resource.TestCheckResourceAttr(resourceName, "service_class_id", serviceClass),
-							resource.TestCheckResourceAttr(resourceName, "datacenter_id", "gke-gcp-us-central1-a"),
+							resource.TestCheckResourceAttr(resourceName, "datacenter_id", internal.TestDatacenterId()),
 						),
 					},
 				},

@@ -82,6 +82,22 @@ func (m *MockCRUDClient) UpdateMessageSpoolWithBodyWithResponse(ctx context.Cont
 	return args.Get(0).(*mc.UpdateMessageSpoolResponse), args.Error(1)
 }
 
+func (m *MockCRUDClient) EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body mc.EnableDmrClusterJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.EnableDmrClusterResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.EnableDmrClusterResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDmrClusterResponse, error) {
+	args := m.Called(ctx, serviceId, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.DeleteDmrClusterResponse), args.Error(1)
+}
+
 func (m *MockCRUDClient) GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error) {
 	args := m.Called(ctx, serviceId, operationId, params, reqEditors)
 	if args.Get(0) == nil {
@@ -461,6 +477,63 @@ func TestRetryableClient_GetServiceOperationWithResponse_Success(t *testing.T) {
 }
 
 // Connection Endpoint Tests
+
+// dmrTestServiceId is the service identifier used by the DMR wrapper tests.
+const dmrTestServiceId = "service-id"
+
+func TestRetryableClient_EnableDmrClusterWithResponse_Success(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 3, 0)
+
+	ctx := context.Background()
+	body := mc.EnableDmrClusterJSONRequestBody{}
+	expectedResponse := &mc.EnableDmrClusterResponse{}
+
+	mockApi.On("EnableDmrClusterWithResponse", ctx, dmrTestServiceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil)
+
+	result, err := client.EnableDmrClusterWithResponse(ctx, dmrTestServiceId, body)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResponse, result)
+	mockApi.AssertExpectations(t)
+}
+
+func TestRetryableClient_EnableDmrClusterWithResponse_RetryableError(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 2, 0)
+
+	ctx := context.Background()
+	body := mc.EnableDmrClusterJSONRequestBody{}
+	expectedResponse := &mc.EnableDmrClusterResponse{}
+	retryableResponse := &mc.EnableDmrClusterResponse{
+		HTTPResponse: &http.Response{StatusCode: 500},
+	}
+
+	mockApi.On("EnableDmrClusterWithResponse", ctx, dmrTestServiceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(retryableResponse, nil).Once()
+	mockApi.On("EnableDmrClusterWithResponse", ctx, dmrTestServiceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil).Once()
+
+	result, err := client.EnableDmrClusterWithResponse(ctx, dmrTestServiceId, body)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResponse, result)
+	mockApi.AssertExpectations(t)
+}
+
+func TestRetryableClient_DeleteDmrClusterWithResponse_Success(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 3, 0)
+
+	ctx := context.Background()
+	expectedResponse := &mc.DeleteDmrClusterResponse{}
+
+	mockApi.On("DeleteDmrClusterWithResponse", ctx, dmrTestServiceId, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil)
+
+	result, err := client.DeleteDmrClusterWithResponse(ctx, dmrTestServiceId)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResponse, result)
+	mockApi.AssertExpectations(t)
+}
 
 func TestRetryableClient_CreateConnectionEndpointWithResponse_Success(t *testing.T) {
 	mockApi := &MockCRUDClient{}

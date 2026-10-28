@@ -7,12 +7,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 	"terraform-provider-solacecloud/internal/model"
 	"terraform-provider-solacecloud/internal/provider/apiclient"
 	"terraform-provider-solacecloud/internal/provider/operationutils"
 	"terraform-provider-solacecloud/internal/shared"
 	"terraform-provider-solacecloud/missioncontrol"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -146,8 +146,15 @@ func (r *DnsNameResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	// Read back the created DNS name
-	r.readDnsName(ctx, &data, &resp.Diagnostics)
+	found := r.readDnsName(ctx, &data, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !found {
+		resp.Diagnostics.AddError(
+			"DNS name not found",
+			fmt.Sprintf("DNS name %s not found for connection endpoint %s", dnsName, connectionEndpointId),
+		)
 		return
 	}
 
@@ -162,8 +169,16 @@ func (r *DnsNameResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	r.readDnsName(ctx, &data, &resp.Diagnostics)
+	found := r.readDnsName(ctx, &data, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !found {
+		// The DNS name was deleted outside Terraform: drop it from state so it is planned for re-creation
+		tflog.Warn(ctx, "DNS name not found, removing it from state", map[string]interface{}{
+			"dnsName": data.DnsName.ValueString(),
+		})
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
@@ -201,12 +216,12 @@ func (r *DnsNameResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	// Handle not found error
+	// The DNS name is already gone (for example deleted in the console): nothing left to delete
 	if deleteResp.StatusCode() == http.StatusNotFound {
-		resp.Diagnostics.AddError(
-			"DNS name not found",
-			fmt.Sprintf("DNS name '%s' was not found on connection endpoint %s. It may have already been deleted or never existed.", dnsName, connectionEndpointId),
-		)
+		tflog.Warn(ctx, "DNS name not found on delete, treating it as already deleted", map[string]interface{}{
+			"dnsName":              dnsName,
+			"connectionEndpointId": connectionEndpointId,
+		})
 		return
 	}
 
@@ -271,9 +286,9 @@ func (r *DnsNameResource) ImportState(ctx context.Context, req resource.ImportSt
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("dns_name"), parts[2])...)
 }
 
-
-
-func (r *DnsNameResource) readDnsName(ctx context.Context, data *model.DnsNameModel, diagnostics *diag.Diagnostics) {
+// readDnsName refreshes data from the API. It returns false, without an error, when the DNS name
+// (or its service or connection endpoint) no longer exists; callers decide whether that is an error.
+func (r *DnsNameResource) readDnsName(ctx context.Context, data *model.DnsNameModel, diagnostics *diag.Diagnostics) bool {
 	serviceId := data.ServiceId.ValueString()
 	connectionEndpointId := data.ConnectionEndpointId.ValueString()
 	dnsName := data.DnsName.ValueString()
@@ -284,12 +299,16 @@ func (r *DnsNameResource) readDnsName(ctx context.Context, data *model.DnsNameMo
 			"Error calling Solace Cloud API",
 			"Could not read DNS names, unexpected error: "+err.Error(),
 		)
-		return
+		return false
+	}
+
+	if dnsNamesResp.StatusCode() == http.StatusNotFound {
+		return false
 	}
 
 	if handleAPIResponse(dnsNamesResp.StatusCode(), dnsNamesResp.Body, dnsNamesResp.HTTPResponse,
 		nil, nil, nil, nil, nil, diagnostics, http.StatusOK) {
-		return
+		return false
 	}
 
 	// Find the specific DNS name
@@ -299,14 +318,10 @@ func (r *DnsNameResource) readDnsName(ctx context.Context, data *model.DnsNameMo
 				data.Id = types.StringPointerValue(dns.Id)
 				data.DnsName = types.StringPointerValue(dns.DnsName)
 				data.DomainType = types.StringValue(string(*dns.DomainType))
-				return
+				return true
 			}
 		}
 	}
 
-	// If we get here, the DNS name was not found
-	diagnostics.AddError(
-		"DNS name not found",
-		fmt.Sprintf("DNS name %s not found for connection endpoint %s", dnsName, connectionEndpointId),
-	)
+	return false
 }

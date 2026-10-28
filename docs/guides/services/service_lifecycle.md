@@ -46,9 +46,11 @@ Some attributes of a service cannot be changed after creation and require creati
 2. **datacenter_id** - The datacenter where the service is deployed.
 3. **message_vpn_name** - The name of the Message VPN.
 4. **event_broker_version** - The version of the event broker.
-5. **cluster_name** - The name of the DMR cluster.
+5. **cluster_name** - The name of the DMR cluster. An existing cluster cannot be renamed, but a name can be supplied when enabling DMR on a service that does not have a cluster.
 6. **custom_router_name** - The custom router name prefix.
 7. **environment_id** - The environment where the service is deployed.
+
+`dmr_enabled` is **not** immutable: changing it enables or disables Dynamic Message Routing on the existing service. For more information, see [Enabling and Disabling DMR](service_configuration.md#enabling-and-disabling-dmr).
 
 If you need to change any of these attributes, you must:
 
@@ -108,7 +110,8 @@ The Solace Cloud Terraform Provider uses the Solace Cloud V2 API to manage servi
 | `message_vpn_name` | `msgVpnName` | The name of the Message VPN |
 | `max_spool_usage` | `maxSpoolUsage` | The maximum message spool usage in GB |
 | `event_broker_version` | `eventBrokerVersion` | The version of the event broker |
-| `cluster_name` | `clusterName` | The name of the DMR cluster |
+| `dmr_enabled` | `dmrEnabled` at creation; the DMR cluster endpoints afterwards | Whether the service has a DMR cluster |
+| `cluster_name` | `clusterName` | The name of the DMR cluster (requires `dmr_enabled = true`) |
 | `custom_router_name` | `customRouterName` | The custom router name prefix |
 | `environment_id` | `environmentId` | The ID of the environment |
 | `locked` | `locked` | Whether the service is locked against deletion |
@@ -128,7 +131,8 @@ When reading a service from the API, the provider maps the API response fields t
 | `eventBrokerServiceVersion` | `event_broker_version` | The version of the event broker |
 | `broker.msgVpns[0].msgVpnName` | `message_vpn_name` | The name of the Message VPN |
 | `broker.maxSpoolUsage` | `max_spool_usage` | The maximum message spool usage in GB |
-| `broker.cluster.name` | `cluster_name` | The name of the DMR cluster |
+| `broker.cluster` (present or absent) | `dmr_enabled` | Whether the service has a DMR cluster |
+| `broker.cluster.name` | `cluster_name` | The name of the DMR cluster (null without DMR) |
 | `locked` | `locked` | Whether the service is locked against deletion |
 | `environmentId` | `environment_id` | The ID of the environment |
 | `broker.redundancyGroupSslEnabled` | `mate_link_encryption` | Whether mate link encryption is enabled |

@@ -25,6 +25,7 @@ import (
 
 var _ resource.Resource = &ServiceResource{}
 var _ resource.ResourceWithImportState = &ServiceResource{}
+var _ resource.ResourceWithModifyPlan = &ServiceResource{}
 
 func NewServiceResource() resource.Resource {
 	return &ServiceResource{}
@@ -47,6 +48,7 @@ type ServiceResourceModel struct {
 	ServiceClassId     types.String          `tfsdk:"service_class_id"`
 	DatacenterId       types.String          `tfsdk:"datacenter_id"`
 	ClusterName        types.String          `tfsdk:"cluster_name"`
+	DmrEnabled         types.Bool            `tfsdk:"dmr_enabled"`
 	OwnedBy            types.String          `tfsdk:"owned_by"`
 	Locked             types.Bool            `tfsdk:"locked"`
 	MateLinkEncryption types.Bool            `tfsdk:"mate_link_encryption"`
@@ -183,9 +185,12 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"cluster_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the DMR cluster where the service will be created",
-				Optional:            true,
-				Computed:            true,
+				MarkdownDescription: "The name of the Dynamic Message Routing (DMR) cluster for the service. " +
+					"Requires `dmr_enabled = true`; setting a cluster name without opting in to DMR is rejected at plan time. " +
+					"Solace Cloud generates a name when this is omitted, and a service without DMR has no cluster name. " +
+					"It can be set when DMR is enabled, either at creation or when enabling DMR later, but an existing cluster cannot be renamed.",
+				Optional: true,
+				Computed: true,
 				Validators: []validator.String{
 					stringvalidator.LengthBetween(1, 64),
 					stringvalidator.RegexMatches(
@@ -201,6 +206,20 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 					validators.NewImmutableStringPlanModifier(),
+				},
+			},
+			"dmr_enabled": schema.BoolAttribute{
+				MarkdownDescription: "Whether the event broker service has a Dynamic Message Routing (DMR) cluster. " +
+					"Set it to `true` to create the service with a cloud-managed DMR cluster, and omit it (or set it to `false`) for a service without DMR. " +
+					"Changing it on an existing service enables or disables DMR in place, without replacing the service. " +
+					"`cluster_name` can only be set when this is `true`. " +
+					"Disabling DMR deletes the cluster and is refused by Solace Cloud while the service belongs to an event mesh. " +
+					"Service packages that always enable DMR (legacy packages) ignore this argument when creating the service; " +
+					"with `false` the provider then disables DMR right after creation so the service matches the configuration, and warns.",
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"owned_by": schema.StringAttribute{

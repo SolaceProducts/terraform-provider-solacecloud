@@ -48,6 +48,14 @@ func (m *MockAPIClient) GetServiceOperationWithResponse(ctx context.Context, ser
 	return m.opResponse, m.opError
 }
 
+func (m *MockAPIClient) EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body missioncontrol.EnableDmrClusterJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.EnableDmrClusterResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.DeleteDmrClusterResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (m *MockAPIClient) CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body missioncontrol.CreateConnectionEndpointJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.CreateConnectionEndpointResponse, error) {
 	return nil, errors.New("not implemented")
 }

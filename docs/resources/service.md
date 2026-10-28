@@ -44,6 +44,22 @@ resource "solacecloud_service" "broker_service" {
 }
 ```
 
+### Service with DMR Enabled
+
+Solace Cloud creates new services without Dynamic Message Routing (DMR) unless you opt in. Set `dmr_enabled = true` to create the service with a cloud-managed DMR cluster, and optionally name the cluster.
+
+```hcl
+resource "solacecloud_service" "broker_service" {
+  name             = "my-broker-service"
+  datacenter_id    = "eks-eu-central-1a"
+  service_class_id = "ENTERPRISE_1K_STANDALONE"
+  dmr_enabled      = true
+  cluster_name     = "my-dmr-cluster" # Optional. Solace Cloud generates a name when omitted.
+}
+```
+
+You can also enable or disable DMR on a service that already exists by changing `dmr_enabled` and applying. The service is not replaced. See [Enabling and Disabling DMR](../guides/services/service_configuration.md#enabling-and-disabling-dmr) for what each direction does.
+
 ### Using Service Credentials with Solace Broker Provider
 
 ```hcl
@@ -122,7 +138,9 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
 
 * `max_spool_usage` - (Optional) The message spool size, in gigabytes (GB). A default message spool size is provided if this is not specified. Must be between 10 and 6000. For more information, see [Configuring Message Spool Sizes](https://docs.solace.com/Cloud/Configure-Message-Spools.htm).
 
-* `cluster_name` - (Optional) The name of the DMR cluster where the service will be created. Must be between 1 and 64 characters, may only contain alphanumeric, - or _ characters, must begin with alphabetic or _ characters, and cannot be 'default'.
+* `dmr_enabled` - (Optional, Computed) Whether the service has a Dynamic Message Routing (DMR) cluster. Set it to `true` to create the service with a cloud-managed DMR cluster, and omit it (or set it to `false`) for a service without DMR. Changing it on an existing service enables or disables DMR in place, without replacing the service. Disabling DMR deletes the cluster, and Solace Cloud refuses the request while the service belongs to an event mesh. Service packages that always enable DMR (legacy packages) ignore this argument when creating the service. If you set it to `false` on such a package, the provider disables DMR and deletes the cluster right after the service is created so the service matches your configuration, and reports a warning saying so. Remove `dmr_enabled = false` if you want to keep the DMR cluster. Existing configurations that do not set this argument continue to apply without a plan diff, including configurations that set only `cluster_name` for a service that has DMR.
+
+* `cluster_name` - (Optional, Computed) The name of the DMR cluster for the service. Requires `dmr_enabled = true`; setting `cluster_name` without opting in to DMR is rejected during `terraform plan`. You can set it when DMR is enabled, either at creation or when enabling DMR on an existing service. Solace Cloud generates a name when this is omitted, and a service without DMR has no cluster name. An existing cluster cannot be renamed. Must be between 1 and 64 characters, may only contain alphanumeric, - or _ characters, must begin with alphabetic or _ characters, and cannot be 'default'.
 
 * `owned_by` - (Optional, Computed) The unique identifier representing the user who owns the event broker service.
 
@@ -179,7 +197,7 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
 **Note:** To read connection endpoint information, use the `solacecloud_connection_endpoints` data source. To manage connection endpoints independently, use the `solacecloud_connection_endpoint` resource.
 
 
-* `dmr_cluster` - The DMR cluster details. This is a complex object with the following attributes:
+* `dmr_cluster` - The DMR cluster details. This is null for a service created without DMR (`dmr_enabled` is `false`). This is a complex object with the following attributes:
   * `name` - The name of the DMR cluster.
   * `password` - The password for the cluster (sensitive).
   * `remote_address` - The address of the remote node in the cluster.

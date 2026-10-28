@@ -48,7 +48,7 @@ func TestDnsNameCreationSuccess(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -96,7 +96,7 @@ func TestDnsNameValidation(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -141,7 +141,7 @@ func TestDnsNameImport(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -310,7 +310,7 @@ func TestDnsNameCapacityExceeded(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -373,7 +373,7 @@ func TestDnsNamesDataSource(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -424,7 +424,7 @@ func TestDnsNameUpdateNotSupported(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -444,7 +444,7 @@ resource "solacecloud_connection_endpoint_dns_name" "test" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -534,7 +534,7 @@ func TestDnsNameDeleteDefaultHostname(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -587,7 +587,7 @@ func TestDnsNameErrorHandling(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -661,7 +661,7 @@ func TestDnsNameReadNotFound(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -703,7 +703,7 @@ func TestDnsNameInvalidImportFormat(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -769,7 +769,7 @@ func TestDnsNameDuplicateCreation(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -938,7 +938,7 @@ func TestDnsNamesDataSourceEmpty(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -991,7 +991,7 @@ func TestDnsNamesDataSourceError(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -1162,7 +1162,7 @@ func TestDnsNameCreationPollingTimeout(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -1206,7 +1206,7 @@ func TestDnsNameMoveImportInvalidFormat(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -1256,7 +1256,7 @@ func TestDnsNameCreationRealAPI(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -1286,6 +1286,169 @@ resource "solacecloud_connection_endpoint_dns_name" "test" {
 						return nil
 					},
 				),
+			},
+		},
+	})
+}
+
+// dnsNameAlreadyDeletedHcl is the config shared by the DATAGO-120147 acceptance tests
+func dnsNameAlreadyDeletedHcl(instance *internal.TestInstance, params internal.ConfigurableParams) string {
+	return instance.GetBaseHcl() + fmt.Sprintf(`
+resource "solacecloud_service" "%s" {
+  name             = "%s"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
+  service_class_id = "%s"
+}
+
+resource "solacecloud_connection_endpoint_dns_name" "test" {
+  service_id             = "%s"
+  connection_endpoint_id = "%s"
+  dns_name               = "%s"
+}
+`, params.ServiceName, params.ServiceName, params.ServiceClass,
+		params.ServiceId, params.ConnectionEndpointId, params.DnsName)
+}
+
+// TestDnsNameDestroyAfterConsoleDelete covers DATAGO-120147: terraform destroy succeeds when the
+// DNS name was deleted in the console and the API answers the DELETE with 404
+func TestDnsNameDestroyAfterConsoleDelete(t *testing.T) {
+	instance := internal.NewTestInstance()
+	randomName := strings.ToLower(random.String(8))
+
+	params := internal.ConfigurableParams{
+		ServiceClass:         "ENTERPRISE_1K_STANDALONE",
+		ServiceName:          "DNS_Gone_Destroy_" + randomName,
+		ServiceId:            "gone-svc-" + randomName,
+		ConnectionEndpointId: "gone-ep-" + randomName,
+		DnsName:              "gone-" + randomName + ".example.com",
+	}
+
+	instance.Init(params)
+	if !instance.IsMocked() {
+		return
+	}
+	instance.SetupDnsNameMocks(params)
+
+	deleteKey := "DELETE " + instance.GetBaseURL() + "/api/v2/missionControl/eventBrokerServices/" + params.ServiceId +
+		"/connectionEndpoints/" + params.ConnectionEndpointId + "/dnsNames/" + params.DnsName
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: dnsNameAlreadyDeletedHcl(instance, params),
+				Check:  resource.TestCheckResourceAttr("solacecloud_connection_endpoint_dns_name.test", "dns_name", params.DnsName),
+			},
+			{
+				// The DNS name is deleted in the console between refresh and delete: the DELETE now answers 404
+				PreConfig: func() {
+					httpmock.RegisterResponder("DELETE", strings.TrimPrefix(deleteKey, "DELETE "),
+						internal.JsonResponder(404, `{"message": "dns name not found", "errorId": "test-error-id"}`))
+				},
+				Config:   dnsNameAlreadyDeletedHcl(instance, params),
+				PlanOnly: true,
+			},
+		},
+		// The test case's destroy fails the test on any error; also prove the 404 DELETE was the one sent
+		CheckDestroy: func(_ *terraform.State) error {
+			if httpmock.GetCallCountInfo()[deleteKey] == 0 {
+				return fmt.Errorf("expected a DELETE of the DNS name, none was sent")
+			}
+			return nil
+		},
+	})
+}
+
+// TestDnsNameRefreshAfterConsoleDelete covers DATAGO-120147: a refresh drops a DNS name that was
+// deleted in the console from state, so Terraform plans to create it again
+func TestDnsNameRefreshAfterConsoleDelete(t *testing.T) {
+	instance := internal.NewTestInstance()
+	randomName := strings.ToLower(random.String(8))
+
+	params := internal.ConfigurableParams{
+		ServiceClass:         "ENTERPRISE_1K_STANDALONE",
+		ServiceName:          "DNS_Gone_Refresh_" + randomName,
+		ServiceId:            "gone-svc-" + randomName,
+		ConnectionEndpointId: "gone-ep-" + randomName,
+		DnsName:              "gone-" + randomName + ".example.com",
+	}
+
+	instance.Init(params)
+	if !instance.IsMocked() {
+		return
+	}
+	instance.SetupDnsNameMocks(params)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: dnsNameAlreadyDeletedHcl(instance, params),
+				Check:  resource.TestCheckResourceAttr("solacecloud_connection_endpoint_dns_name.test", "dns_name", params.DnsName),
+			},
+			{
+				// The DNS name is deleted in the console: it is no longer listed and its DELETE answers 404
+				PreConfig: func() {
+					dnsNamesUrl := instance.GetBaseURL() + "/api/v2/missionControl/eventBrokerServices/" + params.ServiceId +
+						"/connectionEndpoints/" + params.ConnectionEndpointId + "/dnsNames"
+					httpmock.RegisterResponder("GET", dnsNamesUrl, internal.JsonResponder(200, `{"data": []}`))
+					httpmock.RegisterResponder("DELETE", dnsNamesUrl+"/"+params.DnsName,
+						internal.JsonResponder(404, `{"message": "dns name not found", "errorId": "test-error-id"}`))
+				},
+				Config:             dnsNameAlreadyDeletedHcl(instance, params),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+// TestDnsNameMoveRefreshAfterConsoleDelete covers DATAGO-120147: a refresh drops a moved DNS name
+// that was deleted in the console, instead of failing with "move verification failed"
+func TestDnsNameMoveRefreshAfterConsoleDelete(t *testing.T) {
+	instance := internal.NewTestInstance()
+	randomName := strings.ToLower(random.String(8))
+
+	params := internal.ConfigurableParams{
+		ServiceId:                  "gone-src-svc-" + randomName,
+		ConnectionEndpointId:       "gone-src-ep-" + randomName,
+		TargetServiceId:            "gone-dst-svc-" + randomName,
+		TargetConnectionEndpointId: "gone-dst-ep-" + randomName,
+		DnsName:                    "gone-move-" + randomName + ".example.com",
+	}
+
+	instance.Init(params)
+	if !instance.IsMocked() {
+		return
+	}
+	instance.SetupDnsNameMoveMocks(params)
+
+	targetUrl := instance.GetBaseURL() + "/api/v2/missionControl/eventBrokerServices/" + params.TargetServiceId +
+		"/connectionEndpoints/" + params.TargetConnectionEndpointId + "/dnsNames"
+	httpmock.RegisterResponder("GET", targetUrl, internal.JsonResponder(200, `{"data": [{"id": "dns-id-123", "dnsName": "`+params.DnsName+`", "domainType": "CUSTOM"}]}`))
+
+	config := instance.GetBaseHcl() + fmt.Sprintf(`
+resource "solacecloud_connection_endpoint_dns_name_move" "test" {
+  source_service_id             = "%s"
+  source_connection_endpoint_id = "%s"
+  dns_name                      = "%s"
+  target_service_id             = "%s"
+  target_connection_endpoint_id = "%s"
+}
+`, params.ServiceId, params.ConnectionEndpointId, params.DnsName,
+		params.TargetServiceId, params.TargetConnectionEndpointId)
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{Config: config},
+			{
+				PreConfig: func() {
+					httpmock.RegisterResponder("GET", targetUrl, internal.JsonResponder(200, `{"data": []}`))
+				},
+				Config:             config,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

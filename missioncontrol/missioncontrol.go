@@ -228,6 +228,8 @@ const (
 	JobOperationTypesDeleteConnectionEndpoint JobOperationTypes = "deleteConnectionEndpoint"
 	JobOperationTypesDeleteDnsName            JobOperationTypes = "deleteDnsName"
 	JobOperationTypesDeleteService            JobOperationTypes = "deleteService"
+	JobOperationTypesDisableDmrCluster        JobOperationTypes = "disableDmrCluster"
+	JobOperationTypesEnableDmrCluster         JobOperationTypes = "enableDmrCluster"
 	JobOperationTypesHaSwitchover             JobOperationTypes = "haSwitchover"
 	JobOperationTypesInfrastructureRequest    JobOperationTypes = "infrastructureRequest"
 	JobOperationTypesInstallCertificate       JobOperationTypes = "installCertificate"
@@ -1019,7 +1021,7 @@ type CreateConnectionEndpointK8sServiceType string
 
 // CreateServiceRequest defines model for CreateServiceRequest.
 type CreateServiceRequest struct {
-	// ClusterName The name of the DMR cluster.
+	// ClusterName The name of the Dynamic Message Routing (DMR) cluster. For service packages that support configuring DMR at service creation, this value is used only when <code>dmrEnabled</code> is set to <code>true</code>. For legacy service packages that enable DMR by default, this value always applies.
 	ClusterName *string `json:"clusterName,omitempty"`
 
 	// CustomRouterName <p>The unique prefix for the name of the router for the event broker service. The prefix must be constructed using only lower-case, alphanumeric characters.</p><p>When the customRouterName value is defined, it’s value is added as a prefix to the high-availability role ("primary", "backup", or "monitoring"), and "cn" (custom name) is appended to the end to create the custom router name. For example, if you specified a value of "custom", the router name is "customprimarycn".</p><p> If the customRouterName value is left blank, the prefix defaults to the service id of the event broker service. This is prefixed to the event broker service node role to create the router name, for example, "bd37t1d5h4kprimary".<p><p><b>Note:</b> customRouterName is only supported on event broker versions 10.4 or later.</p>
@@ -1027,6 +1029,9 @@ type CreateServiceRequest struct {
 
 	// DatacenterId The identifier of the datacenter.
 	DatacenterId string `json:"datacenterId"`
+
+	// DmrEnabled Indicates whether to create and enable a Dynamic Message Routing (DMR) cluster on this event broker service. For service packages that support DMR opt-in, a value of <code>true</code> creates a cloud-managed DMR cluster using the supplied or generated cluster name; a value of <code>false</code> or omitting this field creates the service without DMR and ignores the <code>clusterName</code>. Legacy service packages ignore this field and preserve their existing DMR behavior.
+	DmrEnabled *bool `json:"dmrEnabled,omitempty"`
 
 	// EnvironmentId The unique identifier of the environment where you want to create the service.
 	//
@@ -1155,6 +1160,12 @@ type DatacenterResponse struct {
 type DatacentersResponse struct {
 	Data []Datacenter                      `json:"data"`
 	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
+// DmrClusterRequest defines model for DmrClusterRequest.
+type DmrClusterRequest struct {
+	// ClusterName The name of the DMR cluster to create. If you omit this field or provide an empty value, a cluster name is generated automatically.
+	ClusterName *string `json:"clusterName,omitempty"`
 }
 
 // DnsName Connection endpoint DNS name
@@ -2523,6 +2534,9 @@ type CreateResourceJSONRequestBody = CreateResourceJSONBody
 // ReplaceResourceJSONRequestBody defines body for ReplaceResource for application/json ContentType.
 type ReplaceResourceJSONRequestBody = ReplaceResourceJSONBody
 
+// EnableDmrClusterJSONRequestBody defines body for EnableDmrCluster for application/json ContentType.
+type EnableDmrClusterJSONRequestBody = DmrClusterRequest
+
 // CreateClientProfileJSONRequestBody defines body for CreateClientProfile for application/json ContentType.
 type CreateClientProfileJSONRequestBody = ClientProfileRequest
 
@@ -2709,6 +2723,14 @@ type ClientInterface interface {
 	ReplaceResourceWithBody(ctx context.Context, serviceId string, resourcePath string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	ReplaceResource(ctx context.Context, serviceId string, resourcePath string, body ReplaceResourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteDmrCluster request
+	DeleteDmrCluster(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnableDmrClusterWithBody request with any body
+	EnableDmrClusterWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnableDmrCluster(ctx context.Context, serviceId string, body EnableDmrClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetBrokerStateByServiceId request
 	GetBrokerStateByServiceId(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3170,6 +3192,42 @@ func (c *Client) ReplaceResourceWithBody(ctx context.Context, serviceId string, 
 
 func (c *Client) ReplaceResource(ctx context.Context, serviceId string, resourcePath string, body ReplaceResourceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewReplaceResourceRequest(c.Server, serviceId, resourcePath, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteDmrCluster(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteDmrClusterRequest(c.Server, serviceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnableDmrClusterWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnableDmrClusterRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnableDmrCluster(ctx context.Context, serviceId string, body EnableDmrClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnableDmrClusterRequest(c.Server, serviceId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4862,6 +4920,87 @@ func NewReplaceResourceRequestWithBody(server string, serviceId string, resource
 	return req, nil
 }
 
+// NewDeleteDmrClusterRequest generates requests for DeleteDmrCluster
+func NewDeleteDmrClusterRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/broker/cluster", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnableDmrClusterRequest calls the generic EnableDmrCluster builder with application/json body
+func NewEnableDmrClusterRequest(server string, serviceId string, body EnableDmrClusterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnableDmrClusterRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewEnableDmrClusterRequestWithBody generates requests for EnableDmrCluster with any type of body
+func NewEnableDmrClusterRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/broker/cluster", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetBrokerStateByServiceIdRequest generates requests for GetBrokerStateByServiceId
 func NewGetBrokerStateByServiceIdRequest(server string, serviceId string) (*http.Request, error) {
 	var err error
@@ -6401,6 +6540,14 @@ type ClientWithResponsesInterface interface {
 
 	ReplaceResourceWithResponse(ctx context.Context, serviceId string, resourcePath string, body ReplaceResourceJSONRequestBody, reqEditors ...RequestEditorFn) (*ReplaceResourceResponse, error)
 
+	// DeleteDmrClusterWithResponse request
+	DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*DeleteDmrClusterResponse, error)
+
+	// EnableDmrClusterWithBodyWithResponse request with any body
+	EnableDmrClusterWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*EnableDmrClusterResponse, error)
+
+	EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body EnableDmrClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*EnableDmrClusterResponse, error)
+
 	// GetBrokerStateByServiceIdWithResponse request
 	GetBrokerStateByServiceIdWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetBrokerStateByServiceIdResponse, error)
 
@@ -7039,6 +7186,62 @@ func (r ReplaceResourceResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r ReplaceResourceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteDmrClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteDmrClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteDmrClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type EnableDmrClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r EnableDmrClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnableDmrClusterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8072,6 +8275,32 @@ func (c *ClientWithResponses) ReplaceResourceWithResponse(ctx context.Context, s
 		return nil, err
 	}
 	return ParseReplaceResourceResponse(rsp)
+}
+
+// DeleteDmrClusterWithResponse request returning *DeleteDmrClusterResponse
+func (c *ClientWithResponses) DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*DeleteDmrClusterResponse, error) {
+	rsp, err := c.DeleteDmrCluster(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteDmrClusterResponse(rsp)
+}
+
+// EnableDmrClusterWithBodyWithResponse request with arbitrary body returning *EnableDmrClusterResponse
+func (c *ClientWithResponses) EnableDmrClusterWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*EnableDmrClusterResponse, error) {
+	rsp, err := c.EnableDmrClusterWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnableDmrClusterResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body EnableDmrClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*EnableDmrClusterResponse, error) {
+	rsp, err := c.EnableDmrCluster(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnableDmrClusterResponse(rsp)
 }
 
 // GetBrokerStateByServiceIdWithResponse request returning *GetBrokerStateByServiceIdResponse
@@ -9467,6 +9696,142 @@ func ParseReplaceResourceResponse(rsp *http.Response) (*ReplaceResourceResponse,
 			return nil, err
 		}
 		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteDmrClusterResponse parses an HTTP response from a DeleteDmrClusterWithResponse call
+func ParseDeleteDmrClusterResponse(rsp *http.Response) (*DeleteDmrClusterResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteDmrClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnableDmrClusterResponse parses an HTTP response from a EnableDmrClusterWithResponse call
+func ParseEnableDmrClusterResponse(rsp *http.Response) (*EnableDmrClusterResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnableDmrClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
 
 	}
 

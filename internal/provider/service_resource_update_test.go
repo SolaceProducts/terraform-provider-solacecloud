@@ -56,7 +56,7 @@ func TestUpdateWorksMocked(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
   owner_id         = "` + params.OwnerId + `"
 }
@@ -66,7 +66,7 @@ resource "solacecloud_service" "` + params.ServiceName + `" {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `New"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
   owner_id         = "owneridnew"
 }
@@ -98,7 +98,7 @@ func TestUpdateWorksNotMocked(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -107,7 +107,7 @@ resource "solacecloud_service" "` + params.ServiceName + `" {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `New"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -180,7 +180,7 @@ func TestUpdateSpoolWorks(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
   max_spool_usage  = 200
 }
@@ -194,7 +194,7 @@ resource "solacecloud_service" "` + params.ServiceName + `" {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
   max_spool_usage  = 400
 }
@@ -233,7 +233,7 @@ func TestUpdateImmutableValueFails(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
