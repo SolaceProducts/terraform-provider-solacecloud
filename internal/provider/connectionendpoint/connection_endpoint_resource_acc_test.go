@@ -106,7 +106,7 @@ func TestAccConnectionEndpointResource_Create(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "test" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
 }
 
@@ -506,7 +506,7 @@ func TestCRUDUnit(t *testing.T) {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "broker_service" {
   name                 = "%s"
-  datacenter_id        = "gke-gcp-us-central1-a"
+  datacenter_id        = "`+internal.TestDatacenterId()+`"
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
   event_broker_version = "10.25.0.276-48"
   locked               = false
@@ -550,7 +550,7 @@ resource "solacecloud_connection_endpoint" "myendpoint" {
 				Config: instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "broker_service" {
   name                 = "%s"
-  datacenter_id        = "gke-gcp-us-central1-a"
+  datacenter_id        = "`+internal.TestDatacenterId()+`"
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
   event_broker_version = "10.25.0.276-48"
   locked               = false

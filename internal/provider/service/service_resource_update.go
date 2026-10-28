@@ -36,7 +36,16 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// Save updated data into Terraform state
-	r.readDataInternal(ctx, &state, &plan)
+	readDiags := r.readDataInternal(ctx, &state, &plan)
+	resp.Diagnostics.Append(*readDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// State records what the service reports. If that still differs from the plan, the DMR
+	// change did not take effect; report it rather than pretend.
+	verifyDmrMatchesPlan(&plan, state.DmrEnabled, &resp.Diagnostics)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -77,7 +86,13 @@ func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceReso
 			return diags
 		}
 	}
-	diags = r.updateDefaultConnectionEndpoint(ctx, state, plan)
+	dmrDiags := r.updateDmrEnablement(ctx, state, plan)
+	diags.Append(dmrDiags...)
+	if diags.HasError() {
+		return diags
+	}
+
+	diags.Append(r.updateDefaultConnectionEndpoint(ctx, state, plan)...)
 	return diags
 }
 

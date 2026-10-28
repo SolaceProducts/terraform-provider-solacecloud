@@ -2,12 +2,15 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
 	"terraform-provider-solacecloud/missioncontrol"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/labstack/gommon/random"
@@ -41,6 +44,20 @@ func (provider *TestInstance) GetBaseURL() string {
 func (provider *TestInstance) GetClient() *missioncontrol.ClientWithResponses {
 	return provider.client
 }
+
+// defaultTestDatacenterId is the datacenter the mocked fixtures report and the tests create
+// services in when SOLACE_TEST_DATACENTER_ID is not set.
+const defaultTestDatacenterId = "gke-gcp-us-central1-a"
+
+// TestDatacenterId is the datacenter the tests create services in. SOLACE_TEST_DATACENTER_ID
+// overrides it, so a run against a real API can use a datacenter that has capacity there.
+func TestDatacenterId() string {
+	if override := os.Getenv("SOLACE_TEST_DATACENTER_ID"); override != "" {
+		return override
+	}
+	return defaultTestDatacenterId
+}
+
 func (provider *TestInstance) Init(params ConfigurableParams) {
 	baseUrl := os.Getenv("SOLACE_BASE_URL")
 	provider.baseUrl = baseUrl
@@ -101,6 +118,10 @@ type ConfigurableParams struct {
 	// DNS Name move specific params
 	TargetServiceId            string
 	TargetConnectionEndpointId string
+	// DMR shape of the mocked service. When DmrOff is true the broker has no "cluster"
+	// object, matching a service created without Dynamic Message Routing.
+	DmrOff      bool
+	ClusterName string
 }
 
 func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
@@ -122,20 +143,7 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
 	httpmock.RegisterResponder(
 		"POST",
 		provider.baseUrl+"/api/v2/missionControl/eventBrokerServices",
-		JsonResponder(202, `{
-    "data": {
-        "id": "44x9yacy20i",
-        "type": "operation",
-        "operationType": "createService",
-        "createdBy": "67tr8tkuel",
-        "createdTime": "2025-02-19T01:33:04Z",
-        "completedTime": "2025-02-19T01:33:04Z",
-        "resourceId": "`+params.ServiceId+`",
-        "resourceType": "service",
-        "status": "PENDING",
-        "error": null
-    }
-}`))
+		JsonResponder(202, CreateServiceOperationResponse(params)))
 
 	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
 		JsonResponder(200, CreateGetServiceResponse(params)))
@@ -167,6 +175,151 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
 		JsonResponder(200, provider.createGetConnectionEndpointResponse(params)))
 }
 
+// SetupDmrClusterMocks registers the enable and disable DMR endpoints and the operation they
+// return. Each request flips the mocked service's DMR shape and re-registers the service
+// responders, so a later read observes the new state the way the real API behaves.
+//
+// A non-empty dmrOperationError makes both requests return that operation as FAILED instead,
+// which is how Solace Cloud reports a refused enablement, such as disabling DMR on a service
+// that belongs to an event mesh.
+func (provider *TestInstance) SetupDmrClusterMocks(params ConfigurableParams, dmrOperationError string) {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	const operationId = "dmr-operation-123"
+	clusterUrl := provider.baseUrl + "/api/v2/missionControl/eventBrokerServices/" + params.ServiceId + "/broker/cluster"
+
+	// Register the operation first so it is in place before any request polls it.
+	provider.registerDmrOperation(params.ServiceId, operationId, dmrOperationError)
+
+	httpmock.RegisterResponder("POST", clusterUrl, func(r *http.Request) (*http.Response, error) {
+		enabled := params
+		enabled.DmrOff = false
+		if name := readClusterName(r); name != "" {
+			enabled.ClusterName = name
+		}
+		if dmrOperationError == "" {
+			provider.SetupDefaultMocks(enabled)
+			provider.registerDmrOperation(params.ServiceId, operationId, dmrOperationError)
+		}
+		return JsonResponder(202, dmrOperationResponse(operationId, params.ServiceId, "enableDmrCluster"))(r)
+	})
+
+	httpmock.RegisterResponder("DELETE", clusterUrl, func(r *http.Request) (*http.Response, error) {
+		disabled := params
+		disabled.DmrOff = true
+		disabled.ClusterName = ""
+		if dmrOperationError == "" {
+			provider.SetupDefaultMocks(disabled)
+			provider.registerDmrOperation(params.ServiceId, operationId, dmrOperationError)
+		}
+		return JsonResponder(202, dmrOperationResponse(operationId, params.ServiceId, "disableDmrCluster"))(r)
+	})
+}
+
+// registerDmrOperation registers the operation-status endpoint the provider polls after an
+// enable or disable request.
+func (provider *TestInstance) registerDmrOperation(serviceId, operationId, operationError string) {
+	status, errorBlock := "SUCCEEDED", "null"
+	if operationError != "" {
+		status = "FAILED"
+		errorBlock = `{"message": "` + operationError + `"}`
+	}
+	httpmock.RegisterResponder("GET",
+		provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+serviceId+"/operations/"+operationId,
+		JsonResponder(200, `{
+    "data": {
+        "id": "`+operationId+`",
+        "type": "operation",
+        "operationType": "enableDmrCluster",
+        "resourceId": "`+serviceId+`",
+        "resourceType": "service",
+        "status": "`+status+`",
+        "error": `+errorBlock+`
+    }
+}`))
+}
+
+// readClusterName returns the clusterName of an enable DMR request body, or an empty string
+// when the body is absent or does not name a cluster.
+func readClusterName(r *http.Request) string {
+	if r.Body == nil {
+		return ""
+	}
+	raw, err := io.ReadAll(r.Body)
+	if err != nil || len(raw) == 0 {
+		return ""
+	}
+	var body struct {
+		ClusterName string `json:"clusterName"`
+	}
+	if err := json.Unmarshal(raw, &body); err != nil {
+		return ""
+	}
+	return body.ClusterName
+}
+
+func dmrOperationResponse(operationId, serviceId, operationType string) string {
+	return `{
+    "data": {
+        "id": "` + operationId + `",
+        "type": "operation",
+        "operationType": "` + operationType + `",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "resourceId": "` + serviceId + `",
+        "resourceType": "service",
+        "status": "PENDING",
+        "error": null
+    }
+}`
+}
+
+// CreateServiceOperationResponse is the 202 body returned by the mocked create service
+// call. Tests that register their own POST responder (for example to inspect the request
+// body) reuse it so the rest of the mocked flow is unchanged.
+func CreateServiceOperationResponse(params ConfigurableParams) string {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	return `{
+    "data": {
+        "id": "44x9yacy20i",
+        "type": "operation",
+        "operationType": "createService",
+        "createdBy": "67tr8tkuel",
+        "createdTime": "2025-02-19T01:33:04Z",
+        "completedTime": "2025-02-19T01:33:04Z",
+        "resourceId": "` + params.ServiceId + `",
+        "resourceType": "service",
+        "status": "PENDING",
+        "error": null
+    }
+}`
+}
+
+// clusterJson renders the broker "cluster" object of the mocked GET service response,
+// or nothing for a service created without DMR.
+func clusterJson(params ConfigurableParams) string {
+	if params.DmrOff {
+		return ""
+	}
+	clusterName := params.ClusterName
+	if clusterName == "" {
+		clusterName = "cluster-eks-eu-central-1a-3-62xaikge1vm"
+	}
+	return `"cluster": {
+                "name": "` + clusterName + `",
+                "password": "3hg48osubca8t5blpqjcge0ju",
+                "remoteAddress": "mr-connection-80dx8er674q.messaging.solace.cloud",
+                "primaryRouterName": "` + determineRouterName(params.CustomRouterName) + `",
+                "supportedAuthenticationMode": [
+                    "Basic"
+                ]
+            },
+            `
+}
+
 func CreateGetServiceResponse(params ConfigurableParams) string {
 	return `
 {
@@ -178,7 +331,7 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
         "createdTime": "2025-02-19T01:18:36Z",
         "ownedBy": ` + strconv.Quote(params.OwnerId) + `,
         "infrastructureId": "62xaikge1vm",
-        "datacenterId": "gke-gcp-us-central1-a",
+        "datacenterId": "` + TestDatacenterId() + `",
         "serviceClassId": "` + params.ServiceClass + `",
         "adminState": "START",
         "creationState": "COMPLETED",
@@ -284,16 +437,7 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
             "configSyncSslEnabled": true,
             "monitoringMode": "BASIC",
             "tlsStandardDomainCertificateAuthoritiesEnabled": true,
-            "cluster": {
-                "name": "cluster-eks-eu-central-1a-3-62xaikge1vm",
-                "password": "3hg48osubca8t5blpqjcge0ju",
-                "remoteAddress": "mr-connection-80dx8er674q.messaging.solace.cloud",
-                "primaryRouterName": "` + determineRouterName(params.CustomRouterName) + `",
-                "supportedAuthenticationMode": [
-                    "Basic"
-                ]
-            },
-            "managementReadOnlyLoginCredential": {
+            ` + clusterJson(params) + `"managementReadOnlyLoginCredential": {
                 "username": "msgvpn-6q1p55o6ovr-view",
                 "password": "5k02537vrlu59fq7sc4epur7ug",
                 "token": "YWJj.eyJhY2Nlc3NfdG9rZW4iOiAibXNndnBuLTZxMXA1NW82b3ZyLXZpZXc6NWswMjUzN3ZybHU1OWZxN3NjNGVwdXI3dWcifQ%3D%3D.eHl6"
@@ -311,6 +455,7 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
                         }
                     ],
                     "enabled": true,
+                    "dmrEnabled": ` + strconv.FormatBool(!params.DmrOff) + `,
                     "eventLargeMsgThreshold": 11,
                     "managementAdminLoginCredential": {
                         "username": "msgvpn-6q1p55o6ovr-admin",

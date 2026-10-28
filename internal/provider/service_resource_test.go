@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 	"terraform-provider-solacecloud/internal"
 	"terraform-provider-solacecloud/internal/provider"
 	"testing"
@@ -34,7 +35,7 @@ func TestOrderResource(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -62,7 +63,7 @@ func TestResourceDeletedExternally(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -114,7 +115,7 @@ resource "solacecloud_service" "` + params.ServiceName + `" {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -148,10 +149,12 @@ func TestServiceResourceImport(t *testing.T) {
 	serviceName := "Import_Test_Service_" + randomName
 	var capturedServiceID string
 
+	// Router names are unique per datacenter, so a fixed name collides with any service
+	// that already uses it there (another run, or another org's service).
 	params := internal.ConfigurableParams{
 		ServiceClass:     "ENTERPRISE_1K_HIGHAVAILABILITY",
 		ServiceName:      serviceName,
-		CustomRouterName: "myrouter",
+		CustomRouterName: "rt" + strings.ToLower(random.String(8)),
 	}
 	instance.Init(params)
 
@@ -159,7 +162,7 @@ func TestServiceResourceImport(t *testing.T) {
 	baseConfig := instance.GetBaseHcl() + fmt.Sprintf(`
 resource "solacecloud_service" "%s" {
   name             = "%s"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "`+internal.TestDatacenterId()+`"
   service_class_id = "%s"
   custom_router_name = "%s"
 }
@@ -314,7 +317,7 @@ func TestAccServiceResource_Delete(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
 resource "solacecloud_service" "` + params.ServiceName + `" {
   name             = "` + params.ServiceName + `"
-  datacenter_id    = "gke-gcp-us-central1-a"
+  datacenter_id    = "` + internal.TestDatacenterId() + `"
   service_class_id = "` + params.ServiceClass + `"
 }
 `,
@@ -353,7 +356,7 @@ func TestAccServiceResource_DeleteLockedFails(t *testing.T) {
 			"name": "`+params.ServiceName+`",
 			"locked": false,
 			"serviceClassId": "`+params.ServiceClass+`",
-			"datacenterId": "gke-gcp-us-central1-a"
+			"datacenterId": "`+internal.TestDatacenterId()+`"
 		}`)(r)
 			},
 		)
@@ -373,7 +376,7 @@ func TestAccServiceResource_DeleteLockedFails(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
  resource "solacecloud_service" "` + params.ServiceName + `" {
    name             = "` + params.ServiceName + `"
-   datacenter_id    = "gke-gcp-us-central1-a"
+   datacenter_id    = "` + internal.TestDatacenterId() + `"
    service_class_id = "` + params.ServiceClass + `"
    locked           = true
  }
@@ -387,7 +390,7 @@ func TestAccServiceResource_DeleteLockedFails(t *testing.T) {
 				Config: instance.GetBaseHcl() + `
  resource "solacecloud_service" "` + params.ServiceName + `" {
    name             = "` + params.ServiceName + `"
-   datacenter_id    = "gke-gcp-us-central1-a"
+   datacenter_id    = "` + internal.TestDatacenterId() + `"
    service_class_id = "` + params.ServiceClass + `"
    locked           = false
  }

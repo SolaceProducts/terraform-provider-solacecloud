@@ -212,6 +212,8 @@ output "messaging_password" {
 
 ### Accessing DMR Cluster Information
 
+These attributes are only populated for a service created with `dmr_enabled = true`. For a service without DMR, `dmr_cluster` is null. See [Dynamic Message Routing (DMR)](#dynamic-message-routing-dmr).
+
 ```hcl
 output "dmr_cluster_name" {
   value = solacecloud_service.broker_service.dmr_cluster.name
@@ -221,6 +223,45 @@ output "dmr_remote_address" {
   value = solacecloud_service.broker_service.dmr_cluster.remote_address
 }
 ```
+
+## Dynamic Message Routing (DMR)
+
+Solace Cloud creates new event broker services **without** a DMR cluster unless you opt in. Set `dmr_enabled = true` to create the service with a cloud-managed DMR cluster, and optionally name the cluster with `cluster_name`.
+
+```hcl
+resource "solacecloud_service" "mesh_member" {
+  name             = "mesh-member"
+  datacenter_id    = "aws-us-east-1a"
+  service_class_id = "ENTERPRISE_1K_STANDALONE"
+  dmr_enabled      = true
+  cluster_name     = "prod-dmr-cluster" # Optional. Solace Cloud generates a name when omitted.
+}
+```
+
+Keep the following in mind:
+
+* `cluster_name` requires `dmr_enabled = true`. Setting `cluster_name` without opting in is rejected when you run `terraform plan`.
+* A service without DMR has no `cluster_name`, and its `dmr_cluster` attribute is null.
+* Existing configurations that set neither argument keep applying without a plan diff. `dmr_enabled` is read from the service, so an existing DMR-enabled service reports `true`.
+* Service packages that always enable DMR (legacy packages) ignore `dmr_enabled` when creating the service. If you set `dmr_enabled = false` on such a package, the provider disables DMR and deletes the cluster right after the service is created so it matches your configuration, and reports a warning saying so. Remove `dmr_enabled = false` if you want to keep the DMR cluster.
+
+### Enabling and Disabling DMR
+
+Changing `dmr_enabled` on a service that already exists enables or disables DMR in place. The service is not replaced and keeps its identifier, endpoints and credentials.
+
+```hcl
+resource "solacecloud_service" "mesh_member" {
+  name             = "mesh-member"
+  datacenter_id    = "aws-us-east-1a"
+  service_class_id = "ENTERPRISE_1K_STANDALONE"
+  dmr_enabled      = true # Was false. Applying this creates the DMR cluster.
+}
+```
+
+* **Enabling** creates a cloud-managed DMR cluster and enables DMR on the Message VPN. Solace Cloud generates and stores the cluster credential. You can name the cluster in the same change by adding `cluster_name`; otherwise a name is generated.
+* **Disabling** deletes the DMR cluster and disables DMR on the Message VPN. Solace Cloud refuses the request while the service belongs to an event mesh, and the refusal is reported as a Terraform error. Remove the service from the event mesh first.
+* Each direction runs as an asynchronous Solace Cloud operation that reconfigures the broker, so the apply waits for it to finish.
+* An existing cluster cannot be renamed. Changing `cluster_name` on a service that already has a DMR cluster is rejected.
 
 ## Complete Example
 
@@ -242,6 +283,7 @@ resource "solacecloud_service" "ha_service" {
   max_spool_usage     = 100
   mate_link_encryption = true
   locked              = true
+  dmr_enabled         = true
   cluster_name        = "prod-dmr-cluster"
 }
 

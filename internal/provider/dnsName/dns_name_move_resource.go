@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 	"terraform-provider-solacecloud/internal/model"
 	"terraform-provider-solacecloud/internal/provider/apiclient"
 	"terraform-provider-solacecloud/internal/provider/operationutils"
 	"terraform-provider-solacecloud/internal/shared"
 	"terraform-provider-solacecloud/missioncontrol"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -220,7 +220,7 @@ func (r *DnsNameMoveResource) Create(ctx context.Context, req resource.CreateReq
 
 		// Operation completed successfully or with warnings
 		tflog.Info(ctx, "DNS name move operation completed", map[string]interface{}{
-			"dns_name": dnsName,
+			"dns_name":       dnsName,
 			"target_service": targetServiceId,
 		})
 
@@ -233,7 +233,6 @@ func (r *DnsNameMoveResource) Create(ctx context.Context, req resource.CreateReq
 		)
 		return
 	}
-
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -252,13 +251,18 @@ func (r *DnsNameMoveResource) Read(ctx context.Context, req resource.ReadRequest
 	targetConnectionEndpointId := data.TargetConnectionEndpointId.ValueString()
 	dnsName := data.DnsName.ValueString()
 
-
 	dnsNamesResp, err := r.APIClient.GetConnectionEndpointDnsNamesWithResponse(ctx, targetServiceId, targetConnectionEndpointId)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error checking DNS name location",
 			"Could not verify DNS name location: "+err.Error(),
 		)
+		return
+	}
+
+	// The target service or endpoint is gone: drop the move from state so refresh and destroy succeed
+	if dnsNamesResp.StatusCode() == http.StatusNotFound {
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
@@ -281,11 +285,9 @@ func (r *DnsNameMoveResource) Read(ctx context.Context, req resource.ReadRequest
 		}
 	}
 
+	// Deleted in the console after the move: drop it from state (DATAGO-120147)
 	if !found {
-		resp.Diagnostics.AddError(
-			"DNS name move verification failed",
-			fmt.Sprintf("DNS name %s was not found on target service %s after move operation", dnsName, targetServiceId),
-		)
+		resp.State.RemoveResource(ctx)
 		return
 	}
 

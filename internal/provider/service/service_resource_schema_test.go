@@ -6,8 +6,11 @@ import (
 	"terraform-provider-solacecloud/internal/provider/validators"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func TestCorrectFieldsHaveImmutableStringPlanModifier(t *testing.T) {
@@ -59,6 +62,47 @@ func TestCorrectFieldsHaveImmutableStringPlanModifier(t *testing.T) {
 				t.Errorf("Field %s does not have ImmutableStringPlanModifier", fieldName)
 			}
 		})
+	}
+}
+
+func TestDmrEnabledIsOptionalAndComputed(t *testing.T) {
+	serviceResource := service.NewServiceResource()
+	schemaResp := &resource.SchemaResponse{}
+	serviceResource.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	attribute, ok := schemaResp.Schema.Attributes["dmr_enabled"]
+	if !ok {
+		t.Fatal("dmr_enabled does not exist in schema")
+	}
+	boolAttr, ok := attribute.(schema.BoolAttribute)
+	if !ok {
+		t.Fatalf("dmr_enabled is not a BoolAttribute: %T", attribute)
+	}
+
+	// Optional + Computed (with no static default) is what lets existing configurations
+	// that never mention dmr_enabled keep applying without a plan diff.
+	if !boolAttr.IsOptional() || !boolAttr.IsComputed() || boolAttr.IsRequired() {
+		t.Errorf("dmr_enabled must be optional and computed, got optional=%v computed=%v required=%v",
+			boolAttr.IsOptional(), boolAttr.IsComputed(), boolAttr.IsRequired())
+	}
+
+	// DMR can be enabled or disabled in place, so no plan modifier may reject a change:
+	// one that did would make the update path unreachable.
+	for _, modifier := range boolAttr.PlanModifiers {
+		req := planmodifier.BoolRequest{
+			Path:       path.Root("dmr_enabled"),
+			StateValue: types.BoolValue(true),
+			PlanValue:  types.BoolValue(false),
+		}
+		modifierResp := &planmodifier.BoolResponse{PlanValue: req.PlanValue}
+		modifier.PlanModifyBool(context.Background(), req, modifierResp)
+
+		if modifierResp.Diagnostics.HasError() {
+			t.Errorf("plan modifier %T rejects changing dmr_enabled: %v", modifier, modifierResp.Diagnostics)
+		}
+		if !modifierResp.PlanValue.Equal(types.BoolValue(false)) {
+			t.Errorf("plan modifier %T overrode the planned dmr_enabled value: %s", modifier, modifierResp.PlanValue)
+		}
 	}
 }
 

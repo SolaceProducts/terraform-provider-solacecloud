@@ -7,17 +7,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )
 
+const (
+	immutableDescription         = "prevents changes to attribute after resource creation"
+	immutableMarkdownDescription = "**prevents** changes to attribute after resource creation"
+	immutableChangeSummary       = "Immutable Attribute Change"
+	immutableChangeDetail        = "You cannot change this attribute after resource creation. "
+)
+
 // ImmutableStringPlanModifier is a plan modifier that prevents changes to a string attribute
 type ImmutableStringPlanModifier struct{}
 
 // Description returns a plain text description of the plan modifier
 func (m ImmutableStringPlanModifier) Description(ctx context.Context) string {
-	return "prevents changes to attribute after resource creation"
+	return immutableDescription
 }
 
 // MarkdownDescription returns a markdown description of the plan modifier
 func (m ImmutableStringPlanModifier) MarkdownDescription(ctx context.Context) string {
-	return "**prevents** changes to attribute after resource creation"
+	return immutableMarkdownDescription
 }
 
 // PlanModifyString prevents changes to the attribute after resource creation
@@ -46,8 +53,8 @@ func validateImmutableNotChanged(ctx context.Context, req planmodifier.StringReq
 		// Add error diagnostic
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
-			"Immutable Attribute Change",
-			fmt.Sprintf("You cannot change this attribute after resource creation. "+
+			immutableChangeSummary,
+			fmt.Sprintf(immutableChangeDetail+
 				"State value: %q, Planned value: %q",
 				req.StateValue.ValueString(), req.PlanValue.ValueString()),
 		)
@@ -62,12 +69,12 @@ type CustomRouterNamePlanModifier struct{}
 
 // Description returns a plain text description of the plan modifier
 func (m CustomRouterNamePlanModifier) Description(ctx context.Context) string {
-	return "prevents changes to attribute after resource creation"
+	return immutableDescription
 }
 
 // MarkdownDescription returns a markdown description of the plan modifier
 func (m CustomRouterNamePlanModifier) MarkdownDescription(ctx context.Context) string {
-	return "**prevents** changes to attribute after resource creation"
+	return immutableMarkdownDescription
 }
 
 // PlanModifyString prevents changes to the attribute after resource creation
@@ -89,8 +96,8 @@ func (m CustomRouterNamePlanModifier) PlanModifyString(ctx context.Context, req 
 
 	resp.Diagnostics.AddAttributeError(
 		req.Path,
-		"Immutable Attribute Change",
-		fmt.Sprintf("You cannot change this attribute after resource creation. "+
+		immutableChangeSummary,
+		fmt.Sprintf(immutableChangeDetail+
 			"State value: %q, Planned value: %q",
 			req.StateValue.ValueString(), req.PlanValue.ValueString()),
 	)

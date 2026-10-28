@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package service
 
 import (
@@ -81,6 +78,9 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 	if util.IsKnown(data.ClusterName) {
 		varServiceBody.ClusterName = data.ClusterName.ValueStringPointer()
+	}
+	if util.IsKnown(data.DmrEnabled) {
+		varServiceBody.DmrEnabled = data.DmrEnabled.ValueBoolPointer()
 	}
 	if util.IsKnown(data.CustomRouterName) {
 		varServiceBody.CustomRouterName = data.CustomRouterName.ValueStringPointer()
@@ -187,18 +187,20 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	// A service package that always enables DMR ignores dmr_enabled = false at creation. The
+	// update below then disables DMR so the service matches the configuration; say so first.
+	warnWhenServicePackageIgnoredDmr(&data, assumedState.DmrEnabled, &resp.Diagnostics)
+
 	///////////////////////////////////////////////
 	// After SCService creation has been COMPLETED
-	// Get Connection Properties from the Service
+	// Apply what the create request cannot carry (owner, lock, DMR, endpoint)
 	///////////////////////////////////////////////
 
 	updateDiags := r.updateInternal(ctx, &assumedState, &data)
 	resp.Diagnostics.Append(updateDiags...)
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if resp.Diagnostics.HasError() {
+		// The service exists. Record it so Terraform tracks it (as tainted) instead of leaking it.
+		resp.Diagnostics.Append(resp.State.Set(ctx, assumedState)...)
 		return
 	}
 
@@ -206,8 +208,13 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 	diags = r.readDataInternal(ctx, &assumedState, &data)
 	resp.Diagnostics.Append(*diags...)
 	if resp.Diagnostics.HasError() {
+		resp.Diagnostics.Append(resp.State.Set(ctx, assumedState)...)
 		return
 	}
+
+	// State records what the service reports. If that still differs from the plan, the DMR
+	// change did not take effect; report it rather than pretend.
+	verifyDmrMatchesPlan(&data, assumedState.DmrEnabled, &resp.Diagnostics)
 
 	// update state with data
 	resp.Diagnostics.Append(resp.State.Set(ctx, assumedState)...)
@@ -298,22 +305,29 @@ func (r *ServiceResource) readDataInternal(ctx context.Context, currentState *Se
 		return &diagnostics
 	}
 
-	supportedDmrAuthenticationModes, diags := types.ListValueFrom(ctx, types.StringType, respBroker.Cluster.SupportedAuthenticationMode)
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return &diagnostics
-	}
+	// Check if the broker has a DMR cluster. Services created with DMR off have no cluster object.
+	var dmrClusterInfo basetypes.ObjectValue
+	if respBroker.Cluster == nil {
+		tflog.Info(ctx, "Broker has no DMR cluster (DMR is off). Setting null DMR cluster attributes.")
+		dmrClusterInfo = types.ObjectNull(model.DmrClusterInfoObjectType().AttrTypes)
+	} else {
+		supportedDmrAuthenticationModes, diags := types.ListValueFrom(ctx, types.StringType, respBroker.Cluster.SupportedAuthenticationMode)
+		diagnostics.Append(diags...)
+		if diagnostics.HasError() {
+			return &diagnostics
+		}
 
-	dmrClusterInfo, diags := model.DmrClusterInfoModel{
-		Name:                         types.StringValue(*respBroker.Cluster.Name),
-		Password:                     types.StringValue(*respBroker.Cluster.Password),
-		RemoteAddress:                types.StringValue(*respBroker.Cluster.RemoteAddress),
-		PrimaryRouterName:            types.StringValue(*respBroker.Cluster.PrimaryRouterName),
-		SupportedAuthenticationModes: supportedDmrAuthenticationModes,
-	}.ToObjectValue()
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return &diagnostics
+		dmrClusterInfo, diags = model.DmrClusterInfoModel{
+			Name:                         types.StringValue(*respBroker.Cluster.Name),
+			Password:                     types.StringValue(*respBroker.Cluster.Password),
+			RemoteAddress:                types.StringValue(*respBroker.Cluster.RemoteAddress),
+			PrimaryRouterName:            types.StringValue(*respBroker.Cluster.PrimaryRouterName),
+			SupportedAuthenticationModes: supportedDmrAuthenticationModes,
+		}.ToObjectValue()
+		diagnostics.Append(diags...)
+		if diagnostics.HasError() {
+			return &diagnostics
+		}
 	}
 
 	messageVpn := model.MessageVpnModel{
@@ -351,12 +365,22 @@ func (r *ServiceResource) readDataInternal(ctx context.Context, currentState *Se
 	currentState.Locked = types.BoolPointerValue(respData.Locked)
 	currentState.EnvironmentId = types.StringPointerValue(respData.EnvironmentId)
 	currentState.MateLinkEncryption = types.BoolPointerValue(respBroker.RedundancyGroupSslEnabled)
-	currentState.ClusterName = types.StringPointerValue(respBroker.Cluster.Name)
 	currentState.OwnedBy = types.StringValue(*respData.OwnedBy)
 	currentState.DmrClusterInfo = dmrClusterInfo
-	name := determineCustomRouterName(respBroker.Cluster.PrimaryRouterName)
-	if name != "" {
-		currentState.CustomRouterName = types.StringValue(name)
+	currentState.DmrEnabled = types.BoolValue(respBroker.Cluster != nil)
+	if respBroker.Cluster == nil {
+		currentState.ClusterName = types.StringNull()
+		// custom_router_name is Optional and not Computed: without a cluster there is
+		// nothing to derive it from, so carry the planned value through on Create/Update.
+		if initialPlan != nil {
+			currentState.CustomRouterName = initialPlan.CustomRouterName
+		}
+	} else {
+		currentState.ClusterName = types.StringPointerValue(respBroker.Cluster.Name)
+		name := determineCustomRouterName(respBroker.Cluster.PrimaryRouterName)
+		if name != "" {
+			currentState.CustomRouterName = types.StringValue(name)
+		}
 	}
 	readDefaultDiags := r.readDefaultConnectionEndpoint(ctx, currentState, initialPlan)
 	diagnostics.Append(*readDefaultDiags...)

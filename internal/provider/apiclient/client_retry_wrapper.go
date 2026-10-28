@@ -29,6 +29,10 @@ type CRUDClientWithResponses interface {
 	UpdateMessageSpoolWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMessageSpoolResponse, error)
 	GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error)
 
+	// DMR cluster operations
+	EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body mc.EnableDmrClusterJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.EnableDmrClusterResponse, error)
+	DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDmrClusterResponse, error)
+
 	// Connection Endpoint operations
 	CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body mc.CreateConnectionEndpointJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointResponse, error)
 	GetConnectionEndpointsWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.GetConnectionEndpointsResponse, error)
@@ -73,7 +77,7 @@ func isRetryableResponse(resp ApiError) bool {
 	// This handles the case where we have a typed nil pointer
 	// this should never happen but it happens witH mocks sometimes
 	v := reflect.ValueOf(resp)
-	if v.Kind() == reflect.Ptr && v.IsNil() {
+	if v.Kind() == reflect.Pointer && v.IsNil() {
 		return false
 	}
 	statusCode := resp.StatusCode()
@@ -138,6 +142,18 @@ func (w *RetryableClientWithResponses) UpdateMessageSpoolWithBodyWithResponse(ct
 func (w *RetryableClientWithResponses) GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error) {
 	return retry(ctx, func() (*mc.GetServiceOperationResponse, error) {
 		return w.api.GetServiceOperationWithResponse(ctx, serviceId, operationId, params, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body mc.EnableDmrClusterJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.EnableDmrClusterResponse, error) {
+	return retry(ctx, func() (*mc.EnableDmrClusterResponse, error) {
+		return w.api.EnableDmrClusterWithResponse(ctx, serviceId, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDmrClusterResponse, error) {
+	return retry(ctx, func() (*mc.DeleteDmrClusterResponse, error) {
+		return w.api.DeleteDmrClusterWithResponse(ctx, serviceId, reqEditors...)
 	}, w.maxRetries, w.waitSeconds)
 }
 
