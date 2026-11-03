@@ -4,7 +4,7 @@ The connection endpoint resource allows you to create and manage connection endp
 
 ## Configuration
 - `service_id` - (Required) The ID of the Solace Cloud service to which the connection endpoint will be associated.
-- `access_type` - (Required) The access type of the connection endpoint. Valid values are `PUBLIC` or `VPC_PEERING`.
+- `access_type` - (Required) The access type of the connection endpoint. Valid values are `PRIVATE` (private IP) or `PUBLIC` (public Internet IP).
 - `name` - (Required) The name of the connection endpoint.
 - `description` - (Optional) A description for the connection endpoint.
 - `ports` - (Required) A map defining the ports for various protocols.

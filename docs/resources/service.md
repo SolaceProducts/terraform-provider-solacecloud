@@ -188,10 +188,17 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
     * `username` - The username.
     * `password` - The password (sensitive).
 
-* `connection_endpoint` - (Optional) Optional default connection endpoint configuration. If specified, creates one connection endpoint with the provided settings during service creation/update. This is a create/update-only field (not read back from state). This is a complex object with the following attributes:
+* `connection_endpoint` - (Optional) Optional default connection endpoint configuration.
+  * Created with the service: if specified, one connection endpoint is created with the provided settings.
+  * Updates: later changes to its `name`, `description` or `ports` update that endpoint.
+  * Read back on refresh: the provider stores the endpoint's `id` in state and reads the endpoint back on every refresh, including its `access_type`.
+  * Import: importing a service does not fill in this attribute.
+  * Adding or removing the block: on an existing service, adding it does not create an endpoint and removing it does not delete one. To add or manage endpoints on an existing service, use the `solacecloud_connection_endpoint` resource.
+
+  This is a complex object with the following attributes:
   * `name` - (Required) The name of the connection endpoint. Must be between 1 and 50 characters.
   * `description` - (Optional) The description for the connection endpoint. Maximum 255 characters.
-  * `access_type` - (Required) The connectivity for the connection endpoint. Valid values: `PRIVATE` (private IP) or `PUBLIC` (public Internet IP).
+  * `access_type` - (Required) The connectivity for the connection endpoint. Valid values: `PRIVATE` (private IP) or `PUBLIC` (public Internet IP). This cannot be changed after creation.
   * `ports` - (Optional) Port configuration for the connection endpoint protocols.
 
 **Note:** To read connection endpoint information, use the `solacecloud_connection_endpoints` data source. To manage connection endpoints independently, use the `solacecloud_connection_endpoint` resource.
