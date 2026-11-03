@@ -61,7 +61,7 @@ resource "solacecloud_connection_endpoint" "public_endpoint" {
 ### Required Arguments
 
 * `service_id` - (Required) The ID of the Solace Cloud service that the connection endpoint is associated to.
-* `access_type` - (Required) The access type of the connection endpoint. Valid values are `PUBLIC` or `VPC_PEERING`. This cannot be changed after creation.
+* `access_type` - (Required) The access type of the connection endpoint. Valid values are `PRIVATE` (private IP) or `PUBLIC` (public Internet IP). This cannot be changed after creation.
 * `name` - (Required) The name of the connection endpoint.
 * `ports` - (Required) A map defining the ports for various protocols. Each protocol can be configured with a port number.
 
