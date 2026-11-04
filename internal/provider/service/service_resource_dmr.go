@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"terraform-provider-solacecloud/internal/provider/operationutils"
 	"terraform-provider-solacecloud/internal/shared"
 	"terraform-provider-solacecloud/internal/util"
 	"terraform-provider-solacecloud/missioncontrol"
@@ -80,7 +79,7 @@ func (r *ServiceResource) enableDmr(ctx context.Context, serviceId string, plan 
 		return
 	}
 
-	r.waitForDmrOperation(ctx, serviceId, apiResp.JSON202, diags)
+	r.waitForServiceOperation(ctx, serviceId, apiResp.JSON202, dmrOperationTimeout, "DMR", diags)
 }
 
 // disableDmr asks Solace Cloud to delete the service's DMR cluster. Solace Cloud refuses this
@@ -111,29 +110,7 @@ func (r *ServiceResource) disableDmr(ctx context.Context, serviceId string, diag
 		return
 	}
 
-	r.waitForDmrOperation(ctx, serviceId, apiResp.JSON202, diags)
-}
-
-// waitForDmrOperation polls the operation returned by an enable or disable request until it
-// finishes, so the value written to state reflects the service's settled DMR configuration.
-func (r *ServiceResource) waitForDmrOperation(ctx context.Context, serviceId string, operation *missioncontrol.OperationResponse, diags *diag.Diagnostics) {
-	if operation == nil || operation.Data.Id == nil {
-		diags.AddError(
-			"Unexpected Solace Cloud API response",
-			"The DMR request was accepted without an operation identifier, so its progress cannot be tracked.",
-		)
-		return
-	}
-
-	operationutils.WaitForOperationToComplete(&operationutils.OperationParams{
-		Ctx:             ctx,
-		ServiceId:       serviceId,
-		OperationId:     *operation.Data.Id,
-		R:               r.APIClient,
-		PollingInterval: r.APIPollingInterval,
-		Timeout:         dmrOperationTimeout,
-		Diagnostics:     diags,
-	})
+	r.waitForServiceOperation(ctx, serviceId, apiResp.JSON202, dmrOperationTimeout, "DMR", diags)
 }
 
 // warnWhenServicePackageIgnoredDmr explains, at creation, that the service came up with a DMR
@@ -166,27 +143,9 @@ func warnWhenServicePackageIgnoredDmr(plan *ServiceResourceModel, observed types
 // service. State always records what the service reports, so this is the only signal that the
 // configuration and the service still disagree after an apply.
 func verifyDmrMatchesPlan(plan *ServiceResourceModel, observed types.Bool, diags *diag.Diagnostics) {
-	if !dmrDiffersFromPlan(plan, observed) {
-		return
-	}
-	diags.AddAttributeError(
-		path.Root("dmr_enabled"),
-		"DMR configuration did not take effect",
-		fmt.Sprintf("dmr_enabled = %t was applied, but the event broker service reports DMR %s. "+
-			"The service is recorded as it is; run terraform plan to see the remaining change and apply again, "+
-			"or check the service in Solace Cloud if the change keeps failing.",
-			plan.DmrEnabled.ValueBool(), dmrStateWord(observed.ValueBool())),
-	)
+	verifyBoolMatchesPlan("dmr_enabled", "DMR configuration did not take effect", "DMR", plan.DmrEnabled, observed, diags)
 }
 
 func dmrDiffersFromPlan(plan *ServiceResourceModel, observed types.Bool) bool {
-	return util.IsKnown(plan.DmrEnabled) && util.IsKnown(observed) &&
-		plan.DmrEnabled.ValueBool() != observed.ValueBool()
-}
-
-func dmrStateWord(enabled bool) string {
-	if enabled {
-		return "enabled"
-	}
-	return "disabled"
+	return boolDiffersFromPlan(plan.DmrEnabled, observed)
 }

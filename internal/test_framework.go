@@ -20,6 +20,13 @@ import (
 // This is a test framework for the Solace Cloud Terraform provider.
 // All shared test code should be saved in this file.
 
+const eventBrokerServicesPath = "/api/v2/missionControl/eventBrokerServices/"
+
+const (
+	connectionEndpointsPath = "/connectionEndpoints/"
+	dnsNamesPath            = "/dnsNames"
+)
+
 type TestInstance struct {
 	baseUrl   string
 	mockedApi bool
@@ -122,6 +129,8 @@ type ConfigurableParams struct {
 	// object, matching a service created without Dynamic Message Routing.
 	DmrOff      bool
 	ClusterName string
+	// MateLinkOff makes the mocked broker report mate-link encryption disabled.
+	MateLinkOff bool
 }
 
 func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
@@ -145,16 +154,16 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
 		provider.baseUrl+"/api/v2/missionControl/eventBrokerServices",
 		JsonResponder(202, CreateServiceOperationResponse(params)))
 
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId,
 		JsonResponder(200, CreateGetServiceResponse(params)))
 
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"?expand=broker,serviceConnectionEndpoints,allowedActions,messageSpoolDetails",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+"?expand=broker,serviceConnectionEndpoints,allowedActions,messageSpoolDetails",
 		JsonResponder(200, CreateGetServiceResponse(params)))
 
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+"/connectionEndpoints",
 		JsonResponder(200, CreateGetConnectionEndpointsResponse(params)))
 
-	httpmock.RegisterResponder("DELETE", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
+	httpmock.RegisterResponder("DELETE", provider.baseUrl+eventBrokerServicesPath+params.ServiceId,
 		JsonResponder(202, `
 {
     "data": {
@@ -171,7 +180,7 @@ func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
     }
 }`))
 
-	httpmock.RegisterResponder("GET", provider.GetBaseURL()+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/80dx8er674q",
+	httpmock.RegisterResponder("GET", provider.GetBaseURL()+eventBrokerServicesPath+params.ServiceId+"/connectionEndpoints/80dx8er674q",
 		JsonResponder(200, provider.createGetConnectionEndpointResponse(params)))
 }
 
@@ -187,10 +196,10 @@ func (provider *TestInstance) SetupDmrClusterMocks(params ConfigurableParams, dm
 		params.ServiceId = "6q1p55o6ovr"
 	}
 	const operationId = "dmr-operation-123"
-	clusterUrl := provider.baseUrl + "/api/v2/missionControl/eventBrokerServices/" + params.ServiceId + "/broker/cluster"
+	clusterUrl := provider.baseUrl + eventBrokerServicesPath + params.ServiceId + "/broker/cluster"
 
 	// Register the operation first so it is in place before any request polls it.
-	provider.registerDmrOperation(params.ServiceId, operationId, dmrOperationError)
+	provider.registerServiceOperation(params.ServiceId, operationId, dmrOperationError)
 
 	httpmock.RegisterResponder("POST", clusterUrl, func(r *http.Request) (*http.Response, error) {
 		enabled := params
@@ -200,9 +209,9 @@ func (provider *TestInstance) SetupDmrClusterMocks(params ConfigurableParams, dm
 		}
 		if dmrOperationError == "" {
 			provider.SetupDefaultMocks(enabled)
-			provider.registerDmrOperation(params.ServiceId, operationId, dmrOperationError)
+			provider.registerServiceOperation(params.ServiceId, operationId, dmrOperationError)
 		}
-		return JsonResponder(202, dmrOperationResponse(operationId, params.ServiceId, "enableDmrCluster"))(r)
+		return JsonResponder(202, serviceOperationResponse(operationId, params.ServiceId, "enableDmrCluster"))(r)
 	})
 
 	httpmock.RegisterResponder("DELETE", clusterUrl, func(r *http.Request) (*http.Response, error) {
@@ -211,22 +220,64 @@ func (provider *TestInstance) SetupDmrClusterMocks(params ConfigurableParams, dm
 		disabled.ClusterName = ""
 		if dmrOperationError == "" {
 			provider.SetupDefaultMocks(disabled)
-			provider.registerDmrOperation(params.ServiceId, operationId, dmrOperationError)
+			provider.registerServiceOperation(params.ServiceId, operationId, dmrOperationError)
 		}
-		return JsonResponder(202, dmrOperationResponse(operationId, params.ServiceId, "disableDmrCluster"))(r)
+		return JsonResponder(202, serviceOperationResponse(operationId, params.ServiceId, "disableDmrCluster"))(r)
 	})
 }
 
-// registerDmrOperation registers the operation-status endpoint the provider polls after an
+// SetupMateLinkMocks makes each request change the mocked mate-link state, unless operationError fails it.
+func (provider *TestInstance) SetupMateLinkMocks(params ConfigurableParams, operationError string) {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	const operationId = "mate-link-operation-123"
+	mateLinkUrl := provider.baseUrl + eventBrokerServicesPath + params.ServiceId + "/mateLinkEncryption"
+
+	provider.registerServiceOperation(params.ServiceId, operationId, operationError)
+
+	httpmock.RegisterResponder("PATCH", mateLinkUrl, func(r *http.Request) (*http.Response, error) {
+		enabled, ok := readMateLinkEnabled(r)
+		if !ok {
+			return JsonResponder(400, `{"message": "enabled is required", "errorId": "mock"}`)(r)
+		}
+		if operationError == "" {
+			updated := params
+			updated.MateLinkOff = !enabled
+			provider.SetupDefaultMocks(updated)
+			provider.registerServiceOperation(params.ServiceId, operationId, operationError)
+		}
+		return JsonResponder(202, serviceOperationResponse(operationId, params.ServiceId, "updateMateLinkEncryption"))(r)
+	})
+}
+
+func readMateLinkEnabled(r *http.Request) (enabled bool, ok bool) {
+	if r.Body == nil {
+		return false, false
+	}
+	raw, err := io.ReadAll(r.Body)
+	if err != nil {
+		return false, false
+	}
+	var body struct {
+		Enabled *bool `json:"enabled"`
+	}
+	if err := json.Unmarshal(raw, &body); err != nil || body.Enabled == nil {
+		return false, false
+	}
+	return *body.Enabled, true
+}
+
+// registerServiceOperation registers the operation-status endpoint the provider polls after an
 // enable or disable request.
-func (provider *TestInstance) registerDmrOperation(serviceId, operationId, operationError string) {
+func (provider *TestInstance) registerServiceOperation(serviceId, operationId, operationError string) {
 	status, errorBlock := "SUCCEEDED", "null"
 	if operationError != "" {
 		status = "FAILED"
 		errorBlock = `{"message": "` + operationError + `"}`
 	}
 	httpmock.RegisterResponder("GET",
-		provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+serviceId+"/operations/"+operationId,
+		provider.baseUrl+eventBrokerServicesPath+serviceId+"/operations/"+operationId,
 		JsonResponder(200, `{
     "data": {
         "id": "`+operationId+`",
@@ -259,7 +310,7 @@ func readClusterName(r *http.Request) string {
 	return body.ClusterName
 }
 
-func dmrOperationResponse(operationId, serviceId, operationType string) string {
+func serviceOperationResponse(operationId, serviceId, operationType string) string {
 	return `{
     "data": {
         "id": "` + operationId + `",
@@ -433,7 +484,7 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
             "versionFamily": "10.10",
             "maxSpoolUsage": ` + strconv.Itoa(params.MaxSpoolUsage) + `,
             "diskSize": 260,
-            "redundancyGroupSslEnabled": true,
+            "redundancyGroupSslEnabled": ` + strconv.FormatBool(!params.MateLinkOff) + `,
             "configSyncSslEnabled": true,
             "monitoringMode": "BASIC",
             "tlsStandardDomainCertificateAuthoritiesEnabled": true,
@@ -655,7 +706,7 @@ func (provider *TestInstance) SetupDnsNameMocks(params ConfigurableParams) {
 	}
 
 	// Mock GET DNS names for the connection endpoint (returns the DNS name)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+dnsNamesPath,
 		JsonResponder(200, `{
     "data": [
         {
@@ -667,7 +718,7 @@ func (provider *TestInstance) SetupDnsNameMocks(params ConfigurableParams) {
 }`))
 
 	// Mock CREATE DNS name
-	httpmock.RegisterResponder("POST", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+	httpmock.RegisterResponder("POST", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+dnsNamesPath,
 		JsonResponder(202, `{
     "data": {
         "id": "create-operation-123",
@@ -682,7 +733,7 @@ func (provider *TestInstance) SetupDnsNameMocks(params ConfigurableParams) {
 }`))
 
 	// Mock GET operation status for the create operation (polling endpoint)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/operations/create-operation-123",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+"/operations/create-operation-123",
 		JsonResponder(200, `{
     "data": {
         "id": "create-operation-123",
@@ -699,7 +750,7 @@ func (provider *TestInstance) SetupDnsNameMocks(params ConfigurableParams) {
 }`))
 
 	// Mock DELETE DNS name
-	httpmock.RegisterResponder("DELETE", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames/"+params.DnsName,
+	httpmock.RegisterResponder("DELETE", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+"/dnsNames/"+params.DnsName,
 		JsonResponder(202, `{
     "data": {
         "id": "delete-operation-123",
@@ -714,7 +765,7 @@ func (provider *TestInstance) SetupDnsNameMocks(params ConfigurableParams) {
 }`))
 
 	// Mock GET operation status for the delete operation (polling endpoint)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/operations/delete-operation-123",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+"/operations/delete-operation-123",
 		JsonResponder(200, `{
     "data": {
         "id": "delete-operation-123",
@@ -750,17 +801,17 @@ func (provider *TestInstance) SetupDnsNameMoveMocks(params ConfigurableParams) {
 	}
 
 	// Mock service details for source service (for organization validation)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId,
 		JsonResponder(200, CreateGetServiceResponse(params)))
 
 	// Mock service details for target service
 	targetParams := params
 	targetParams.ServiceId = params.TargetServiceId
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId,
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.TargetServiceId,
 		JsonResponder(200, CreateGetServiceResponse(targetParams)))
 
 	// Mock PATCH operations for service updates (needed when services are created with specific IDs)
-	httpmock.RegisterResponder("PATCH", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId,
+	httpmock.RegisterResponder("PATCH", provider.baseUrl+eventBrokerServicesPath+params.ServiceId,
 		JsonResponder(202, `{
     "data": {
         "id": "update-operation-123",
@@ -770,7 +821,7 @@ func (provider *TestInstance) SetupDnsNameMoveMocks(params ConfigurableParams) {
     }
 }`))
 
-	httpmock.RegisterResponder("PATCH", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId,
+	httpmock.RegisterResponder("PATCH", provider.baseUrl+eventBrokerServicesPath+params.TargetServiceId,
 		JsonResponder(202, `{
     "data": {
         "id": "update-operation-124",
@@ -781,13 +832,13 @@ func (provider *TestInstance) SetupDnsNameMoveMocks(params ConfigurableParams) {
 }`))
 
 	// Mock GET DNS names for target endpoint (returns empty initially for capacity check)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId+"/connectionEndpoints/"+params.TargetConnectionEndpointId+"/dnsNames",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.TargetServiceId+connectionEndpointsPath+params.TargetConnectionEndpointId+dnsNamesPath,
 		JsonResponder(200, `{
     "data": []
 }`))
 
 	// Mock POST DNS name move operation (correct endpoint)
-	httpmock.RegisterResponder("POST", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames/"+params.DnsName+"/move",
+	httpmock.RegisterResponder("POST", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+"/dnsNames/"+params.DnsName+"/move",
 		JsonResponder(202, `{
     "data": {
         "id": "move-operation-123",
@@ -804,7 +855,7 @@ func (provider *TestInstance) SetupDnsNameMoveMocks(params ConfigurableParams) {
 }`))
 
 	// Mock GET operation status for the move operation (polling endpoint)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.TargetServiceId+"/operations/move-operation-123",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.TargetServiceId+"/operations/move-operation-123",
 		JsonResponder(200, `{
     "data": {
         "id": "move-operation-123",
@@ -821,7 +872,7 @@ func (provider *TestInstance) SetupDnsNameMoveMocks(params ConfigurableParams) {
 }`))
 
 	// Mock GET DNS names on source (returns the DNS name initially)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+dnsNamesPath,
 		JsonResponder(200, `{
     "data": [
         {
@@ -843,7 +894,7 @@ func (provider *TestInstance) SetupDnsNameErrorMocks(params ConfigurableParams) 
 	}
 
 	// Mock GET DNS names returning max capacity (5 DNS names)
-	httpmock.RegisterResponder("GET", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+	httpmock.RegisterResponder("GET", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+dnsNamesPath,
 		JsonResponder(200, `{
     "data": [
         {"id": "1", "dnsName": "dns1.example.com", "domainType": "CUSTOM"},
@@ -855,7 +906,7 @@ func (provider *TestInstance) SetupDnsNameErrorMocks(params ConfigurableParams) 
 }`))
 
 	// Mock CREATE returning 400 for capacity exceeded
-	httpmock.RegisterResponder("POST", provider.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/connectionEndpoints/"+params.ConnectionEndpointId+"/dnsNames",
+	httpmock.RegisterResponder("POST", provider.baseUrl+eventBrokerServicesPath+params.ServiceId+connectionEndpointsPath+params.ConnectionEndpointId+dnsNamesPath,
 		JsonResponder(400, `{
     "error": {
         "code": "CAPACITY_EXCEEDED",

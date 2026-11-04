@@ -98,6 +98,14 @@ func (m *MockCRUDClient) DeleteDmrClusterWithResponse(ctx context.Context, servi
 	return args.Get(0).(*mc.DeleteDmrClusterResponse), args.Error(1)
 }
 
+func (m *MockCRUDClient) UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body mc.UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMateLinkEncryptionResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.UpdateMateLinkEncryptionResponse), args.Error(1)
+}
+
 func (m *MockCRUDClient) GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error) {
 	args := m.Called(ctx, serviceId, operationId, params, reqEditors)
 	if args.Get(0) == nil {
@@ -529,6 +537,27 @@ func TestRetryableClient_DeleteDmrClusterWithResponse_Success(t *testing.T) {
 	mockApi.On("DeleteDmrClusterWithResponse", ctx, dmrTestServiceId, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil)
 
 	result, err := client.DeleteDmrClusterWithResponse(ctx, dmrTestServiceId)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResponse, result)
+	mockApi.AssertExpectations(t)
+}
+
+func TestRetryableClient_UpdateMateLinkEncryptionWithResponse_RetryableError(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 2, 0)
+
+	ctx := context.Background()
+	body := mc.UpdateMateLinkEncryptionJSONRequestBody{Enabled: true}
+	expectedResponse := &mc.UpdateMateLinkEncryptionResponse{}
+	retryableResponse := &mc.UpdateMateLinkEncryptionResponse{
+		HTTPResponse: &http.Response{StatusCode: 502},
+	}
+
+	mockApi.On("UpdateMateLinkEncryptionWithResponse", ctx, dmrTestServiceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(retryableResponse, nil).Once()
+	mockApi.On("UpdateMateLinkEncryptionWithResponse", ctx, dmrTestServiceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil).Once()
+
+	result, err := client.UpdateMateLinkEncryptionWithResponse(ctx, dmrTestServiceId, body)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedResponse, result)

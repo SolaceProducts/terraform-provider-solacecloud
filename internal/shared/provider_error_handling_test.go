@@ -2,6 +2,7 @@ package shared
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -228,6 +229,52 @@ func TestErrorResponseAdaptor_HandleError(t *testing.T) {
 			// Verify no errors were added if not expected
 			if !tt.expectError && len(diagnostics) > 0 {
 				t.Errorf("expected no diagnostic errors, got %d", len(diagnostics))
+			}
+		})
+	}
+}
+func TestHandleErrorConflictDetail(t *testing.T) {
+	const apiMessage = "Another operation is already in progress."
+	const fallback = "a resource with the same name already exists"
+
+	tests := []struct {
+		name     string
+		body     string
+		wantText string
+		notText  string
+	}{
+		{name: "api message shown", body: `{"message":"` + apiMessage + `","errorId":"abc"}`,
+			wantText: apiMessage, notText: "same name"},
+		{name: "empty message falls back", body: `{"message":"","errorId":"abc"}`, wantText: fallback},
+		{name: "no message field falls back", body: `{"errorId":"abc"}`, wantText: fallback},
+		{name: "non-json body falls back", body: "upstream timeout", wantText: fallback},
+		{name: "empty body falls back", body: "", wantText: fallback},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := &ErrorResponseAdaptor{
+				ExpectedStatusCode: http.StatusOK,
+				Body:               []byte(tt.body),
+				HTTPResponse:       &http.Response{StatusCode: http.StatusConflict},
+			}
+			var diagnostics diag.Diagnostics
+
+			if !handler.HandleError(&diagnostics) {
+				t.Fatal("expected an error for 409")
+			}
+			if len(diagnostics) != 1 {
+				t.Fatalf("expected one diagnostic, got %v", diagnostics)
+			}
+			d := diagnostics[0]
+			if d.Summary() != "Resource Conflict" {
+				t.Errorf("expected summary %q, got %q", "Resource Conflict", d.Summary())
+			}
+			if !strings.Contains(d.Detail(), tt.wantText) {
+				t.Errorf("expected detail containing %q, got %q", tt.wantText, d.Detail())
+			}
+			if tt.notText != "" && strings.Contains(d.Detail(), tt.notText) {
+				t.Errorf("expected detail without %q, got %q", tt.notText, d.Detail())
 			}
 		})
 	}

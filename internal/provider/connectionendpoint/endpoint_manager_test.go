@@ -56,6 +56,10 @@ func (m *MockAPIClient) DeleteDmrClusterWithResponse(ctx context.Context, servic
 	return nil, errors.New("not implemented")
 }
 
+func (m *MockAPIClient) UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body missioncontrol.UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.UpdateMateLinkEncryptionResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (m *MockAPIClient) CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body missioncontrol.CreateConnectionEndpointJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.CreateConnectionEndpointResponse, error) {
 	return nil, errors.New("not implemented")
 }
