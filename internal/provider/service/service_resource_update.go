@@ -42,41 +42,20 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	// State records what the service reports. If that still differs from the plan, the DMR
-	// change did not take effect; report it rather than pretend.
 	verifyDmrMatchesPlan(&plan, state.DmrEnabled, &resp.Diagnostics)
+	verifyMateLinkMatchesPlan(&plan, state.MateLinkEncryption, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) diag.Diagnostics {
-	// create new empty diagnostics
 	var diags diag.Diagnostics
 
-	// check if
-	nameChanged := !plan.Name.IsUnknown() && !plan.Name.IsNull() && state.Name != plan.Name
-	ownedByChanged := !plan.OwnedBy.IsUnknown() && !plan.OwnedBy.IsNull() && state.OwnedBy != plan.OwnedBy
-	lockedChanged := !plan.Locked.IsUnknown() && !plan.Locked.IsNull() && state.Locked != plan.Locked
 	storageSizeChanged := !plan.MaxSpoolUsage.IsUnknown() && !plan.MaxSpoolUsage.IsNull() && state.MaxSpoolUsage != plan.MaxSpoolUsage
 
-	if nameChanged || ownedByChanged || lockedChanged {
-		updateRequest := missioncontrol.UpdateServiceRequest{}
-
-		if nameChanged {
-			updateRequest.Name = plan.Name.ValueStringPointer()
-		}
-		if ownedByChanged {
-			updateRequest.OwnedBy = plan.OwnedBy.ValueStringPointer()
-		}
-		if lockedChanged {
-			updateRequest.Locked = plan.Locked.ValueBoolPointer()
-		}
-
-		patchDiags := r.patchService(ctx, state, &updateRequest)
-		diags.Append(patchDiags...)
-		if diags.HasError() {
-			return diags
-		}
+	diags.Append(r.patchChangedAttributes(ctx, state, plan)...)
+	if diags.HasError() {
+		return diags
 	}
 
 	if storageSizeChanged {
@@ -91,8 +70,38 @@ func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceReso
 	if diags.HasError() {
 		return diags
 	}
+	diags.Append(r.updateMateLinkEncryption(ctx, state, plan)...)
+	if diags.HasError() {
+		return diags
+	}
 
 	diags.Append(r.updateDefaultConnectionEndpoint(ctx, state, plan)...)
+	return diags
+}
+
+func (r *ServiceResource) patchChangedAttributes(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	nameChanged := !plan.Name.IsUnknown() && !plan.Name.IsNull() && state.Name != plan.Name
+	ownedByChanged := !plan.OwnedBy.IsUnknown() && !plan.OwnedBy.IsNull() && state.OwnedBy != plan.OwnedBy
+	lockedChanged := !plan.Locked.IsUnknown() && !plan.Locked.IsNull() && state.Locked != plan.Locked
+
+	if !nameChanged && !ownedByChanged && !lockedChanged {
+		return diags
+	}
+
+	updateRequest := missioncontrol.UpdateServiceRequest{}
+	if nameChanged {
+		updateRequest.Name = plan.Name.ValueStringPointer()
+	}
+	if ownedByChanged {
+		updateRequest.OwnedBy = plan.OwnedBy.ValueStringPointer()
+	}
+	if lockedChanged {
+		updateRequest.Locked = plan.Locked.ValueBoolPointer()
+	}
+
+	diags.Append(r.patchService(ctx, state, &updateRequest)...)
 	return diags
 }
 

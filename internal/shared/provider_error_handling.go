@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"encoding/json"
 	"net/http"
 	"terraform-provider-solacecloud/missioncontrol"
 	"terraform-provider-solacecloud/platform"
@@ -262,7 +263,15 @@ func (h *ErrorResponseAdaptor) addServiceUnavailableDiagnostics(diagnostics *dia
 	}
 }
 
+// The generated clients have no typed 409 body, so the message is read from the raw body.
 func (h *ErrorResponseAdaptor) addConflictDiagnostics(diagnostics *diag.Diagnostics) {
+	var body struct {
+		Message string `json:"message"`
+	}
+	if json.Unmarshal(h.Body, &body) == nil && body.Message != "" {
+		diagnostics.AddError("Resource Conflict", body.Message)
+		return
+	}
 	diagnostics.AddError("Resource Conflict", "Received HTTP 409 Conflict. "+
 		"This usually indicates that a resource with the same name already exists. "+
 		string(h.Body))

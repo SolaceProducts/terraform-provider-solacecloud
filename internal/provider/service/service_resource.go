@@ -193,7 +193,7 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 
 	///////////////////////////////////////////////
 	// After SCService creation has been COMPLETED
-	// Apply what the create request cannot carry (owner, lock, DMR, endpoint)
+	// Apply what the create request cannot carry (owner, lock, DMR, mate-link, endpoint)
 	///////////////////////////////////////////////
 
 	updateDiags := r.updateInternal(ctx, &assumedState, &data)
@@ -212,9 +212,8 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	// State records what the service reports. If that still differs from the plan, the DMR
-	// change did not take effect; report it rather than pretend.
 	verifyDmrMatchesPlan(&data, assumedState.DmrEnabled, &resp.Diagnostics)
+	verifyMateLinkMatchesPlan(&data, assumedState.MateLinkEncryption, &resp.Diagnostics)
 
 	// update state with data
 	resp.Diagnostics.Append(resp.State.Set(ctx, assumedState)...)

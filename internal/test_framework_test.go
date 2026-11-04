@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	"github.com/jarcoal/httpmock"
 )
@@ -170,5 +171,153 @@ func TestSetupDmrClusterMocksReportsAFailedOperation(t *testing.T) {
 	operationError, ok := data["error"].(map[string]interface{})
 	if !ok || operationError["message"] != "refused by the event mesh" {
 		t.Errorf("expected the operation to carry the refusal message, got %v", data["error"])
+	}
+}
+
+func readMockedMateLinkState(t *testing.T, instance *TestInstance, serviceId string) bool {
+	t.Helper()
+	resp, err := http.Get(instance.baseUrl + "/api/v2/missionControl/eventBrokerServices/" + serviceId)
+	if err != nil {
+		t.Fatalf("service read failed: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("could not read the service response: %v", err)
+	}
+	broker := decodeServiceResponse(t, string(body))["broker"].(map[string]interface{})
+	enabled, ok := broker["redundancyGroupSslEnabled"].(bool)
+	if !ok {
+		t.Fatalf("expected the service to report redundancyGroupSslEnabled, got %v", broker["redundancyGroupSslEnabled"])
+	}
+	return enabled
+}
+
+func patchMateLink(t *testing.T, url, body string) *http.Response {
+	t.Helper()
+	req, err := http.NewRequest("PATCH", url, strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("could not build the mate-link request: %v", err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("mate-link request failed: %v", err)
+	}
+	t.Cleanup(func() { _ = resp.Body.Close() })
+	return resp
+}
+
+func TestSetupMateLinkMocksAppliesTheRequestedState(t *testing.T) {
+	cases := []struct {
+		name        string
+		mateLinkOff bool
+		body        string
+		want        bool
+	}{
+		{name: "enable", mateLinkOff: true, body: `{"enabled":true}`, want: true},
+		{name: "disable", mateLinkOff: false, body: `{"enabled":false}`, want: false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+
+			instance := &TestInstance{baseUrl: "https://api.solace.test", mockedApi: true}
+			params := ConfigurableParams{ServiceId: "svc-mock-mlk", ServiceName: "mock-mlk", MateLinkOff: tc.mateLinkOff}
+			instance.SetupDefaultMocks(params)
+			instance.SetupMateLinkMocks(params, "")
+
+			if got := readMockedMateLinkState(t, instance, params.ServiceId); got != !tc.mateLinkOff {
+				t.Fatalf("expected the service to start with mate-link encryption %t, got %t", !tc.mateLinkOff, got)
+			}
+
+			resp := patchMateLink(t, instance.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/mateLinkEncryption", tc.body)
+			if resp.StatusCode != 202 {
+				t.Fatalf("expected 202 from the mate-link request, got %d", resp.StatusCode)
+			}
+			if got := readMockedMateLinkState(t, instance, params.ServiceId); got != tc.want {
+				t.Errorf("expected mate-link encryption %t after the request, got %t", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestSetupMateLinkMocksFailedOperationKeepsTheState(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	instance := &TestInstance{baseUrl: "https://api.solace.test", mockedApi: true}
+	params := ConfigurableParams{ServiceId: "svc-mock-mlk-fail", ServiceName: "mock-mlk-fail", MateLinkOff: true}
+	instance.SetupDefaultMocks(params)
+	instance.SetupMateLinkMocks(params, "service is not highly available")
+
+	resp := patchMateLink(t, instance.baseUrl+"/api/v2/missionControl/eventBrokerServices/"+params.ServiceId+"/mateLinkEncryption", `{"enabled":true}`)
+	if resp.StatusCode != 202 {
+		t.Fatalf("expected 202 from the mate-link request, got %d", resp.StatusCode)
+	}
+	if readMockedMateLinkState(t, instance, params.ServiceId) {
+		t.Error("expected mate-link encryption to stay disabled after a failed operation")
+	}
+
+	opResp, err := http.Get(instance.baseUrl + "/api/v2/missionControl/eventBrokerServices/" + params.ServiceId + "/operations/mate-link-operation-123")
+	if err != nil {
+		t.Fatalf("operation read failed: %v", err)
+	}
+	defer func() { _ = opResp.Body.Close() }()
+	body, err := io.ReadAll(opResp.Body)
+	if err != nil {
+		t.Fatalf("could not read the operation response: %v", err)
+	}
+	data := decodeServiceResponse(t, string(body))
+	if data["status"] != "FAILED" {
+		t.Errorf("expected a FAILED operation, got %v", data["status"])
+	}
+	operationError, ok := data["error"].(map[string]interface{})
+	if !ok || operationError["message"] != "service is not highly available" {
+		t.Errorf("expected the operation to carry the refusal message, got %v", data["error"])
+	}
+}
+
+func TestSetupMateLinkMocksRejectsARequestWithoutEnabled(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	instance := &TestInstance{baseUrl: "https://api.solace.test", mockedApi: true}
+	instance.SetupMateLinkMocks(ConfigurableParams{}, "")
+
+	resp := patchMateLink(t, instance.baseUrl+"/api/v2/missionControl/eventBrokerServices/6q1p55o6ovr/mateLinkEncryption", `{}`)
+	if resp.StatusCode != 400 {
+		t.Errorf("expected 400 for a request without enabled, got %d", resp.StatusCode)
+	}
+}
+
+func TestReadMateLinkEnabled(t *testing.T) {
+	cases := []struct {
+		name        string
+		body        io.Reader
+		wantEnabled bool
+		wantOk      bool
+	}{
+		{name: "no body", body: nil},
+		{name: "unreadable body", body: iotest.ErrReader(io.ErrUnexpectedEOF)},
+		{name: "not JSON", body: strings.NewReader(`enabled=true`)},
+		{name: "enabled missing", body: strings.NewReader(`{}`)},
+		{name: "enabled null", body: strings.NewReader(`{"enabled":null}`)},
+		{name: "enabled true", body: strings.NewReader(`{"enabled":true}`), wantEnabled: true, wantOk: true},
+		{name: "enabled false", body: strings.NewReader(`{"enabled":false}`), wantEnabled: false, wantOk: true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := http.NewRequest("PATCH", "https://api.solace.test", tc.body)
+			if err != nil {
+				t.Fatalf("could not build the request: %v", err)
+			}
+			enabled, ok := readMateLinkEnabled(req)
+			if enabled != tc.wantEnabled || ok != tc.wantOk {
+				t.Errorf("expected (%t, %t), got (%t, %t)", tc.wantEnabled, tc.wantOk, enabled, ok)
+			}
+		})
 	}
 }

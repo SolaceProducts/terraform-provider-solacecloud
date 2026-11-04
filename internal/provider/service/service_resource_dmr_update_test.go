@@ -186,6 +186,7 @@ func TestUpdateDmrEnablementSurfacesApiErrors(t *testing.T) {
 		state      bool
 		plan       bool
 		wantText   string
+		notText    string
 	}{
 		{name: "enable refused", method: methodPost, statusCode: 400, state: false, plan: true,
 			body:     `{"message":"` + alreadyEnabled + `","errorId":"abc"}`,
@@ -198,7 +199,8 @@ func TestUpdateDmrEnablementSurfacesApiErrors(t *testing.T) {
 			wantText: "Could not find"},
 		{name: "disable conflicts with another operation", method: methodDelete, statusCode: 409, state: true, plan: false,
 			body:     `{"message":"Another operation is already in progress.","errorId":"abc"}`,
-			wantText: "409"},
+			wantText: "Another operation is already in progress.",
+			notText:  "same name"},
 	}
 
 	for _, tc := range cases {
@@ -219,6 +221,9 @@ func TestUpdateDmrEnablementSurfacesApiErrors(t *testing.T) {
 			}
 			if !diagnosticsContain(diags.Errors(), tc.wantText) {
 				t.Errorf("expected a diagnostic mentioning %q, got %v", tc.wantText, diags.Errors())
+			}
+			if tc.notText != "" && diagnosticsContain(diags.Errors(), tc.notText) {
+				t.Errorf("expected no diagnostic mentioning %q, got %v", tc.notText, diags.Errors())
 			}
 		})
 	}
@@ -265,12 +270,28 @@ func TestUpdateDmrEnablementRejectsResponseWithoutOperation(t *testing.T) {
 	if !diags.HasError() {
 		t.Fatal("expected an error diagnostic when no operation identifier is returned")
 	}
-	if !diagnosticsContain(diags.Errors(), "operation identifier") {
-		t.Errorf("expected a diagnostic about the missing operation identifier, got %v", diags.Errors())
-	}
+	assertSingleError(t, diags, "Unexpected Solace Cloud API response",
+		"The DMR request was accepted without an operation identifier, so its progress cannot be tracked.")
 }
 
 func strPtrLocal(s string) *string { return &s }
+
+const notTakenEffectAdvice = "The service is recorded as it is; run terraform plan to see the remaining change and apply again, " +
+	"or check the service in Solace Cloud if the change keeps failing."
+
+func assertSingleError(t *testing.T, diags diag.Diagnostics, summary, detail string) {
+	t.Helper()
+	if diags.ErrorsCount() != 1 {
+		t.Fatalf("expected exactly one error, got %v", diags.Errors())
+	}
+	got := diags.Errors()[0]
+	if got.Summary() != summary {
+		t.Errorf("summary:\n got %q\nwant %q", got.Summary(), summary)
+	}
+	if got.Detail() != detail {
+		t.Errorf("detail:\n got %q\nwant %q", got.Detail(), detail)
+	}
+}
 
 func diagnosticsContain(errs []diag.Diagnostic, text string) bool {
 	for _, e := range errs {

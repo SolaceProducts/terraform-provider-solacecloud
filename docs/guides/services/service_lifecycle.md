@@ -52,6 +52,8 @@ Some attributes of a service cannot be changed after creation and require creati
 
 `dmr_enabled` is **not** immutable: changing it enables or disables Dynamic Message Routing on the existing service. For more information, see [Enabling and Disabling DMR](service_configuration.md#enabling-and-disabling-dmr).
 
+`mate_link_encryption` is **not** immutable either: changing it enables or disables mate-link encryption on the existing high-availability service. For more information, see [Mate Link Encryption](service_configuration.md#mate-link-encryption).
+
 If you need to change any of these attributes, you must:
 
 1. Create a new service with the desired attributes.
@@ -115,7 +117,7 @@ The Solace Cloud Terraform Provider uses the Solace Cloud V2 API to manage servi
 | `custom_router_name` | `customRouterName` | The custom router name prefix |
 | `environment_id` | `environmentId` | The ID of the environment |
 | `locked` | `locked` | Whether the service is locked against deletion |
-| `mate_link_encryption` | `redundancyGroupSslEnabled` | Whether mate link encryption is enabled |
+| `mate_link_encryption` | `redundancyGroupSslEnabled` at creation; the mate-link encryption endpoint afterwards | Whether mate link encryption is enabled |
 | `owned_by` | `ownedBy` | The ID of the user who owns the service |
 
 ### API Response to Terraform Attribute Mapping

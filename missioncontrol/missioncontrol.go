@@ -1479,6 +1479,22 @@ type ManagementLoginCredential struct {
 	Username *string `json:"username,omitempty"`
 }
 
+// MateLinkEncryption defines model for MateLinkEncryption.
+type MateLinkEncryption struct {
+	// Enabled Indicates whether encryption for the mate-link between the primary and backup event broker nodes is enabled. A value of `true` indicates encryption is enabled while `false` indicates it is disabled.
+	Enabled bool    `json:"enabled"`
+	Id      *string `json:"id,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// MateLinkEncryptionResponse defines model for MateLinkEncryptionResponse.
+type MateLinkEncryptionResponse struct {
+	Data MateLinkEncryption                `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
 // MessageSpool defines model for MessageSpool.
 type MessageSpool struct {
 	Id *string `json:"id,omitempty"`
@@ -2558,6 +2574,9 @@ type CreateConnectionEndpointDnsNameJSONRequestBody = DnsNameCreateRequest
 // MoveConnectionEndpointDnsNameJSONRequestBody defines body for MoveConnectionEndpointDnsName for application/json ContentType.
 type MoveConnectionEndpointDnsNameJSONRequestBody = DnsNameMoveRequest
 
+// UpdateMateLinkEncryptionJSONRequestBody defines body for UpdateMateLinkEncryption for application/json ContentType.
+type UpdateMateLinkEncryptionJSONRequestBody = MateLinkEncryption
+
 // UpdateMessageSpoolJSONRequestBody defines body for UpdateMessageSpool for application/json ContentType.
 type UpdateMessageSpoolJSONRequestBody = MessageSpool
 
@@ -2793,6 +2812,14 @@ type ClientInterface interface {
 	MoveConnectionEndpointDnsNameWithBody(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMateLinkEncryption request
+	GetMateLinkEncryption(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateMateLinkEncryptionWithBody request with any body
+	UpdateMateLinkEncryptionWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateMateLinkEncryption(ctx context.Context, serviceId string, body UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UpdateMessageSpoolWithBody request with any body
 	UpdateMessageSpoolWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3504,6 +3531,42 @@ func (c *Client) MoveConnectionEndpointDnsNameWithBody(ctx context.Context, serv
 
 func (c *Client) MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewMoveConnectionEndpointDnsNameRequest(c.Server, serviceId, connectionEndpointId, dnsName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMateLinkEncryption(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMateLinkEncryptionRequest(c.Server, serviceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateMateLinkEncryptionWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateMateLinkEncryptionRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateMateLinkEncryption(ctx context.Context, serviceId string, body UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateMateLinkEncryptionRequest(c.Server, serviceId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5781,6 +5844,87 @@ func NewMoveConnectionEndpointDnsNameRequestWithBody(server string, serviceId st
 	return req, nil
 }
 
+// NewGetMateLinkEncryptionRequest generates requests for GetMateLinkEncryption
+func NewGetMateLinkEncryptionRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/mateLinkEncryption", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateMateLinkEncryptionRequest calls the generic UpdateMateLinkEncryption builder with application/json body
+func NewUpdateMateLinkEncryptionRequest(server string, serviceId string, body UpdateMateLinkEncryptionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateMateLinkEncryptionRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewUpdateMateLinkEncryptionRequestWithBody generates requests for UpdateMateLinkEncryption with any type of body
+func NewUpdateMateLinkEncryptionRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/mateLinkEncryption", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewUpdateMessageSpoolRequest calls the generic UpdateMessageSpool builder with application/json body
 func NewUpdateMessageSpoolRequest(server string, serviceId string, body UpdateMessageSpoolJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -6609,6 +6753,14 @@ type ClientWithResponsesInterface interface {
 	MoveConnectionEndpointDnsNameWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
 
 	MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
+
+	// GetMateLinkEncryptionWithResponse request
+	GetMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetMateLinkEncryptionResponse, error)
+
+	// UpdateMateLinkEncryptionWithBodyWithResponse request with any body
+	UpdateMateLinkEncryptionWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateMateLinkEncryptionResponse, error)
+
+	UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateMateLinkEncryptionResponse, error)
 
 	// UpdateMessageSpoolWithBodyWithResponse request with any body
 	UpdateMessageSpoolWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateMessageSpoolResponse, error)
@@ -7679,6 +7831,61 @@ func (r MoveConnectionEndpointDnsNameResponse) StatusCode() int {
 	return 0
 }
 
+type GetMateLinkEncryptionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *MateLinkEncryptionResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMateLinkEncryptionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMateLinkEncryptionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateMateLinkEncryptionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateMateLinkEncryptionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateMateLinkEncryptionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type UpdateMessageSpoolResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8501,6 +8708,32 @@ func (c *ClientWithResponses) MoveConnectionEndpointDnsNameWithResponse(ctx cont
 		return nil, err
 	}
 	return ParseMoveConnectionEndpointDnsNameResponse(rsp)
+}
+
+// GetMateLinkEncryptionWithResponse request returning *GetMateLinkEncryptionResponse
+func (c *ClientWithResponses) GetMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetMateLinkEncryptionResponse, error) {
+	rsp, err := c.GetMateLinkEncryption(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMateLinkEncryptionResponse(rsp)
+}
+
+// UpdateMateLinkEncryptionWithBodyWithResponse request with arbitrary body returning *UpdateMateLinkEncryptionResponse
+func (c *ClientWithResponses) UpdateMateLinkEncryptionWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateMateLinkEncryptionResponse, error) {
+	rsp, err := c.UpdateMateLinkEncryptionWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateMateLinkEncryptionResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateMateLinkEncryptionResponse, error) {
+	rsp, err := c.UpdateMateLinkEncryption(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateMateLinkEncryptionResponse(rsp)
 }
 
 // UpdateMessageSpoolWithBodyWithResponse request with arbitrary body returning *UpdateMessageSpoolResponse
@@ -10794,6 +11027,135 @@ func ParseMoveConnectionEndpointDnsNameResponse(rsp *http.Response) (*MoveConnec
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMateLinkEncryptionResponse parses an HTTP response from a GetMateLinkEncryptionWithResponse call
+func ParseGetMateLinkEncryptionResponse(rsp *http.Response) (*GetMateLinkEncryptionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMateLinkEncryptionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest MateLinkEncryptionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateMateLinkEncryptionResponse parses an HTTP response from a UpdateMateLinkEncryptionWithResponse call
+func ParseUpdateMateLinkEncryptionResponse(rsp *http.Response) (*UpdateMateLinkEncryptionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateMateLinkEncryptionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
 		var dest ErrorResponse

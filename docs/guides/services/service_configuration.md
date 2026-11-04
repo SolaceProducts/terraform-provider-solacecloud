@@ -108,6 +108,12 @@ resource "solacecloud_service" "broker_service" {
 }
 ```
 
+You can also enable or disable mate-link encryption on a service that already exists by changing `mate_link_encryption` and applying. The service is not replaced; the mate link is reconfigured in place, and the provider waits for that to finish. Note that:
+
+* Enabling mate-link encryption also enables Config-Sync encryption if it is not already enabled. Disabling mate-link encryption leaves Config-Sync encryption unchanged.
+* The change is refused on a service that is not high-availability, and the provider reports the error. Omit `mate_link_encryption` for standalone services: setting it to `true` when creating one creates the service, then fails the apply and leaves the service tainted, so the next apply replaces it.
+* If you remove `mate_link_encryption` from the configuration, the service keeps its current setting and Terraform plans no change.
+
 ## Environment Configuration
 
 Environments in Solace Cloud allow you to organize and manage services. You can specify an environment when creating a service:

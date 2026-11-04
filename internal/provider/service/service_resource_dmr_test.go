@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/jarcoal/httpmock"
 )
@@ -112,11 +113,15 @@ func TestVerifyDmrMatchesPlan(t *testing.T) {
 		plan      types.Bool
 		observed  types.Bool
 		wantError bool
+		wantStart string
 	}{
 		{name: "matching", plan: types.BoolValue(true), observed: types.BoolValue(true)},
 		{name: "unset dmr_enabled never errors", plan: types.BoolUnknown(), observed: types.BoolValue(false)},
-		{name: "requested true but service reports disabled", plan: types.BoolValue(true), observed: types.BoolValue(false), wantError: true},
-		{name: "requested false but service reports enabled", plan: types.BoolValue(false), observed: types.BoolValue(true), wantError: true},
+		{name: "service reports no value", plan: types.BoolValue(true), observed: types.BoolNull()},
+		{name: "requested true but service reports disabled", plan: types.BoolValue(true), observed: types.BoolValue(false), wantError: true,
+			wantStart: "dmr_enabled = true was applied, but the event broker service reports DMR disabled. "},
+		{name: "requested false but service reports enabled", plan: types.BoolValue(false), observed: types.BoolValue(true), wantError: true,
+			wantStart: "dmr_enabled = false was applied, but the event broker service reports DMR enabled. "},
 	}
 
 	for _, tc := range cases {
@@ -127,9 +132,13 @@ func TestVerifyDmrMatchesPlan(t *testing.T) {
 			if diags.HasError() != tc.wantError {
 				t.Fatalf("expected error=%t, got %v", tc.wantError, diags)
 			}
-			if tc.wantError && !strings.Contains(diags.Errors()[0].Detail(), "did not take effect") &&
-				!strings.Contains(diags.Errors()[0].Summary(), "did not take effect") {
-				t.Errorf("expected the error to say the change did not take effect, got %v", diags.Errors()[0])
+			if !tc.wantError {
+				return
+			}
+			assertSingleError(t, diags, "DMR configuration did not take effect", tc.wantStart+notTakenEffectAdvice)
+			withPath, ok := diags.Errors()[0].(diag.DiagnosticWithPath)
+			if !ok || !withPath.Path().Equal(path.Root("dmr_enabled")) {
+				t.Errorf("expected the error on dmr_enabled, got %v", diags.Errors()[0])
 			}
 		})
 	}

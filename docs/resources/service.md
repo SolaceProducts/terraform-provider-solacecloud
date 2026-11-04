@@ -39,7 +39,6 @@ resource "solacecloud_service" "broker_service" {
   service_class_id     = "ENTERPRISE_1K_STANDALONE"
   message_vpn_name     = "my-custom-vpn"
   max_spool_usage      = 20
-  mate_link_encryption = true
   locked               = false
 }
 ```
@@ -148,7 +147,7 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
   * `true` - You cannot delete this service
   * `false` - You can delete this service
 
-* `mate_link_encryption` - (Optional, Computed) For high-availability (HA) services, you can enable encryption of the mate-link connection between the primary and backup brokers, also known as redundancyGroupSSL in the V2 REST API documentation. For more information, see [HA-Link Security](https://docs.solace.com/Cloud/ha_concept.htm?Highlight=mate-link#ha-link-security). The default value is true. The valid values are:
+* `mate_link_encryption` - (Optional, Computed) For high-availability (HA) services, you can enable encryption of the mate-link connection between the primary and backup brokers, also known as redundancyGroupSSL in the V2 REST API documentation. For more information, see [HA-Link Security](https://docs.solace.com/Cloud/ha_concept.htm?Highlight=mate-link#ha-link-security). The default value is false. Changing it on an existing service enables or disables mate-link encryption in place, without replacing the service. Enabling it also enables Config-Sync encryption if it is not already enabled; disabling it leaves Config-Sync encryption unchanged. The change is refused on a service that is not high-availability, so omit this argument for standalone services. If a new service comes up with a different value than the one configured, the provider changes it right after the service is created. Existing configurations that do not set this argument continue to apply without a plan diff. The valid values are:
   * `true` - Enabled
   * `false` - Disabled
 

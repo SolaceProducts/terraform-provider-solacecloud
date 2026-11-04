@@ -240,7 +240,8 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					boolplanmodifier.UseStateForUnknown()},
 			},
 			"mate_link_encryption": schema.BoolAttribute{
-				MarkdownDescription: "Enable or disable SSL for the redundancy group (for mate-link encryption). " +
+				MarkdownDescription: "Enable or disable SSL for the redundancy group (for mate-link encryption) on a high-availability service. " +
+					"Changing it on an existing service updates it in place. The change is refused on a service that is not high-availability, so omit it for standalone services. " +
 					"The default value is false and the valid values are: <p><ul><li>'true' - enabled</li><li>'false' - disabled</li></ul></p>",
 				Optional: true,
 				Computed: true,

@@ -32,6 +32,7 @@ type CRUDClientWithResponses interface {
 	// DMR cluster operations
 	EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body mc.EnableDmrClusterJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.EnableDmrClusterResponse, error)
 	DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDmrClusterResponse, error)
+	UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body mc.UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMateLinkEncryptionResponse, error)
 
 	// Connection Endpoint operations
 	CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body mc.CreateConnectionEndpointJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointResponse, error)
@@ -154,6 +155,12 @@ func (w *RetryableClientWithResponses) EnableDmrClusterWithResponse(ctx context.
 func (w *RetryableClientWithResponses) DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDmrClusterResponse, error) {
 	return retry(ctx, func() (*mc.DeleteDmrClusterResponse, error) {
 		return w.api.DeleteDmrClusterWithResponse(ctx, serviceId, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body mc.UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMateLinkEncryptionResponse, error) {
+	return retry(ctx, func() (*mc.UpdateMateLinkEncryptionResponse, error) {
+		return w.api.UpdateMateLinkEncryptionWithResponse(ctx, serviceId, body, reqEditors...)
 	}, w.maxRetries, w.waitSeconds)
 }
 
