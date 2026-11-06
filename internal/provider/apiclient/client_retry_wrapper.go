@@ -34,6 +34,12 @@ type CRUDClientWithResponses interface {
 	DeleteDmrClusterWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDmrClusterResponse, error)
 	UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body mc.UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMateLinkEncryptionResponse, error)
 
+	// LDAP management access operations
+	GetLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.GetLdapManagementAccessResponse, error)
+	CreateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body mc.CreateLdapManagementAccessJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateLdapManagementAccessResponse, error)
+	UpdateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body mc.UpdateLdapManagementAccessJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateLdapManagementAccessResponse, error)
+	DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteLdapManagementAccessResponse, error)
+
 	// Connection Endpoint operations
 	CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body mc.CreateConnectionEndpointJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointResponse, error)
 	GetConnectionEndpointsWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.GetConnectionEndpointsResponse, error)
@@ -82,7 +88,6 @@ func isRetryableResponse(resp ApiError) bool {
 		return false
 	}
 	statusCode := resp.StatusCode()
-	// Existing retry logic for 5xx and 409
 	return statusCode >= 500 && statusCode < 600
 }
 
@@ -161,6 +166,31 @@ func (w *RetryableClientWithResponses) DeleteDmrClusterWithResponse(ctx context.
 func (w *RetryableClientWithResponses) UpdateMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, body mc.UpdateMateLinkEncryptionJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMateLinkEncryptionResponse, error) {
 	return retry(ctx, func() (*mc.UpdateMateLinkEncryptionResponse, error) {
 		return w.api.UpdateMateLinkEncryptionWithResponse(ctx, serviceId, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+// LDAP management access operations
+func (w *RetryableClientWithResponses) GetLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.GetLdapManagementAccessResponse, error) {
+	return retry(ctx, func() (*mc.GetLdapManagementAccessResponse, error) {
+		return w.api.GetLdapManagementAccessWithResponse(ctx, serviceId, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) CreateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body mc.CreateLdapManagementAccessJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateLdapManagementAccessResponse, error) {
+	return retry(ctx, func() (*mc.CreateLdapManagementAccessResponse, error) {
+		return w.api.CreateLdapManagementAccessWithResponse(ctx, serviceId, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) UpdateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body mc.UpdateLdapManagementAccessJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateLdapManagementAccessResponse, error) {
+	return retry(ctx, func() (*mc.UpdateLdapManagementAccessResponse, error) {
+		return w.api.UpdateLdapManagementAccessWithResponse(ctx, serviceId, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteLdapManagementAccessResponse, error) {
+	return retry(ctx, func() (*mc.DeleteLdapManagementAccessResponse, error) {
+		return w.api.DeleteLdapManagementAccessWithResponse(ctx, serviceId, reqEditors...)
 	}, w.maxRetries, w.waitSeconds)
 }
 

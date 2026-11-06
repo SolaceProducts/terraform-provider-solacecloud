@@ -2,6 +2,7 @@ package shared
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"terraform-provider-solacecloud/missioncontrol"
 	"terraform-provider-solacecloud/platform"
@@ -277,8 +278,22 @@ func (h *ErrorResponseAdaptor) addConflictDiagnostics(diagnostics *diag.Diagnost
 		string(h.Body))
 }
 
+// Covers statuses without their own handler, such as 422 for an operation the service does not support.
 func (h *ErrorResponseAdaptor) addUnexpectedErrorDiagnostics(diagnostics *diag.Diagnostics) {
-	diagnostics.AddError(string(h.Body), "Unexpected Error")
+	summary := fmt.Sprintf("API error (HTTP %d)", h.StatusCode())
+	var body struct {
+		Message string `json:"message"`
+		ErrorId string `json:"errorId"`
+	}
+	if json.Unmarshal(h.Body, &body) == nil && body.Message != "" {
+		detail := body.Message
+		if body.ErrorId != "" {
+			detail += " (error ID: " + body.ErrorId + ")"
+		}
+		diagnostics.AddError(summary, detail)
+		return
+	}
+	diagnostics.AddError(summary, string(h.Body))
 }
 
 func addBadRequestError(diagnostics *diag.Diagnostics) {

@@ -279,3 +279,35 @@ func TestHandleErrorConflictDetail(t *testing.T) {
 		})
 	}
 }
+
+func TestHandleErrorUnexpectedStatusDetail(t *testing.T) {
+	tests := []struct {
+		name       string
+		body       string
+		wantDetail string
+	}{
+		{name: "api message and error id shown", body: `{"message":"Request not supported for this service","errorId":"abc"}`,
+			wantDetail: "Request not supported for this service (error ID: abc)"},
+		{name: "api message without error id", body: `{"message":"Request not supported for this service"}`,
+			wantDetail: "Request not supported for this service"},
+		{name: "non-json body shown as is", body: "bad gateway", wantDetail: "bad gateway"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := &ErrorResponseAdaptor{
+				ExpectedStatusCode: http.StatusAccepted,
+				Body:               []byte(tt.body),
+				HTTPResponse:       &http.Response{StatusCode: http.StatusUnprocessableEntity},
+			}
+			var diagnostics diag.Diagnostics
+
+			if !handler.HandleError(&diagnostics) || len(diagnostics) != 1 {
+				t.Fatalf("expected one error for 422, got %v", diagnostics)
+			}
+			if d := diagnostics[0]; d.Summary() != "API error (HTTP 422)" || d.Detail() != tt.wantDetail {
+				t.Errorf("got summary %q, detail %q", d.Summary(), d.Detail())
+			}
+		})
+	}
+}

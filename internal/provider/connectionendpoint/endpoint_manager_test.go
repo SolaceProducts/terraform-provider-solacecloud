@@ -60,6 +60,22 @@ func (m *MockAPIClient) UpdateMateLinkEncryptionWithResponse(ctx context.Context
 	return nil, errors.New("not implemented")
 }
 
+func (m *MockAPIClient) GetLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.GetLdapManagementAccessResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) CreateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body missioncontrol.CreateLdapManagementAccessJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.CreateLdapManagementAccessResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) UpdateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body missioncontrol.UpdateLdapManagementAccessJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.UpdateLdapManagementAccessResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.DeleteLdapManagementAccessResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (m *MockAPIClient) CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body missioncontrol.CreateConnectionEndpointJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.CreateConnectionEndpointResponse, error) {
 	return nil, errors.New("not implemented")
 }

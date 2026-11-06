@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"terraform-provider-solacecloud/missioncontrol"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -324,6 +325,129 @@ func serviceOperationResponse(operationId, serviceId, operationType string) stri
         "error": null
     }
 }`
+}
+
+// Responses copy the shapes the real API returned on 2026-11-02.
+type LdapManagementAccessMock struct {
+	serviceId string
+	mu        sync.Mutex
+	access    map[string]json.RawMessage // nil when not configured
+	patches   []map[string]json.RawMessage
+}
+
+func (m *LdapManagementAccessMock) Configured() bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.access != nil
+}
+
+// Simulates a removal made outside Terraform, for example in the console.
+func (m *LdapManagementAccessMock) Remove() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.access = nil
+}
+
+func (m *LdapManagementAccessMock) Patches() []map[string]json.RawMessage {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return append([]map[string]json.RawMessage(nil), m.patches...)
+}
+
+// The service starts without a configuration.
+func (provider *TestInstance) SetupLdapManagementAccessMocks(serviceId string) *LdapManagementAccessMock {
+	url := provider.baseUrl + eventBrokerServicesPath + serviceId + "/ldapManagementAccess"
+	mock := &LdapManagementAccessMock{serviceId: serviceId}
+
+	provider.registerServiceOperation(serviceId, ldapOperationId, "")
+	httpmock.RegisterResponder("GET", url, mock.get)
+	httpmock.RegisterResponder("POST", url, mock.create)
+	httpmock.RegisterResponder("PATCH", url, mock.update)
+	httpmock.RegisterResponder("DELETE", url, mock.delete)
+	return mock
+}
+
+const ldapOperationId = "ldap-management-access-operation-123"
+
+func (m *LdapManagementAccessMock) notFound(r *http.Request) (*http.Response, error) {
+	return JsonResponder(404, `{"message": "Could not find LDAP management access configuration for event broker service `+m.serviceId+`", "errorId": "mock"}`)(r)
+}
+
+func (m *LdapManagementAccessMock) accepted(r *http.Request, operationType string) (*http.Response, error) {
+	return JsonResponder(202, serviceOperationResponse(ldapOperationId, m.serviceId, operationType))(r)
+}
+
+func (m *LdapManagementAccessMock) get(r *http.Request) (*http.Response, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.access == nil {
+		return m.notFound(r)
+	}
+	data, _ := json.Marshal(m.access)
+	return JsonResponder(200, `{"data": `+string(data)+`, "meta": {}}`)(r)
+}
+
+func (m *LdapManagementAccessMock) create(r *http.Request) (*http.Response, error) {
+	body, ok := readJsonObject(r)
+	if !ok {
+		return JsonResponder(400, `{"message": "invalid body", "errorId": "mock"}`)(r)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.access != nil {
+		return JsonResponder(409, `{"message": "LDAP management access is already configured for event broker service `+m.serviceId+`. Use the PATCH API to change it, or the DELETE API to remove it first.", "errorId": "mock", "validationDetails": {"ldapManagementAccess": ["is already configured for this event broker service"]}}`)(r)
+	}
+	m.access = map[string]json.RawMessage{
+		"readOnlyGroupNames":    json.RawMessage(`[]`),
+		"readWriteGroupNames":   json.RawMessage(`[]`),
+		"meshManagerGroupNames": json.RawMessage(`[]`),
+		"id":                    json.RawMessage(`"ldapManagementAccess"`),
+		"type":                  json.RawMessage(`"ldapManagementAccess"`),
+		"managementProfileName": json.RawMessage(`"management"`),
+	}
+	for k, v := range body {
+		m.access[k] = v
+	}
+	return m.accepted(r, "createLdapManagementAccess")
+}
+
+func (m *LdapManagementAccessMock) update(r *http.Request) (*http.Response, error) {
+	body, ok := readJsonObject(r)
+	if !ok || len(body) == 0 {
+		return JsonResponder(400, `{"message": "The request body must contain at least one field to change.", "errorId": "mock"}`)(r)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.access == nil {
+		return m.notFound(r)
+	}
+	m.patches = append(m.patches, body)
+	for k, v := range body {
+		m.access[k] = v
+	}
+	return m.accepted(r, "updateLdapManagementAccess")
+}
+
+func (m *LdapManagementAccessMock) delete(r *http.Request) (*http.Response, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.access == nil {
+		return m.notFound(r)
+	}
+	m.access = nil
+	return m.accepted(r, "deleteLdapManagementAccess")
+}
+
+func readJsonObject(r *http.Request) (map[string]json.RawMessage, bool) {
+	if r.Body == nil {
+		return nil, false
+	}
+	var body map[string]json.RawMessage
+	raw, err := io.ReadAll(r.Body)
+	if err != nil || json.Unmarshal(raw, &body) != nil {
+		return nil, false
+	}
+	return body, true
 }
 
 // CreateServiceOperationResponse is the 202 body returned by the mocked create service
