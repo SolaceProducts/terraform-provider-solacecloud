@@ -321,3 +321,59 @@ func TestReadMateLinkEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestSetupLdapManagementAccessMocksFollowsTheApiLifecycle(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	instance := &TestInstance{baseUrl: "https://api.solace.test", mockedApi: true}
+	mock := instance.SetupLdapManagementAccessMocks("svc-mock-ldap")
+	url := instance.baseUrl + "/api/v2/missionControl/eventBrokerServices/svc-mock-ldap/ldapManagementAccess"
+	send := func(method, body string) int {
+		req, err := http.NewRequest(method, url, strings.NewReader(body))
+		if err != nil {
+			t.Fatalf("could not build the %s request: %v", method, err)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatalf("%s request failed: %v", method, err)
+		}
+		_ = resp.Body.Close()
+		return resp.StatusCode
+	}
+
+	steps := []struct {
+		method, body string
+		want         int
+	}{
+		{"GET", "", 404},
+		{"PATCH", `{"enabled":false}`, 404},
+		{"DELETE", "", 404},
+		{"POST", "not json", 400},
+		{"POST", `{"enabled":true,"groupAttributeName":"memberOf"}`, 202},
+		{"POST", `{"enabled":true,"groupAttributeName":"memberOf"}`, 409},
+		{"PATCH", `{}`, 400},
+		{"PATCH", `{"enabled":false}`, 202},
+		{"GET", "", 200},
+		{"DELETE", "", 202},
+		{"GET", "", 404},
+	}
+	for i, s := range steps {
+		if got := send(s.method, s.body); got != s.want {
+			t.Fatalf("step %d: %s %s returned %d, want %d", i, s.method, s.body, got, s.want)
+		}
+	}
+
+	if patches := mock.Patches(); len(patches) != 1 || string(patches[0]["enabled"]) != "false" {
+		t.Errorf("expected one recorded PATCH that sets enabled to false, got %v", patches)
+	}
+
+	send("POST", `{"enabled":true}`)
+	if !mock.Configured() {
+		t.Fatal("expected the configuration to exist after a POST")
+	}
+	mock.Remove()
+	if mock.Configured() || send("GET", "") != 404 {
+		t.Error("expected Remove to delete the configuration")
+	}
+}

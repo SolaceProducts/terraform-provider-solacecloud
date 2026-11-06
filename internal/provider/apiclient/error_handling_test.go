@@ -495,8 +495,11 @@ func TestErrorResponseAdaptor_HandleError_DefaultCase(t *testing.T) {
 	}
 
 	errorDiag := diagnostics.Errors()[0]
-	if errorDiag.Summary() != string(body) {
-		t.Errorf("errorDiag.Summary() = %v, expected %v", errorDiag.Summary(), string(body))
+	if errorDiag.Summary() != "API error (HTTP 500)" {
+		t.Errorf("errorDiag.Summary() = %v, expected %v", errorDiag.Summary(), "API error (HTTP 500)")
+	}
+	if errorDiag.Detail() != string(body) {
+		t.Errorf("errorDiag.Detail() = %v, expected %v", errorDiag.Detail(), string(body))
 	}
 }
 
@@ -510,7 +513,7 @@ func TestErrorResponseAdaptor_HandleError_MultipleStatusCodes(t *testing.T) {
 		{"Unauthorized", 401, "Authentication Failed"},
 		{"Forbidden", 403, "Forbidden"},
 		{"Not Found", 404, "Not Found"},
-		{"Internal Server Error", 500, "Custom error body"},
+		{"Internal Server Error", 500, "API error (HTTP 500)"},
 		{"Service Unavailable", 503, "Service Unavailable"},
 	}
 

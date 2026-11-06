@@ -106,6 +106,38 @@ func (m *MockCRUDClient) UpdateMateLinkEncryptionWithResponse(ctx context.Contex
 	return args.Get(0).(*mc.UpdateMateLinkEncryptionResponse), args.Error(1)
 }
 
+func (m *MockCRUDClient) GetLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.GetLdapManagementAccessResponse, error) {
+	args := m.Called(ctx, serviceId, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.GetLdapManagementAccessResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) CreateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body mc.CreateLdapManagementAccessJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateLdapManagementAccessResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.CreateLdapManagementAccessResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) UpdateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body mc.UpdateLdapManagementAccessJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateLdapManagementAccessResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.UpdateLdapManagementAccessResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteLdapManagementAccessResponse, error) {
+	args := m.Called(ctx, serviceId, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.DeleteLdapManagementAccessResponse), args.Error(1)
+}
+
 func (m *MockCRUDClient) GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error) {
 	args := m.Called(ctx, serviceId, operationId, params, reqEditors)
 	if args.Get(0) == nil {
@@ -873,4 +905,44 @@ func TestRetryableClient_CreateConnectionEndpointDnsNameWithResponse_RetryableEr
 // Helper function for string pointers
 func StringPtr(s string) *string {
 	return &s
+}
+
+func TestRetryableClient_LdapManagementAccess_RetriesServerErrors(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 2, 0)
+	ctx := context.Background()
+	serverError := &http.Response{StatusCode: 502}
+	editors := mock.AnythingOfType("[]missioncontrol.RequestEditorFn")
+
+	getOk := &mc.GetLdapManagementAccessResponse{}
+	mockApi.On("GetLdapManagementAccessWithResponse", ctx, dmrTestServiceId, editors).Return(&mc.GetLdapManagementAccessResponse{HTTPResponse: serverError}, nil).Once()
+	mockApi.On("GetLdapManagementAccessWithResponse", ctx, dmrTestServiceId, editors).Return(getOk, nil).Once()
+
+	createBody := mc.CreateLdapManagementAccessJSONRequestBody{Enabled: true}
+	createOk := &mc.CreateLdapManagementAccessResponse{}
+	mockApi.On("CreateLdapManagementAccessWithResponse", ctx, dmrTestServiceId, createBody, editors).Return(&mc.CreateLdapManagementAccessResponse{HTTPResponse: serverError}, nil).Once()
+	mockApi.On("CreateLdapManagementAccessWithResponse", ctx, dmrTestServiceId, createBody, editors).Return(createOk, nil).Once()
+
+	updateBody := mc.UpdateLdapManagementAccessJSONRequestBody{}
+	updateOk := &mc.UpdateLdapManagementAccessResponse{}
+	mockApi.On("UpdateLdapManagementAccessWithResponse", ctx, dmrTestServiceId, updateBody, editors).Return(&mc.UpdateLdapManagementAccessResponse{HTTPResponse: serverError}, nil).Once()
+	mockApi.On("UpdateLdapManagementAccessWithResponse", ctx, dmrTestServiceId, updateBody, editors).Return(updateOk, nil).Once()
+
+	deleteOk := &mc.DeleteLdapManagementAccessResponse{}
+	mockApi.On("DeleteLdapManagementAccessWithResponse", ctx, dmrTestServiceId, editors).Return(&mc.DeleteLdapManagementAccessResponse{HTTPResponse: serverError}, nil).Once()
+	mockApi.On("DeleteLdapManagementAccessWithResponse", ctx, dmrTestServiceId, editors).Return(deleteOk, nil).Once()
+
+	got, err := client.GetLdapManagementAccessWithResponse(ctx, dmrTestServiceId)
+	assert.NoError(t, err)
+	assert.Same(t, getOk, got)
+	created, err := client.CreateLdapManagementAccessWithResponse(ctx, dmrTestServiceId, createBody)
+	assert.NoError(t, err)
+	assert.Same(t, createOk, created)
+	updated, err := client.UpdateLdapManagementAccessWithResponse(ctx, dmrTestServiceId, updateBody)
+	assert.NoError(t, err)
+	assert.Same(t, updateOk, updated)
+	deleted, err := client.DeleteLdapManagementAccessWithResponse(ctx, dmrTestServiceId)
+	assert.NoError(t, err)
+	assert.Same(t, deleteOk, deleted)
+	mockApi.AssertExpectations(t)
 }

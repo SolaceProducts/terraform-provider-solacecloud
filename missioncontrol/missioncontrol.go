@@ -1019,6 +1019,24 @@ type CreateConnectionEndpointAccessType string
 // CreateConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
 type CreateConnectionEndpointK8sServiceType string
 
+// CreateLdapManagementAccess defines model for CreateLdapManagementAccess.
+type CreateLdapManagementAccess struct {
+	// Enabled Indicates whether management users are authenticated against the LDAP authentication profile. The valid values are 'true' (enabled) or 'false' (disabled).
+	Enabled bool `json:"enabled"`
+
+	// GroupAttributeName The name of the LDAP attribute that carries the group membership of a management user.
+	GroupAttributeName string `json:"groupAttributeName"`
+
+	// MeshManagerGroupNames The LDAP groups whose members are granted Mission Control Manager access to the event broker service. The event broker service must support the Mission Control Manager role.
+	MeshManagerGroupNames *[]string `json:"meshManagerGroupNames,omitempty"`
+
+	// ReadOnlyGroupNames The LDAP groups whose members are granted Mission Control Viewer access to the event broker service.
+	ReadOnlyGroupNames *[]string `json:"readOnlyGroupNames,omitempty"`
+
+	// ReadWriteGroupNames The LDAP groups whose members are granted Mission Control Editor access to the event broker service.
+	ReadWriteGroupNames *[]string `json:"readWriteGroupNames,omitempty"`
+}
+
 // CreateServiceRequest defines model for CreateServiceRequest.
 type CreateServiceRequest struct {
 	// ClusterName The name of the Dynamic Message Routing (DMR) cluster. For service packages that support configuring DMR at service creation, this value is used only when <code>dmrEnabled</code> is set to <code>true</code>. For legacy service packages that enable DMR by default, this value always applies.
@@ -1432,6 +1450,37 @@ type InfrastructureDetails struct {
 // InstallCertificateRequest defines model for InstallCertificateRequest.
 type InstallCertificateRequest struct {
 	Passphrase *string `json:"passphrase,omitempty"`
+}
+
+// LdapManagementAccess defines model for LdapManagementAccess.
+type LdapManagementAccess struct {
+	// Enabled Indicates whether management users are authenticated against the LDAP authentication profile. The valid values are 'true' (enabled) or 'false' (disabled).
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// GroupAttributeName The name of the LDAP attribute that carries the group membership of a management user.
+	GroupAttributeName *string `json:"groupAttributeName,omitempty"`
+	Id                 *string `json:"id,omitempty"`
+
+	// ManagementProfileName The name of the LDAP authentication profile that the event broker service uses to authenticate management users. This API creates and manages the 'management' profile. A service configured through an earlier API version may report a different name, in which case this API cannot modify or delete the configuration.
+	ManagementProfileName *string `json:"managementProfileName,omitempty"`
+
+	// MeshManagerGroupNames The LDAP groups whose members are granted Mission Control Manager access to the event broker service. The event broker service must support the Mission Control Manager role.
+	MeshManagerGroupNames *[]string `json:"meshManagerGroupNames,omitempty"`
+
+	// ReadOnlyGroupNames The LDAP groups whose members are granted Mission Control Viewer access to the event broker service.
+	ReadOnlyGroupNames *[]string `json:"readOnlyGroupNames,omitempty"`
+
+	// ReadWriteGroupNames The LDAP groups whose members are granted Mission Control Editor access to the event broker service.
+	ReadWriteGroupNames *[]string `json:"readWriteGroupNames,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// LdapManagementAccessResponse defines model for LdapManagementAccessResponse.
+type LdapManagementAccessResponse struct {
+	Data LdapManagementAccess              `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
 // LdapProfile The LDAP profiles configured for the event broker service.
@@ -2259,6 +2308,24 @@ type UpdateConnectionEndpointAccessType string
 // UpdateConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
 type UpdateConnectionEndpointK8sServiceType string
 
+// UpdateLdapManagementAccess defines model for UpdateLdapManagementAccess.
+type UpdateLdapManagementAccess struct {
+	// Enabled Indicates whether management users are authenticated against the LDAP authentication profile. The valid values are 'true' (enabled) or 'false' (disabled).
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// GroupAttributeName The name of the LDAP attribute that carries the group membership of a management user.
+	GroupAttributeName *string `json:"groupAttributeName,omitempty"`
+
+	// MeshManagerGroupNames The LDAP groups whose members are granted Mission Control Manager access to the event broker service. The event broker service must support the Mission Control Manager role.
+	MeshManagerGroupNames *[]string `json:"meshManagerGroupNames,omitempty"`
+
+	// ReadOnlyGroupNames The LDAP groups whose members are granted Mission Control Viewer access to the event broker service.
+	ReadOnlyGroupNames *[]string `json:"readOnlyGroupNames,omitempty"`
+
+	// ReadWriteGroupNames The LDAP groups whose members are granted Mission Control Editor access to the event broker service.
+	ReadWriteGroupNames *[]string `json:"readWriteGroupNames,omitempty"`
+}
+
 // UpdateServiceRequest defines model for UpdateServiceRequest.
 type UpdateServiceRequest struct {
 	// Locked Indicates whether the event broker service has deletion protection enabled. The valid values are 'true' (enabled) or 'false' (disabled). The default is 'false'.
@@ -2574,6 +2641,12 @@ type CreateConnectionEndpointDnsNameJSONRequestBody = DnsNameCreateRequest
 // MoveConnectionEndpointDnsNameJSONRequestBody defines body for MoveConnectionEndpointDnsName for application/json ContentType.
 type MoveConnectionEndpointDnsNameJSONRequestBody = DnsNameMoveRequest
 
+// UpdateLdapManagementAccessJSONRequestBody defines body for UpdateLdapManagementAccess for application/json ContentType.
+type UpdateLdapManagementAccessJSONRequestBody = UpdateLdapManagementAccess
+
+// CreateLdapManagementAccessJSONRequestBody defines body for CreateLdapManagementAccess for application/json ContentType.
+type CreateLdapManagementAccessJSONRequestBody = CreateLdapManagementAccess
+
 // UpdateMateLinkEncryptionJSONRequestBody defines body for UpdateMateLinkEncryption for application/json ContentType.
 type UpdateMateLinkEncryptionJSONRequestBody = MateLinkEncryption
 
@@ -2812,6 +2885,22 @@ type ClientInterface interface {
 	MoveConnectionEndpointDnsNameWithBody(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteLdapManagementAccess request
+	DeleteLdapManagementAccess(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetLdapManagementAccess request
+	GetLdapManagementAccess(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateLdapManagementAccessWithBody request with any body
+	UpdateLdapManagementAccessWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateLdapManagementAccess(ctx context.Context, serviceId string, body UpdateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateLdapManagementAccessWithBody request with any body
+	CreateLdapManagementAccessWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateLdapManagementAccess(ctx context.Context, serviceId string, body CreateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetMateLinkEncryption request
 	GetMateLinkEncryption(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3531,6 +3620,78 @@ func (c *Client) MoveConnectionEndpointDnsNameWithBody(ctx context.Context, serv
 
 func (c *Client) MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewMoveConnectionEndpointDnsNameRequest(c.Server, serviceId, connectionEndpointId, dnsName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteLdapManagementAccess(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteLdapManagementAccessRequest(c.Server, serviceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetLdapManagementAccess(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetLdapManagementAccessRequest(c.Server, serviceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateLdapManagementAccessWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateLdapManagementAccessRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateLdapManagementAccess(ctx context.Context, serviceId string, body UpdateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateLdapManagementAccessRequest(c.Server, serviceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateLdapManagementAccessWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateLdapManagementAccessRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateLdapManagementAccess(ctx context.Context, serviceId string, body CreateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateLdapManagementAccessRequest(c.Server, serviceId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5844,6 +6005,168 @@ func NewMoveConnectionEndpointDnsNameRequestWithBody(server string, serviceId st
 	return req, nil
 }
 
+// NewDeleteLdapManagementAccessRequest generates requests for DeleteLdapManagementAccess
+func NewDeleteLdapManagementAccessRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/ldapManagementAccess", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetLdapManagementAccessRequest generates requests for GetLdapManagementAccess
+func NewGetLdapManagementAccessRequest(server string, serviceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/ldapManagementAccess", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateLdapManagementAccessRequest calls the generic UpdateLdapManagementAccess builder with application/json body
+func NewUpdateLdapManagementAccessRequest(server string, serviceId string, body UpdateLdapManagementAccessJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateLdapManagementAccessRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewUpdateLdapManagementAccessRequestWithBody generates requests for UpdateLdapManagementAccess with any type of body
+func NewUpdateLdapManagementAccessRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/ldapManagementAccess", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateLdapManagementAccessRequest calls the generic CreateLdapManagementAccess builder with application/json body
+func NewCreateLdapManagementAccessRequest(server string, serviceId string, body CreateLdapManagementAccessJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateLdapManagementAccessRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewCreateLdapManagementAccessRequestWithBody generates requests for CreateLdapManagementAccess with any type of body
+func NewCreateLdapManagementAccessRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/ldapManagementAccess", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetMateLinkEncryptionRequest generates requests for GetMateLinkEncryption
 func NewGetMateLinkEncryptionRequest(server string, serviceId string) (*http.Request, error) {
 	var err error
@@ -6753,6 +7076,22 @@ type ClientWithResponsesInterface interface {
 	MoveConnectionEndpointDnsNameWithBodyWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
 
 	MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
+
+	// DeleteLdapManagementAccessWithResponse request
+	DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*DeleteLdapManagementAccessResponse, error)
+
+	// GetLdapManagementAccessWithResponse request
+	GetLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetLdapManagementAccessResponse, error)
+
+	// UpdateLdapManagementAccessWithBodyWithResponse request with any body
+	UpdateLdapManagementAccessWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateLdapManagementAccessResponse, error)
+
+	UpdateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body UpdateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateLdapManagementAccessResponse, error)
+
+	// CreateLdapManagementAccessWithBodyWithResponse request with any body
+	CreateLdapManagementAccessWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateLdapManagementAccessResponse, error)
+
+	CreateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body CreateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateLdapManagementAccessResponse, error)
 
 	// GetMateLinkEncryptionWithResponse request
 	GetMateLinkEncryptionWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetMateLinkEncryptionResponse, error)
@@ -7831,6 +8170,121 @@ func (r MoveConnectionEndpointDnsNameResponse) StatusCode() int {
 	return 0
 }
 
+type DeleteLdapManagementAccessResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteLdapManagementAccessResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteLdapManagementAccessResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetLdapManagementAccessResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *LdapManagementAccessResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetLdapManagementAccessResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetLdapManagementAccessResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateLdapManagementAccessResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateLdapManagementAccessResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateLdapManagementAccessResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateLdapManagementAccessResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateLdapManagementAccessResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateLdapManagementAccessResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetMateLinkEncryptionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8708,6 +9162,58 @@ func (c *ClientWithResponses) MoveConnectionEndpointDnsNameWithResponse(ctx cont
 		return nil, err
 	}
 	return ParseMoveConnectionEndpointDnsNameResponse(rsp)
+}
+
+// DeleteLdapManagementAccessWithResponse request returning *DeleteLdapManagementAccessResponse
+func (c *ClientWithResponses) DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*DeleteLdapManagementAccessResponse, error) {
+	rsp, err := c.DeleteLdapManagementAccess(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteLdapManagementAccessResponse(rsp)
+}
+
+// GetLdapManagementAccessWithResponse request returning *GetLdapManagementAccessResponse
+func (c *ClientWithResponses) GetLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetLdapManagementAccessResponse, error) {
+	rsp, err := c.GetLdapManagementAccess(ctx, serviceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetLdapManagementAccessResponse(rsp)
+}
+
+// UpdateLdapManagementAccessWithBodyWithResponse request with arbitrary body returning *UpdateLdapManagementAccessResponse
+func (c *ClientWithResponses) UpdateLdapManagementAccessWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateLdapManagementAccessResponse, error) {
+	rsp, err := c.UpdateLdapManagementAccessWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateLdapManagementAccessResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body UpdateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateLdapManagementAccessResponse, error) {
+	rsp, err := c.UpdateLdapManagementAccess(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateLdapManagementAccessResponse(rsp)
+}
+
+// CreateLdapManagementAccessWithBodyWithResponse request with arbitrary body returning *CreateLdapManagementAccessResponse
+func (c *ClientWithResponses) CreateLdapManagementAccessWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateLdapManagementAccessResponse, error) {
+	rsp, err := c.CreateLdapManagementAccessWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateLdapManagementAccessResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateLdapManagementAccessWithResponse(ctx context.Context, serviceId string, body CreateLdapManagementAccessJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateLdapManagementAccessResponse, error) {
+	rsp, err := c.CreateLdapManagementAccess(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateLdapManagementAccessResponse(rsp)
 }
 
 // GetMateLinkEncryptionWithResponse request returning *GetMateLinkEncryptionResponse
@@ -11027,6 +11533,299 @@ func ParseMoveConnectionEndpointDnsNameResponse(rsp *http.Response) (*MoveConnec
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteLdapManagementAccessResponse parses an HTTP response from a DeleteLdapManagementAccessWithResponse call
+func ParseDeleteLdapManagementAccessResponse(rsp *http.Response) (*DeleteLdapManagementAccessResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteLdapManagementAccessResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetLdapManagementAccessResponse parses an HTTP response from a GetLdapManagementAccessWithResponse call
+func ParseGetLdapManagementAccessResponse(rsp *http.Response) (*GetLdapManagementAccessResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetLdapManagementAccessResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest LdapManagementAccessResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateLdapManagementAccessResponse parses an HTTP response from a UpdateLdapManagementAccessWithResponse call
+func ParseUpdateLdapManagementAccessResponse(rsp *http.Response) (*UpdateLdapManagementAccessResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateLdapManagementAccessResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateLdapManagementAccessResponse parses an HTTP response from a CreateLdapManagementAccessWithResponse call
+func ParseCreateLdapManagementAccessResponse(rsp *http.Response) (*CreateLdapManagementAccessResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateLdapManagementAccessResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
 		var dest ErrorResponse
