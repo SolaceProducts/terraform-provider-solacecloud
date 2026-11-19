@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -29,7 +30,7 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	diags := r.updateInternal(ctx, &state, &plan)
+	rotated, diags := r.updateInternal(ctx, &state, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -39,6 +40,9 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 	readDiags := r.readDataInternal(ctx, &state, &plan)
 	resp.Diagnostics.Append(*readDiags...)
 	if resp.Diagnostics.HasError() {
+		if rotated {
+			recordRotationAfterFailedRead(ctx, plan, resp)
+		}
 		return
 	}
 
@@ -48,35 +52,58 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) diag.Diagnostics {
+// On error the framework keeps the prior state and its old trigger, so the next apply would
+// rotate again. Store the planned block instead; the passwords update on the next refresh.
+func recordRotationAfterFailedRead(ctx context.Context, plan ServiceResourceModel, resp *resource.UpdateResponse) {
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("broker_password_rotation"), plan.BrokerPasswordRotation)...)
+	resp.Diagnostics.AddAttributeWarning(
+		path.Root("broker_password_rotation"),
+		"Passwords were rotated but could not be read back",
+		"The event broker passwords were rotated, and the new rotation trigger is recorded so the next apply does "+
+			"not rotate them again. The passwords in state are still the old ones: run terraform apply again "+
+			"once the event broker service can be read to store the new passwords.",
+	)
+}
+
+// The bool reports a completed rotation, so the caller can record it if its re-read fails.
+func (r *ServiceResource) updateInternal(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) (bool, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	storageSizeChanged := !plan.MaxSpoolUsage.IsUnknown() && !plan.MaxSpoolUsage.IsNull() && state.MaxSpoolUsage != plan.MaxSpoolUsage
 
 	diags.Append(r.patchChangedAttributes(ctx, state, plan)...)
 	if diags.HasError() {
-		return diags
+		return false, diags
 	}
 
 	if storageSizeChanged {
 		updateDiags := r.updateStorageSize(ctx, *state, *plan)
 		diags.Append(*updateDiags...)
 		if diags.HasError() {
-			return diags
+			return false, diags
 		}
 	}
 	dmrDiags := r.updateDmrEnablement(ctx, state, plan)
 	diags.Append(dmrDiags...)
 	if diags.HasError() {
-		return diags
+		return false, diags
 	}
 	diags.Append(r.updateMateLinkEncryption(ctx, state, plan)...)
 	if diags.HasError() {
-		return diags
+		return false, diags
 	}
 
-	diags.Append(r.updateDefaultConnectionEndpoint(ctx, state, plan)...)
-	return diags
+	endpointDiags := r.updateDefaultConnectionEndpoint(ctx, state, plan)
+	diags.Append(endpointDiags...)
+	if diags.HasError() {
+		return false, diags
+	}
+
+	// Rotate last: a rotation can't be undone, and a later step failing would leave the old
+	// trigger in state and rotate again on the next apply.
+	rotated, rotateDiags := r.rotateBrokerPasswords(ctx, state, plan)
+	diags.Append(rotateDiags...)
+	return rotated, diags
 }
 
 func (r *ServiceResource) patchChangedAttributes(ctx context.Context, state *ServiceResourceModel, plan *ServiceResourceModel) diag.Diagnostics {

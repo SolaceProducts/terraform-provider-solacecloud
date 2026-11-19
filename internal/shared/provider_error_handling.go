@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"terraform-provider-solacecloud/missioncontrol"
 	"terraform-provider-solacecloud/platform"
+	"unicode"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
@@ -216,18 +218,21 @@ func addUnauthorizedDiagnostics(diagnostics *diag.Diagnostics) {
 	)
 }
 
+const badRequest = "Bad Request"
+
 func (h *ErrorResponseAdaptor) addBadRequestDiagnostics(diagnostics *diag.Diagnostics) {
 	if h.JSON400 != nil {
-		details := h.JSON400.GetFirstValidationDetail()
-		const badRequest = "Bad Request"
-		if details != "" {
-			diagnostics.AddError(badRequest, details)
-		}
-		if h.JSON400.GetMessage() != "" {
-			diagnostics.AddError(badRequest, h.JSON400.GetMessage())
-		}
-		if h.JSON400.GetMessage() == "" && details == "" {
+		// One error per response. The message often restates the validation detail, so when one contains the other only the longer one is shown.
+		details, message := h.JSON400.GetFirstValidationDetail(), h.JSON400.GetMessage()
+		switch {
+		case message == "" && details == "":
 			addBadRequestError(diagnostics)
+		case strings.Contains(lettersAndDigits(message), lettersAndDigits(details)):
+			diagnostics.AddError(badRequest, message)
+		case strings.Contains(lettersAndDigits(details), lettersAndDigits(message)):
+			diagnostics.AddError(badRequest, details)
+		default:
+			diagnostics.AddError(badRequest, message+"\n\n"+details)
 		}
 	} else {
 		addBadRequestError(diagnostics)
@@ -297,8 +302,17 @@ func (h *ErrorResponseAdaptor) addUnexpectedErrorDiagnostics(diagnostics *diag.D
 }
 
 func addBadRequestError(diagnostics *diag.Diagnostics) {
-	diagnostics.AddError("Bad Request", "Received HTTP 400 Bad Request. "+
+	diagnostics.AddError(badRequest, "Received HTTP 400 Bad Request. "+
 		"This usually indicates a malformed request or missing required parameters. "+
 		"Check your request body and parameters.",
 	)
+}
+
+func lettersAndDigits(s string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return unicode.ToLower(r)
+		}
+		return -1
+	}, s)
 }

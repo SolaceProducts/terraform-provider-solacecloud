@@ -1,3 +1,8 @@
+---
+page_title: "solacecloud_connection_endpoints Data Source - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Data Source: solacecloud_connection_endpoints
 
 This data source provides information about connection endpoints for a Solace Cloud service. Connection endpoints represent network interfaces through which clients can connect to the service, providing various protocols and ports for communication.

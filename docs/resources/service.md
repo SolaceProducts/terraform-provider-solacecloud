@@ -1,8 +1,15 @@
+---
+page_title: "solacecloud_service Resource - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Resource: solacecloud_service
 
 This resource allows you to create and manage event broker services. A service represents an instance of a Solace event broker instance running in the cloud.
 
 ## Example Usage
+
+The following examples show how to configure the resource.
 
 ### Basic Service Creation
 
@@ -43,6 +50,34 @@ resource "solacecloud_service" "broker_service" {
 }
 ```
 
+### Service with a Connection Endpoint
+
+Set `connection_endpoint` to create the service together with a connection endpoint. Set it only when you create the service: adding the block to an existing service does not create a connection endpoint, and the apply fails with "Could not find default connection endpoint" unless a connection endpoint with that name already exists. To add or manage connection endpoints on an existing service, use the [`solacecloud_connection_endpoint`](connection_endpoint.md) resource instead. You cannot change `access_type` after creation.
+
+```hcl
+resource "solacecloud_service" "broker_service" {
+  name             = "my-broker-service"
+  datacenter_id    = "eks-eu-central-1a"
+  service_class_id = "ENTERPRISE_1K_STANDALONE"
+
+  connection_endpoint = {
+    name        = "public-endpoint"
+    description = "Public endpoint created with the service"
+    access_type = "PUBLIC"
+    ports = {
+      smf_tls = {
+        port = 55443
+      }
+      management_tls = {
+        port = 943
+      }
+    }
+  }
+}
+```
+
+See the [Service Connection Endpoint guide](../guides/service_connection_endpoint.md) for more.
+
 ### Service with DMR Enabled
 
 Solace Cloud creates new services without Dynamic Message Routing (DMR) unless you opt in. Set `dmr_enabled = true` to create the service with a cloud-managed DMR cluster, and optionally name the cluster.
@@ -57,9 +92,28 @@ resource "solacecloud_service" "broker_service" {
 }
 ```
 
-You can also enable or disable DMR on a service that already exists by changing `dmr_enabled` and applying. The service is not replaced. See [Enabling and Disabling DMR](../guides/services/service_configuration.md#enabling-and-disabling-dmr) for what each direction does.
+You can also enable or disable DMR on a service that already exists by changing `dmr_enabled` and applying. The service is not replaced. See [Enabling and Disabling DMR](../guides/service_configuration.md#enabling-and-disabling-dmr) for what each direction does.
 
-### Using Service Credentials with Solace Broker Provider
+### Service with Event Broker Service Password Rotation
+
+Add a `broker_password_rotation` block to rotate the passwords of the event broker service's management users. Change `trigger` and apply to rotate them again. The new passwords are read back into the service's credential attributes in the same apply.
+
+```hcl
+resource "solacecloud_service" "broker_service" {
+  name             = "my-broker-service"
+  datacenter_id    = "eks-eu-central-1a"
+  service_class_id = "ENTERPRISE_1K_STANDALONE"
+
+  broker_password_rotation = {
+    users   = ["mc-manager", "mc-viewer"]
+    trigger = "2026-11-02" # Change this value to rotate the passwords again.
+  }
+}
+```
+
+See [Rotating Event Broker Service Passwords](../guides/service_configuration.md#rotating-event-broker-service-passwords) for when a rotation happens and what to do if one fails.
+
+### Using Service Credentials with Solace Event Broker Provider
 
 ```hcl
 terraform {
@@ -107,6 +161,8 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
 
 ## Argument Reference
 
+The following arguments are supported.
+
 ### Required Arguments
 
 * `name` - (Required) The event broker service name. Must be between 1 and 50 characters.
@@ -147,13 +203,19 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
   * `true` - You cannot delete this service
   * `false` - You can delete this service
 
-* `mate_link_encryption` - (Optional, Computed) For high-availability (HA) services, you can enable encryption of the mate-link connection between the primary and backup brokers, also known as redundancyGroupSSL in the V2 REST API documentation. For more information, see [HA-Link Security](https://docs.solace.com/Cloud/ha_concept.htm?Highlight=mate-link#ha-link-security). The default value is false. Changing it on an existing service enables or disables mate-link encryption in place, without replacing the service. Enabling it also enables Config-Sync encryption if it is not already enabled; disabling it leaves Config-Sync encryption unchanged. The change is refused on a service that is not high-availability, so omit this argument for standalone services. If a new service comes up with a different value than the one configured, the provider changes it right after the service is created. Existing configurations that do not set this argument continue to apply without a plan diff. The valid values are:
+* `mate_link_encryption` - (Optional, Computed) For high-availability (HA) services, you can enable encryption of the mate-link connection between the primary and backup event brokers, also known as redundancyGroupSSL in the V2 REST API documentation. For more information, see [HA-Link Security](https://docs.solace.com/Cloud/ha_concept.htm?Highlight=mate-link#ha-link-security). The default value is false. Changing it on an existing service enables or disables mate-link encryption in place, without replacing the service. Enabling it also enables Config-Sync encryption if it is not already enabled; disabling it leaves Config-Sync encryption unchanged. The change is refused on a service that is not high-availability, so omit this argument for standalone services. If a new service comes up with a different value than the one configured, the provider changes it right after the service is created. Existing configurations that do not set this argument continue to apply without a plan diff. The valid values are:
   * `true` - Enabled
   * `false` - Disabled
 
 * `custom_router_name` - (Optional) The unique prefix for the name of the router for the event broker service. If left undefined, the service ID will be used. Defining this is useful when replacing a part of a DMR Cluster or DR setup. The value should be left undefined for most use cases.
 
 * `environment_id` - (Optional, Computed) The unique identifier of the environment where you want to create the service. You can only specify an environment identifier when creating services in a Public Region. You cannot specify an environment identifier when creating a service in a Dedicated Region. Creating a service in a Public Region without specifying an environment identifier places it in the default environment.
+
+* `broker_password_rotation` - (Optional) Rotates the passwords of the event broker service's management users. New passwords are generated for you, and the provider reads them back into the `message_vpn` credential attributes in the same apply. This is a complex object with the following attributes:
+  * `users` - (Required) The management users whose passwords are rotated. A non-empty set of `mc-editor`, `mc-manager` and `mc-viewer`. They correspond to `message_vpn.editor_management_credential`, `message_vpn.manager_management_credential` and `message_vpn.viewer_management_credential`. `mc-manager` is only available on event brokers that have a manager credential. On any other event broker, `terraform plan` rejects it when you add the block to an existing event broker service or change `trigger`.
+  * `trigger` - (Required) An arbitrary, non-empty value, for example a date or a ticket number. Changing it rotates the passwords of `users`.
+
+  The passwords are rotated only when `trigger` changes on an existing event broker service that already has this block. Creating an event broker service with the block, adding the block to an existing event broker service, changing only `users`, and removing the block all rotate nothing. The first `trigger` is only recorded, and adding the block to an existing event broker service shows a plan warning saying so. A rotation that fails is not retried by the provider; see [Rotating Event Broker Service Passwords](../guides/service_configuration.md#rotating-event-broker-service-passwords).
 
 ## Attribute Reference
 
@@ -173,7 +235,7 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
   * `max_subscription_count` - The maximum number of unique subscriptions.
   * `max_transacted_session_count` - The maximum number of simultaneous transacted sessions and/or XA Sessions allowed for the given Message VPN.
   * `max_transaction_count` - The total number of simultaneous transactions in a Message VPN.
-  * `truststore_uri` - The URI for the TLS trust store.
+  * `truststore_uri` - The URI for the TLS truststore.
   * `manager_management_credential` - The credentials for the manager management user.
     * `username` - The username.
     * `password` - The password (sensitive).
@@ -192,15 +254,15 @@ resource "solacebroker_msg_vpn_queue" "queue1" {
   * Updates: later changes to its `name`, `description` or `ports` update that endpoint.
   * Read back on refresh: the provider stores the endpoint's `id` in state and reads the endpoint back on every refresh, including its `access_type`.
   * Import: importing a service does not fill in this attribute.
-  * Adding or removing the block: on an existing service, adding it does not create an endpoint and removing it does not delete one. To add or manage endpoints on an existing service, use the `solacecloud_connection_endpoint` resource.
+  * Adding or removing the block: on an existing service, adding it does not create a connection endpoint and removing it does not delete one. To add or manage connection endpoints on an existing service, use the `solacecloud_connection_endpoint` resource.
 
   This is a complex object with the following attributes:
   * `name` - (Required) The name of the connection endpoint. Must be between 1 and 50 characters.
   * `description` - (Optional) The description for the connection endpoint. Maximum 255 characters.
   * `access_type` - (Required) The connectivity for the connection endpoint. Valid values: `PRIVATE` (private IP) or `PUBLIC` (public Internet IP). This cannot be changed after creation.
-  * `ports` - (Optional) Port configuration for the connection endpoint protocols.
+  * `ports` - (Required) Port configuration for the connection endpoint protocols.
 
-**Note:** To read connection endpoint information, use the `solacecloud_connection_endpoints` data source. To manage connection endpoints independently, use the `solacecloud_connection_endpoint` resource.
+To read connection endpoint information, use the `solacecloud_connection_endpoints` data source. To manage connection endpoints independently, use the `solacecloud_connection_endpoint` resource.
 
 
 * `dmr_cluster` - The DMR cluster details. This is null for a service created without DMR (`dmr_enabled` is `false`). This is a complex object with the following attributes:

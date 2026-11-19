@@ -1,3 +1,8 @@
+---
+page_title: "Connection Endpoint Data Source"
+subcategory: "Connection Endpoints"
+---
+
 # Connection Endpoint Data Source
 
 The connection endpoint data source allows querying connection endpoints associated with a Solace Cloud service. 
@@ -7,7 +12,11 @@ Each endpoint provides various protocols and ports for communication.
 
 
 ## Arguments
+
+The data source accepts these arguments:
+
 - `service_id` - (Required) The ID of the Solace Cloud service that the connection endpoint is associated to.
+- `id` - (Optional) The ID of a specific connection endpoint to fetch.
 - `name` - (Optional) The name of the connection endpoint to filter by.
 
 ## Example Usage

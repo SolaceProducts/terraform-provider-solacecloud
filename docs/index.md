@@ -1,4 +1,10 @@
-# Solace Cloud Provider (Beta)
+---
+page_title: "Provider: Solace Cloud"
+description: |-
+  The Solace Cloud provider manages Solace Cloud event broker services and their connection endpoints.
+---
+
+# Solace Cloud Terraform Provider (Beta)
 
 **Note:** This provider is currently in beta and under active development. Functionality may change and issues may be encountered.
 
@@ -38,10 +44,10 @@ resource "solacecloud_service" "broker_service" {
 
 ## Authentication
 
-The Solace Cloud Provider offers the following methods for authentication:
+The Solace Cloud Terraform Provider offers the following methods for authentication:
 
-1. Static credentials in the provider configuration
-2. Environment variables
+- Static credentials in the provider configuration
+- Environment variables
 
 ### Static Credentials
 
@@ -66,11 +72,10 @@ provider "solacecloud" {
 
 ## Schema
 
-### Required
-
-- `base_url` (String) - Base URL for REST API Endpoints. The regional location of your accounts Home Cloud determines the base URL you use. For more information, see [Home Cloud](https://docs.solace.com/Cloud/Security/security-home-cloud.htm).
+The provider configuration accepts the following arguments.
 
 ### Optional
 
+- `base_url` (String) - Base URL for REST API Endpoints. The regional location of your account's Home Cloud determines the base URL you use. The default is `https://production-api.solace.cloud`. For more information, see [Home Cloud](https://docs.solace.com/Cloud/Security/security-home-cloud.htm).
 - `api_token` (String, Sensitive) - Token for authenticating with the Solace Cloud API. Can be set as environment variable `SOLACECLOUD_API_TOKEN`.
 - `api_polling_interval` (Number) - Polling interval in seconds for API calls that need to wait until a process changes status. For example, wait until a SC service is marked as COMPLETED. Default value is 30 seconds.

@@ -59,12 +59,39 @@ func TestErrorResponseAdaptor_addBadRequestDiagnostics(t *testing.T) {
 				message:           "The request body is malformed",
 				validationDetails: "field1: invalid value",
 			},
-			expectedErrorCount:     2,
-			expectedErrorSummaries: []string{"Bad Request", "Bad Request"},
-			expectedErrorDetails: []string{
-				"field1: invalid value",
-				"The request body is malformed",
+			expectedErrorCount:     1,
+			expectedErrorSummaries: []string{"Bad Request"},
+			expectedErrorDetails:   []string{"The request body is malformed\n\nfield1: invalid value"},
+		},
+		{
+			name: "with a message that restates the validation detail",
+			json400: &MockErrorResponseProvider{
+				message:           "certContent must contain exactly one PEM-encoded X.509 certificate.",
+				validationDetails: "certContent: must contain exactly one PEM-encoded X.509 certificate",
 			},
+			expectedErrorCount:     1,
+			expectedErrorSummaries: []string{"Bad Request"},
+			expectedErrorDetails:   []string{"certContent must contain exactly one PEM-encoded X.509 certificate."},
+		},
+		{
+			name: "with a message that already contains the validation detail",
+			json400: &MockErrorResponseProvider{
+				message:           "Invalid request. certContent: must contain exactly one certificate",
+				validationDetails: "certContent: must contain exactly one certificate",
+			},
+			expectedErrorCount:     1,
+			expectedErrorSummaries: []string{"Bad Request"},
+			expectedErrorDetails:   []string{"Invalid request. certContent: must contain exactly one certificate"},
+		},
+		{
+			name: "with a validation detail that already contains the message",
+			json400: &MockErrorResponseProvider{
+				message:           "invalid value",
+				validationDetails: "field1: invalid value",
+			},
+			expectedErrorCount:     1,
+			expectedErrorSummaries: []string{"Bad Request"},
+			expectedErrorDetails:   []string{"field1: invalid value"},
 		},
 		{
 			name:                   "with no message or validation details",

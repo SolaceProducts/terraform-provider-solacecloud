@@ -1,8 +1,13 @@
-# Service Connection Endpoint Guide
+---
+page_title: "Defining a Connection Endpoint at Service Creation"
+subcategory: "Services"
+---
+
+# Defining a Connection Endpoint at Service Creation
 
 When you create a service, you have the option of defining a connection endpoint during service creation. 
 
-For example:
+The following example creates a service with a public connection endpoint:
 
 ```hcl
 resource "solacecloud_service" "myservice" {

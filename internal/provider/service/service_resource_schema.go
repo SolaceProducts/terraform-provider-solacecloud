@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 	"terraform-provider-solacecloud/internal/provider/connectionendpoint"
 	"terraform-provider-solacecloud/internal/provider/validators"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -57,6 +59,61 @@ type ServiceResourceModel struct {
 	EnvironmentId      types.String          `tfsdk:"environment_id"`
 	MessageVpn         basetypes.ObjectValue `tfsdk:"message_vpn"`
 	DmrClusterInfo     basetypes.ObjectValue `tfsdk:"dmr_cluster"`
+
+	// BrokerPasswordRotation is configuration only: the API never reports it back, so it is
+	// carried from the plan into state (see readDataInternal).
+	BrokerPasswordRotation basetypes.ObjectValue `tfsdk:"broker_password_rotation"`
+}
+
+// Usernames accepted by the resetBrokerPasswords operation.
+const (
+	brokerUserEditor  = "mc-editor"
+	brokerUserManager = "mc-manager"
+	brokerUserViewer  = "mc-viewer"
+)
+
+func brokerPasswordRotationAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"users":   types.SetType{ElemType: types.StringType},
+		"trigger": types.StringType,
+	}
+}
+
+func brokerPasswordRotationSchema() schema.Attribute {
+	return schema.SingleNestedAttribute{
+		MarkdownDescription: "Rotates the passwords of the event broker service's management users. " +
+			"New passwords are generated for you and read back into the event broker service's credential attributes. " +
+			"Passwords are rotated when `trigger` changes on an existing event broker service that already has this block; " +
+			"changing only `users`, or removing this block, rotates nothing. " +
+			"Neither creating an event broker service with this block nor adding it to an existing event broker service rotates anything: " +
+			"the first `trigger` is only recorded, and a later change to it rotates. " +
+			"Adding it to an existing event broker service shows a plan warning saying so, " +
+			"and refuses users the event broker has no credential for.",
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"users": schema.SetAttribute{
+				MarkdownDescription: "The management users whose passwords are rotated when `trigger` changes. " +
+					"Valid values are `" + brokerUserEditor + "`, `" + brokerUserManager + "` and `" + brokerUserViewer + "`. " +
+					"`" + brokerUserManager + "` is only available on event brokers that have a manager user.",
+				ElementType: types.StringType,
+				Required:    true,
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(brokerUserEditor, brokerUserManager, brokerUserViewer),
+					),
+				},
+			},
+			"trigger": schema.StringAttribute{
+				MarkdownDescription: "An arbitrary value; change it to rotate the passwords of `users` again, " +
+					"for example a date or a ticket number.",
+				Required: true,
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
+			},
+		},
+	}
 }
 
 type NameNotDefaultValidator struct{}
@@ -284,6 +341,8 @@ func (r *ServiceResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"message_vpn": model.MessageVpnAttributeSchema(),
 			"dmr_cluster": model.DmrClusterInfoAttributeSchema(),
+
+			"broker_password_rotation": brokerPasswordRotationSchema(),
 		},
 	}
 }

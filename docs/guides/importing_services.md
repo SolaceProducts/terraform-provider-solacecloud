@@ -1,3 +1,8 @@
+---
+page_title: "Importing Existing Services"
+subcategory: "Services"
+---
+
 # Importing Existing Services
 
 This guide explains how to import existing event broker services into your Terraform configuration, allowing you to manage them using infrastructure as code.
@@ -12,13 +17,13 @@ When you have existing event broker services that were created manually or throu
 
 ## Prerequisites
 
-Before importing services, ensure you have:
+Before you import services, check the following:
 
-1. Terraform installed (version 0.13.0 or later)
-2. The Solace Cloud Terraform Provider configured
-3. The service ID of the existing service you want to import
+- You have installed Terraform version 1.5.0 or later.
+- You have configured the Solace Cloud Terraform Provider.
+- You have the unique identifier of the existing event broker service you want to import.
 
-## Finding Your Service ID
+## Finding Your Event Broker Service ID
 
 To import a service, you need its service ID. You can find this in the Solace Cloud Console:
 
@@ -72,7 +77,7 @@ terraform apply
 
 After a successful import, the services will be managed by Terraform, and you can make changes to them using your Terraform configuration.
 
-## Complete Import Example with Generated Configuration
+## Complete Import Example for Multiple Services
 
 Here's a complete example of importing existing services using the import block:
 
@@ -157,37 +162,37 @@ When new configuration options are added to the Solace Cloud API:
 
 ### Error: Resource Not Found
 
-**Error Message:**
+You see an error similar to:
 ```
 Error: Resource Import Failed
 Could not find service with ID 'service-id'
 ```
 
-**Solution:**
+Solution:
 
-1. Verify that the service ID is correct. For more information, (see [Finding Your Service ID](#finding-your-service-id) section)
+1. Verify that the service ID is correct. For more information, (see [Finding Your Event Broker Service ID](#finding-your-event-broker-service-id) section)
 2. Ensure your API token has the correct permissions. In this case, you require `services:post`. For more information, see [Managing API Tokens](https://docs.solace.com/Cloud/ght_api_tokens.htm).
 3. Check if the service still exists in the Cloud Console. For more information, see [Viewing Event Broker Services](https://docs.solace.com/Cloud/cloud-configure-messaging-services.htm).
 
 ### Error: Resource Already Exists
 
-**Error Message:**
+You see an error similar to:
 ```
 Error: Resource already managed by Terraform
 ```
 
-**Solution:**
-1. Check if the resource is already in your Terraform state
-2. Use `terraform state list` to see all resources in your state
-3. Use a different resource name for the import
+Solution:
+1. Check if the resource is already in your Terraform state.
+2. Use `terraform state list` to see all resources in your state.
+3. Use a different resource name for the import.
 
 ### Error: Invalid Resource Type
 
-**Error Message:**
+Error message:
 ```
 Error: Invalid resource type
 ```
 
-**Solution:**
-1. Ensure you're using the correct resource type (`solacecloud_service`)
-2. Check your provider configuration and version
+Solution:
+1. Ensure you're using the correct resource type (`solacecloud_service`).
+2. Check your provider configuration and version.

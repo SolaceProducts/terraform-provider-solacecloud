@@ -146,6 +146,78 @@ func (m *MockCRUDClient) GetServiceOperationWithResponse(ctx context.Context, se
 	return args.Get(0).(*mc.GetServiceOperationResponse), args.Error(1)
 }
 
+func (m *MockCRUDClient) ResetBrokerPasswordsWithResponse(ctx context.Context, serviceId string, body mc.ResetBrokerPasswordsJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.ResetBrokerPasswordsResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.ResetBrokerPasswordsResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) GetClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.GetClientCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, certificateAuthorityName, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.GetClientCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) CreateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body mc.CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateClientCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.CreateClientCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) UpdateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body mc.UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateClientCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, certificateAuthorityName, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.UpdateClientCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) DeleteClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteClientCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, certificateAuthorityName, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.DeleteClientCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) GetDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.GetDomainCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, certificateAuthorityName, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.GetDomainCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) CreateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body mc.CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateDomainCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.CreateDomainCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) UpdateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body mc.UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateDomainCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, certificateAuthorityName, body, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.UpdateDomainCertificateAuthorityResponse), args.Error(1)
+}
+
+func (m *MockCRUDClient) DeleteDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDomainCertificateAuthorityResponse, error) {
+	args := m.Called(ctx, serviceId, certificateAuthorityName, reqEditors)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*mc.DeleteDomainCertificateAuthorityResponse), args.Error(1)
+}
+
 func (m *MockCRUDClient) CreateConnectionEndpointWithResponse(ctx context.Context, serviceId string, body mc.CreateConnectionEndpointJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointResponse, error) {
 	args := m.Called(ctx, serviceId, body, reqEditors)
 	if args.Get(0) == nil {
@@ -513,6 +585,79 @@ func TestRetryableClient_GetServiceOperationWithResponse_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedResponse, result)
+	mockApi.AssertExpectations(t)
+}
+
+func TestRetryableClient_ResetBrokerPasswordsWithResponse_Success(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 3, 0)
+
+	ctx := context.Background()
+	serviceId := "test-service-id"
+	body := mc.ResetBrokerPasswordsJSONRequestBody{
+		Users: []mc.BrokerManagerUser{{Username: "mc-manager"}},
+	}
+	expectedResponse := &mc.ResetBrokerPasswordsResponse{
+		HTTPResponse: &http.Response{StatusCode: 202},
+	}
+
+	mockApi.On("ResetBrokerPasswordsWithResponse", ctx, serviceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(expectedResponse, nil).Once()
+
+	result, err := client.ResetBrokerPasswordsWithResponse(ctx, serviceId, body)
+
+	assert.NoError(t, err)
+	assert.Same(t, expectedResponse, result)
+	assert.Equal(t, 202, result.HTTPResponse.StatusCode)
+	mockApi.AssertExpectations(t)
+}
+
+func TestRetryableClient_ResetBrokerPasswordsWithResponse_ServerErrorNotRetried(t *testing.T) {
+	for _, status := range []int{500, 502, 503, 504} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			mockApi := &MockCRUDClient{}
+			client := NewRetryableClient(mockApi, 3, 0)
+
+			ctx := context.Background()
+			serviceId := "test-service-id"
+			body := mc.ResetBrokerPasswordsJSONRequestBody{
+				Users: []mc.BrokerManagerUser{{Username: "mc-manager"}},
+			}
+			failed := &mc.ResetBrokerPasswordsResponse{
+				HTTPResponse: &http.Response{StatusCode: status},
+			}
+
+			mockApi.On("ResetBrokerPasswordsWithResponse", ctx, serviceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(failed, nil).Once()
+
+			result, err := client.ResetBrokerPasswordsWithResponse(ctx, serviceId, body)
+
+			assert.NoError(t, err)
+			assert.Same(t, failed, result)
+			mockApi.AssertNumberOfCalls(t, "ResetBrokerPasswordsWithResponse", 1)
+			mockApi.AssertExpectations(t)
+		})
+	}
+}
+
+func TestRetryableClient_ResetBrokerPasswordsWithResponse_ConflictNotRetried(t *testing.T) {
+	mockApi := &MockCRUDClient{}
+	client := NewRetryableClient(mockApi, 3, 0)
+
+	ctx := context.Background()
+	serviceId := "test-service-id"
+	body := mc.ResetBrokerPasswordsJSONRequestBody{
+		Users: []mc.BrokerManagerUser{{Username: "mc-manager"}},
+	}
+	conflictResponse := &mc.ResetBrokerPasswordsResponse{
+		HTTPResponse: &http.Response{StatusCode: 409},
+	}
+
+	mockApi.On("ResetBrokerPasswordsWithResponse", ctx, serviceId, body, mock.AnythingOfType("[]missioncontrol.RequestEditorFn")).Return(conflictResponse, nil).Once()
+
+	result, err := client.ResetBrokerPasswordsWithResponse(ctx, serviceId, body)
+
+	assert.NoError(t, err)
+	assert.Same(t, conflictResponse, result)
+	mockApi.AssertNumberOfCalls(t, "ResetBrokerPasswordsWithResponse", 1)
 	mockApi.AssertExpectations(t)
 }
 
@@ -945,4 +1090,77 @@ func TestRetryableClient_LdapManagementAccess_RetriesServerErrors(t *testing.T) 
 	assert.NoError(t, err)
 	assert.Same(t, deleteOk, deleted)
 	mockApi.AssertExpectations(t)
+}
+
+func TestRetryableClient_CertificateAuthorityOperationsRetryServerErrors(t *testing.T) {
+	ctx := context.Background()
+	status := func(code int) *http.Response { return &http.Response{StatusCode: code} }
+	cases := []struct {
+		method            string
+		args              []interface{}
+		failed, succeeded interface{}
+		call              func(c *RetryableClientWithResponses) (int, error)
+	}{
+		{"GetClientCertificateAuthorityWithResponse", []interface{}{ctx, "svc", "ca", mock.Anything},
+			&mc.GetClientCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.GetClientCertificateAuthorityResponse{HTTPResponse: status(200)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.GetClientCertificateAuthorityWithResponse(ctx, "svc", "ca")
+				return r.StatusCode(), err
+			}},
+		{"CreateClientCertificateAuthorityWithResponse", []interface{}{ctx, "svc", mock.Anything, mock.Anything},
+			&mc.CreateClientCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.CreateClientCertificateAuthorityResponse{HTTPResponse: status(202)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.CreateClientCertificateAuthorityWithResponse(ctx, "svc", mc.CreateClientCertificateAuthorityJSONRequestBody{})
+				return r.StatusCode(), err
+			}},
+		{"UpdateClientCertificateAuthorityWithResponse", []interface{}{ctx, "svc", "ca", mock.Anything, mock.Anything},
+			&mc.UpdateClientCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.UpdateClientCertificateAuthorityResponse{HTTPResponse: status(202)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.UpdateClientCertificateAuthorityWithResponse(ctx, "svc", "ca", mc.UpdateClientCertificateAuthorityJSONRequestBody{})
+				return r.StatusCode(), err
+			}},
+		{"DeleteClientCertificateAuthorityWithResponse", []interface{}{ctx, "svc", "ca", mock.Anything},
+			&mc.DeleteClientCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.DeleteClientCertificateAuthorityResponse{HTTPResponse: status(202)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.DeleteClientCertificateAuthorityWithResponse(ctx, "svc", "ca")
+				return r.StatusCode(), err
+			}},
+		{"GetDomainCertificateAuthorityWithResponse", []interface{}{ctx, "svc", "ca", mock.Anything},
+			&mc.GetDomainCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.GetDomainCertificateAuthorityResponse{HTTPResponse: status(200)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.GetDomainCertificateAuthorityWithResponse(ctx, "svc", "ca")
+				return r.StatusCode(), err
+			}},
+		{"CreateDomainCertificateAuthorityWithResponse", []interface{}{ctx, "svc", mock.Anything, mock.Anything},
+			&mc.CreateDomainCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.CreateDomainCertificateAuthorityResponse{HTTPResponse: status(202)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.CreateDomainCertificateAuthorityWithResponse(ctx, "svc", mc.CreateDomainCertificateAuthorityJSONRequestBody{})
+				return r.StatusCode(), err
+			}},
+		{"UpdateDomainCertificateAuthorityWithResponse", []interface{}{ctx, "svc", "ca", mock.Anything, mock.Anything},
+			&mc.UpdateDomainCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.UpdateDomainCertificateAuthorityResponse{HTTPResponse: status(202)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.UpdateDomainCertificateAuthorityWithResponse(ctx, "svc", "ca", mc.UpdateDomainCertificateAuthorityJSONRequestBody{})
+				return r.StatusCode(), err
+			}},
+		{"DeleteDomainCertificateAuthorityWithResponse", []interface{}{ctx, "svc", "ca", mock.Anything},
+			&mc.DeleteDomainCertificateAuthorityResponse{HTTPResponse: status(503)}, &mc.DeleteDomainCertificateAuthorityResponse{HTTPResponse: status(202)},
+			func(c *RetryableClientWithResponses) (int, error) {
+				r, err := c.DeleteDomainCertificateAuthorityWithResponse(ctx, "svc", "ca")
+				return r.StatusCode(), err
+			}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.method, func(t *testing.T) {
+			mockApi := &MockCRUDClient{}
+			mockApi.On(tc.method, tc.args...).Return(tc.failed, nil).Once()
+			mockApi.On(tc.method, tc.args...).Return(tc.succeeded, nil).Once()
+
+			got, err := tc.call(NewRetryableClient(mockApi, 3, 0))
+
+			assert.NoError(t, err)
+			assert.Less(t, got, 500, "the 503 should have been retried")
+			mockApi.AssertNumberOfCalls(t, tc.method, 2)
+		})
+	}
 }

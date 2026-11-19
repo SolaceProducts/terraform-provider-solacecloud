@@ -62,6 +62,11 @@ func (r *DnsNameResource) Create(ctx context.Context, req resource.CreateRequest
 	serviceId := data.ServiceId.ValueString()
 	connectionEndpointId := data.ConnectionEndpointId.ValueString()
 	dnsName := data.DnsName.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
 
 	// First check if we can reach the maximum of 5 hostnames
 	existingDnsNames, err := r.APIClient.GetConnectionEndpointDnsNamesWithResponse(ctx, serviceId, connectionEndpointId)
@@ -107,42 +112,8 @@ func (r *DnsNameResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	// DNS name creation is asynchronous - poll for completion
-	if createResp.JSON202 != nil && createResp.JSON202.Data.Id != nil {
-		jobId := *createResp.JSON202.Data.Id
-		tflog.Info(ctx, "DNS name creation job started", map[string]interface{}{
-			"jobId": jobId,
-		})
-
-		// Use operationutils for consistent polling behavior
-		adapter := &apiClientAdapter{
-			client:    r.APIClient,
-			serviceId: serviceId,
-		}
-
-		params := &operationutils.OperationParams{
-			Ctx:             ctx,
-			ServiceId:       serviceId,
-			OperationId:     jobId,
-			R:               adapter,
-			PollingInterval: r.APIPollingInterval,
-			Timeout:         5 * time.Minute,
-			Diagnostics:     &resp.Diagnostics,
-		}
-
-		// Wait for operation to complete - errors are handled through Diagnostics
-		operationutils.WaitForOperationToComplete(params)
-
-		// Check if operation failed by examining diagnostics
-		for _, diag := range resp.Diagnostics.Errors() {
-			if diag.Summary() == "The operation failed." {
-				// Operation actually failed - don't continue
-				return
-			}
-		}
-
-		// Operation completed successfully or with warnings
-		tflog.Info(ctx, "DNS name creation operation completed")
+	if r.waitForJob(ctx, serviceId, createResp.JSON202, "creation", &resp.Diagnostics) {
+		return
 	}
 
 	// Read back the created DNS name
@@ -204,6 +175,11 @@ func (r *DnsNameResource) Delete(ctx context.Context, req resource.DeleteRequest
 	serviceId := data.ServiceId.ValueString()
 	connectionEndpointId := data.ConnectionEndpointId.ValueString()
 	dnsName := data.DnsName.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
 
 	// Let the backend handle default hostname validation
 
@@ -231,43 +207,36 @@ func (r *DnsNameResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	// DNS name deletion is asynchronous - poll for completion
-	if deleteResp.JSON202 != nil && deleteResp.JSON202.Data.Id != nil {
-		jobId := *deleteResp.JSON202.Data.Id
-		tflog.Info(ctx, "DNS name deletion job started", map[string]interface{}{
-			"jobId": jobId,
-		})
+	r.waitForJob(ctx, serviceId, deleteResp.JSON202, "deletion", &resp.Diagnostics)
+}
 
-		// Use operationutils for consistent polling behavior
-		adapter := &apiClientAdapter{
-			client:    r.APIClient,
-			serviceId: serviceId,
-		}
-
-		params := &operationutils.OperationParams{
-			Ctx:             ctx,
-			ServiceId:       serviceId,
-			OperationId:     jobId,
-			R:               adapter,
-			PollingInterval: r.APIPollingInterval,
-			Timeout:         5 * time.Minute,
-			Diagnostics:     &resp.Diagnostics,
-		}
-
-		// Wait for operation to complete - errors are handled through Diagnostics
-		operationutils.WaitForOperationToComplete(params)
-
-		// Check if operation failed by examining diagnostics
-		for _, diag := range resp.Diagnostics.Errors() {
-			if diag.Summary() == "The operation failed." {
-				// Operation actually failed - don't continue
-				return
-			}
-		}
-
-		// Operation completed successfully or with warnings
-		tflog.Info(ctx, "DNS name deletion operation completed successfully")
+// waitForJob polls the job that a create or delete started. It returns true if the job failed.
+func (r *DnsNameResource) waitForJob(ctx context.Context, serviceId string, job *missioncontrol.OperationResponse, action string, diagnostics *diag.Diagnostics) bool {
+	if job == nil || job.Data.Id == nil {
+		return false
 	}
+	jobId := *job.Data.Id
+	tflog.Info(ctx, "DNS name "+action+" job started", map[string]interface{}{
+		"jobId": jobId,
+	})
+
+	operationutils.WaitForOperationToComplete(&operationutils.OperationParams{
+		Ctx:             ctx,
+		ServiceId:       serviceId,
+		OperationId:     jobId,
+		R:               &apiClientAdapter{client: r.APIClient, serviceId: serviceId},
+		PollingInterval: r.APIPollingInterval,
+		Timeout:         5 * time.Minute,
+		Diagnostics:     diagnostics,
+	})
+
+	for _, d := range diagnostics.Errors() {
+		if d.Summary() == "The operation failed." {
+			return true
+		}
+	}
+	tflog.Info(ctx, "DNS name "+action+" operation completed")
+	return false
 }
 
 func (r *DnsNameResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

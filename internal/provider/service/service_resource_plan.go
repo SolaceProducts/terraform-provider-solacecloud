@@ -6,12 +6,17 @@ import (
 	"terraform-provider-solacecloud/internal/model"
 	"terraform-provider-solacecloud/internal/util"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 const errClusterNameRequiresDmrOptIn = "cluster_name requires dmr_enabled = true"
+
+const warnPasswordsNotRotated = "Passwords not rotated"
 
 // ModifyPlan enforces the DMR contract across attributes and keeps the plan honest when DMR
 // is enabled or disabled on an existing service.
@@ -48,6 +53,7 @@ func (r *ServiceResource) ModifyPlan(ctx context.Context, req resource.ModifyPla
 	}
 
 	markClusterUnknownOnDmrChange(ctx, req, resp)
+	markCredentialsUnknownOnRotation(ctx, req, resp)
 }
 
 // effectiveDmrEnabled resolves what dmr_enabled means for this plan when the configuration does
@@ -125,4 +131,123 @@ func markClusterUnknownOnDmrChange(ctx context.Context, req resource.ModifyPlanR
 		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("cluster_name"), types.StringUnknown())...)
 	}
 	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("dmr_cluster"), types.ObjectUnknown(model.DmrClusterInfoObjectType().AttrTypes))...)
+}
+
+type brokerPasswordRotationModel struct {
+	Users   types.Set    `tfsdk:"users"`
+	Trigger types.String `tfsdk:"trigger"`
+}
+
+var credentialAttributeByUser = map[string]string{
+	brokerUserEditor:  "editor_management_credential",
+	brokerUserManager: "manager_management_credential",
+	brokerUserViewer:  "viewer_management_credential",
+}
+
+// Rotates only when an existing block's trigger changes; adding, removing or editing users alone
+// rotates nothing. An unknown trigger counts as a change.
+func rotatedUsers(ctx context.Context, state, plan basetypes.ObjectValue) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if !util.IsKnown(state) || !util.IsKnown(plan) {
+		return nil, diags
+	}
+
+	var stateRotation, planRotation brokerPasswordRotationModel
+	diags.Append(state.As(ctx, &stateRotation, basetypes.ObjectAsOptions{})...)
+	diags.Append(plan.As(ctx, &planRotation, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	if util.IsKnown(planRotation.Trigger) && planRotation.Trigger.Equal(stateRotation.Trigger) {
+		return nil, diags
+	}
+	return listedUsers(ctx, planRotation.Users)
+}
+
+func listedUsers(ctx context.Context, users types.Set) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if !util.IsKnown(users) {
+		return nil, diags
+	}
+	var names []string
+	diags.Append(users.ElementsAs(ctx, &names, false)...)
+	return names, diags
+}
+
+// Passwords use UseStateForUnknown, so a rotation must mark them unknown or the apply's
+// read-back is reported as inconsistent with the plan.
+func markCredentialsUnknownOnRotation(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// Only an existing service can rotate; on create the passwords are already unknown.
+	if req.State.Raw.IsNull() {
+		return
+	}
+
+	var stateRotation, planRotation basetypes.ObjectValue
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("broker_password_rotation"), &stateRotation)...)
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("broker_password_rotation"), &planRotation)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if stateRotation.IsNull() && !planRotation.IsNull() {
+		checkBlockAdded(ctx, req.State, planRotation, &resp.Diagnostics)
+		return
+	}
+
+	users, diags := rotatedUsers(ctx, stateRotation, planRotation)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() || len(users) == 0 {
+		return
+	}
+
+	for _, user := range users {
+		credentialPath := path.Root("message_vpn").AtName(credentialAttributeByUser[user])
+		if hasCredential(ctx, req.State, user, &resp.Diagnostics) {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, credentialPath.AtName("password"), types.StringUnknown())...)
+		}
+	}
+}
+
+func checkBlockAdded(ctx context.Context, state tfsdk.State, planRotation basetypes.ObjectValue, diags *diag.Diagnostics) {
+	// An unknown block may turn out null, so it gets neither the warning nor the check.
+	if planRotation.IsUnknown() {
+		return
+	}
+	diags.AddAttributeWarning(
+		path.Root("broker_password_rotation"),
+		warnPasswordsNotRotated,
+		"broker_password_rotation is being added to an existing event broker service. The trigger is "+
+			"recorded and no passwords are rotated. To rotate, change trigger in a later apply.",
+	)
+
+	var rotation brokerPasswordRotationModel
+	diags.Append(planRotation.As(ctx, &rotation, basetypes.ObjectAsOptions{})...)
+	users, d := listedUsers(ctx, rotation.Users)
+	diags.Append(d...)
+	if diags.HasError() {
+		return
+	}
+	for _, user := range users {
+		hasCredential(ctx, state, user, diags)
+	}
+}
+
+// Older brokers have no mc-manager credential, so there is no password to rotate.
+func hasCredential(ctx context.Context, state tfsdk.State, user string, diags *diag.Diagnostics) bool {
+	var credential basetypes.ObjectValue
+	diags.Append(state.GetAttribute(ctx, path.Root("message_vpn").AtName(credentialAttributeByUser[user]), &credential)...)
+	if diags.HasError() {
+		return false
+	}
+	if credential.IsNull() {
+		diags.AddAttributeError(
+			path.Root("broker_password_rotation").AtName("users"),
+			"Cannot rotate password for "+user,
+			fmt.Sprintf("The event broker service has no %s credential, so its password cannot be rotated. "+
+				"Remove %q from users.", user, user),
+		)
+		return false
+	}
+	return true
 }

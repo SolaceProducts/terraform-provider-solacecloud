@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"sync"
 	"terraform-provider-solacecloud/missioncontrol"
@@ -132,6 +134,11 @@ type ConfigurableParams struct {
 	ClusterName string
 	// MateLinkOff makes the mocked broker report mate-link encryption disabled.
 	MateLinkOff bool
+	// Resets per user (mc-editor, mc-manager, mc-viewer); 0 or no entry means the original password.
+	PasswordGenerations map[string]int
+	// NoManagerCredential omits the mission control manager credential from the mocked
+	// service, as older broker versions do.
+	NoManagerCredential bool
 }
 
 func (provider *TestInstance) SetupDefaultMocks(params ConfigurableParams) {
@@ -450,6 +457,138 @@ func readJsonObject(r *http.Request) (map[string]json.RawMessage, bool) {
 	return body, true
 }
 
+// Usernames accepted by the mocked resetBrokerPasswords endpoint.
+const (
+	PasswordUserEditor  = "mc-editor"
+	PasswordUserManager = "mc-manager"
+	PasswordUserViewer  = "mc-viewer"
+)
+
+var originalPasswords = map[string]string{
+	PasswordUserEditor:  "1uc3kqk37ll1vd0k089r7p8cb8",
+	PasswordUserManager: "g0mcefpt10sn7pq4sfaqo4v6qs",
+	PasswordUserViewer:  "5k02537vrlu59fq7sc4epur7ug",
+}
+
+// The original password until the user's first reset, then one that changes with each reset.
+func MockedPassword(params ConfigurableParams, user string) string {
+	generation := params.PasswordGenerations[user]
+	if generation == 0 {
+		return originalPasswords[user]
+	}
+	return fmt.Sprintf("%s-rotated-%d", originalPasswords[user], generation)
+}
+
+// Renders nothing when NoManagerCredential is set, as on older brokers.
+func managerCredentialJson(params ConfigurableParams) string {
+	if params.NoManagerCredential {
+		return ""
+	}
+	return `"missionControlManagerLoginCredential": {
+                        "username": "mission-control-manager",
+                        "password": "` + MockedPassword(params, PasswordUserManager) + `",
+                        "token": "YWJj.eyJhY2Nlc3NfdG9rZW4iOiAibWlzc2lvbi1jb250cm9sLW1hbmFnZXI6ZzBtY2VmcHQxMHNuN3BxNHNmYXFvNHY2cXMifQ%3D%3D.eHl6"
+                    },`
+}
+
+type PasswordResetRecorder struct {
+	mu       sync.Mutex
+	requests [][]string
+}
+
+func (rec *PasswordResetRecorder) Requests() [][]string {
+	rec.mu.Lock()
+	defer rec.mu.Unlock()
+	out := make([][]string, len(rec.requests))
+	copy(out, rec.requests)
+	return out
+}
+
+func (rec *PasswordResetRecorder) record(users []string) {
+	rec.mu.Lock()
+	defer rec.mu.Unlock()
+	rec.requests = append(rec.requests, users)
+}
+
+func copyGenerations(generations map[string]int) map[string]int {
+	out := make(map[string]int, len(generations))
+	maps.Copy(out, generations)
+	return out
+}
+
+func readResetUsers(r *http.Request) ([]string, bool) {
+	var body struct {
+		Users []struct {
+			Username string `json:"username"`
+		} `json:"users"`
+	}
+	raw, err := io.ReadAll(r.Body)
+	if err != nil || json.Unmarshal(raw, &body) != nil {
+		return nil, false
+	}
+	users := make([]string, 0, len(body.Users))
+	for _, u := range body.Users {
+		users = append(users, u.Username)
+	}
+	return users, true
+}
+
+// A reset re-registers the GET mocks so later reads, not the 202 body, return the new passwords,
+// as with the real API. A non-zero failStatus fails every reset; an absent user gets a 400.
+func (provider *TestInstance) SetupPasswordResetMocks(params ConfigurableParams, failStatus int, failBody string) *PasswordResetRecorder {
+	if params.ServiceId == "" {
+		params.ServiceId = "6q1p55o6ovr"
+	}
+	const operationId = "reset-operation-123"
+	recorder := &PasswordResetRecorder{}
+	var mu sync.Mutex
+	current := params
+	current.PasswordGenerations = copyGenerations(params.PasswordGenerations)
+
+	httpmock.RegisterResponder("GET",
+		provider.baseUrl+eventBrokerServicesPath+params.ServiceId+"/operations/"+operationId,
+		JsonResponder(200, `{
+    "data": {
+        "id": "`+operationId+`",
+        "type": "operation",
+        "operationType": "resetBrokerPasswords",
+        "resourceId": "`+params.ServiceId+`",
+        "resourceType": "service",
+        "status": "SUCCEEDED",
+        "error": null
+    }
+}`))
+
+	httpmock.RegisterResponder("POST",
+		provider.baseUrl+eventBrokerServicesPath+params.ServiceId+"/resetBrokerPasswords",
+		func(r *http.Request) (*http.Response, error) {
+			users, ok := readResetUsers(r)
+			if !ok {
+				return JsonResponder(400, `{"message":"request body is not valid JSON","errorId":"mock"}`)(r)
+			}
+			recorder.record(users)
+
+			if failStatus != 0 {
+				return JsonResponder(failStatus, failBody)(r)
+			}
+			if params.NoManagerCredential && slices.Contains(users, PasswordUserManager) {
+				return JsonResponder(400, `{"message":"the 'mc-manager' user does not exist on this event broker service","errorId":"mock"}`)(r)
+			}
+
+			mu.Lock()
+			for _, user := range users {
+				current.PasswordGenerations[user]++
+			}
+			updated := current
+			updated.PasswordGenerations = copyGenerations(current.PasswordGenerations)
+			mu.Unlock()
+
+			provider.SetupDefaultMocks(updated)
+			return JsonResponder(202, serviceOperationResponse(operationId, params.ServiceId, "resetBrokerPasswords"))(r)
+		})
+	return recorder
+}
+
 // CreateServiceOperationResponse is the 202 body returned by the mocked create service
 // call. Tests that register their own POST responder (for example to inspect the request
 // body) reuse it so the rest of the mocked flow is unchanged.
@@ -614,7 +753,7 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
             "tlsStandardDomainCertificateAuthoritiesEnabled": true,
             ` + clusterJson(params) + `"managementReadOnlyLoginCredential": {
                 "username": "msgvpn-6q1p55o6ovr-view",
-                "password": "5k02537vrlu59fq7sc4epur7ug",
+                "password": "` + MockedPassword(params, PasswordUserViewer) + `",
                 "token": "YWJj.eyJhY2Nlc3NfdG9rZW4iOiAibXNndnBuLTZxMXA1NW82b3ZyLXZpZXc6NWswMjUzN3ZybHU1OWZxN3NjNGVwdXI3dWcifQ%3D%3D.eHl6"
             },
             "msgVpns": [
@@ -634,14 +773,10 @@ func CreateGetServiceResponse(params ConfigurableParams) string {
                     "eventLargeMsgThreshold": 11,
                     "managementAdminLoginCredential": {
                         "username": "msgvpn-6q1p55o6ovr-admin",
-                        "password": "1uc3kqk37ll1vd0k089r7p8cb8",
+                        "password": "` + MockedPassword(params, PasswordUserEditor) + `",
                         "token": "YWJj.eyJhY2Nlc3NfdG9rZW4iOiAibXNndnBuLTZxMXA1NW82b3ZyLWFkbWluOjF1YzNrcWszN2xsMXZkMGswODlyN3A4Y2I4In0%3D.eHl6"
                     },
-                    "missionControlManagerLoginCredential": {
-                        "username": "mission-control-manager",
-                        "password": "g0mcefpt10sn7pq4sfaqo4v6qs",
-                        "token": "YWJj.eyJhY2Nlc3NfdG9rZW4iOiAibWlzc2lvbi1jb250cm9sLW1hbmFnZXI6ZzBtY2VmcHQxMHNuN3BxNHNmYXFvNHY2cXMifQ%3D%3D.eHl6"
-                    },
+                    ` + managerCredentialJson(params) + `
                     "serviceLoginCredential": {
                         "username": "solace-cloud-client",
                         "password": "sq23tgo3tsiq15ui7eu3u0epvc"

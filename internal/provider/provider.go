@@ -8,6 +8,7 @@ import (
 	"terraform-provider-solacecloud/internal/provider/dnsName"
 	"terraform-provider-solacecloud/internal/provider/service"
 
+	"terraform-provider-solacecloud/internal/provider/certificateauthority"
 	"terraform-provider-solacecloud/internal/provider/connectionendpoint"
 	"terraform-provider-solacecloud/internal/provider/environment"
 	"terraform-provider-solacecloud/internal/provider/ldapmanagementaccess"
@@ -243,5 +244,7 @@ func (p *solaceCloudProvider) Resources(_ context.Context) []func() resource.Res
 		dnsName.NewDnsNameMoveResource,
 		connectionendpoint.NewConnectionEndpointResource,
 		ldapmanagementaccess.NewLdapManagementAccessResource,
+		certificateauthority.NewClientCertificateAuthorityResource,
+		certificateauthority.NewDomainCertificateAuthorityResource,
 	}
 }

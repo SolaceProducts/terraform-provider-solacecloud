@@ -65,7 +65,7 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 
 To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
-To generate or update documentation, run `go generate`.
+The documentation in `docs/` is written by hand. To validate it against the Terraform Registry layout, run `go generate`.
 
 ### Useful Commands:
 

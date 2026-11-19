@@ -1,14 +1,19 @@
-# Service Configuration Guide
+---
+page_title: "Configuring Event Broker Services"
+subcategory: "Services"
+---
+
+# Configuring Event Broker Services
 
 This guide provides detailed information on configuring event broker services using the Terraform provider.
 
 ## Service Classes
 
-The Solace Cloud Provider supports various service classes, each offering different capabilities and performance characteristics. When creating a service, you specify the service class using the `service_class_id` attribute. For more information, see [Service Class Options for Event Broker Services](https://docs.solace.com/Cloud/service-class-limits.htm).
+The Solace Cloud Terraform Provider supports various service classes, each offering different capabilities and performance characteristics. When creating a service, you specify the service class using the `service_class_id` attribute. For more information, see [Service Class Options for Event Broker Services](https://docs.solace.com/Cloud/service-class-limits.htm).
 
 ### Available Service Classes
 
-For more information, see [Service Class Options for Event Broker Services](https://docs.solace.com/Cloud/service-class-limits.htm).
+The following table lists the values you can use for `service_class_id`.
 
 | Service Class ID | Description |
 |-----------------|-------------|
@@ -19,14 +24,16 @@ For more information, see [Service Class Options for Event Broker Services](http
 | `ENTERPRISE_10K_STANDALONE` | Enterprise 10,000 connections (standalone) |
 | `ENTERPRISE_50K_STANDALONE` | Enterprise 50,000 connections (standalone) |
 | `ENTERPRISE_100K_STANDALONE` | Enterprise 100,000 connections (standalone) |
+| `ENTERPRISE_200K_STANDALONE` | Enterprise 200,000 connections (standalone) |
 | `ENTERPRISE_250_HIGHAVAILABILITY` | Enterprise 250 connections (HA) |
 | `ENTERPRISE_1K_HIGHAVAILABILITY` | Enterprise 1,000 connections (HA) |
 | `ENTERPRISE_5K_HIGHAVAILABILITY` | Enterprise 5,000 connections (HA) |
 | `ENTERPRISE_10K_HIGHAVAILABILITY` | Enterprise 10,000 connections (HA) |
 | `ENTERPRISE_50K_HIGHAVAILABILITY` | Enterprise 50,000 connections (HA) |
 | `ENTERPRISE_100K_HIGHAVAILABILITY` | Enterprise 100,000 connections (HA) |
+| `ENTERPRISE_200K_HIGHAVAILABILITY` | Enterprise 200,000 connections (HA) |
 
-Example:
+The following example creates a high-availability event broker service:
 
 ```hcl
 resource "solacecloud_service" "broker_service" {
@@ -79,6 +86,8 @@ resource "solacecloud_service" "broker_service" {
 The `max_spool_usage` value is specified in gigabytes (GB) and must be between 10 and 6000. For more information, see [Configuring Message Spool Sizes](https://docs.solace.com/Cloud/Configure-Message-Spools.htm).
 
 ## Service Security
+
+You can protect an event broker service from deletion and encrypt its mate link.
 
 ### Locking a Service
 
@@ -133,6 +142,8 @@ resource "solacecloud_service" "broker_service" {
 
 ## Advanced Configuration
 
+Most configurations can omit the options in this section, because each has a default.
+
 ### Custom Router Name
 
 In some scenarios, such as replacing a part of a DMR Cluster or disaster recovery setup, you may need to specify a custom router name:
@@ -150,7 +161,7 @@ This is an advanced feature and should be left undefined for most use cases.
 
 ### Event Broker Version
 
-You can specify a particular version of the Solace PubSub+ event broker:
+You can specify specific event broker versions:
 
 ```hcl
 resource "solacecloud_service" "broker_service" {
@@ -216,6 +227,68 @@ output "messaging_password" {
 }
 ```
 
+### Rotating Event Broker Service Passwords
+
+Use the `broker_password_rotation` block to rotate the passwords for the event broker service's management users. The new passwords are generated for you and are not returned in the rotation response, so after the rotation finishes the provider reads the service again and stores them in the credential attributes in the same apply. You do not need a separate `terraform refresh`.
+
+```hcl
+resource "solacecloud_service" "broker_service" {
+  name             = "my-broker-service"
+  datacenter_id    = "aws-us-east-1a"
+  service_class_id = "ENTERPRISE_1K_STANDALONE"
+
+  broker_password_rotation = {
+    users   = ["mc-manager", "mc-viewer"]
+    trigger = "2026-11-02"
+  }
+}
+
+# Updated in the apply that rotates the passwords.
+output "viewer_password" {
+  value     = solacecloud_service.broker_service.message_vpn.viewer_management_credential.password
+  sensitive = true
+}
+```
+
+The following table shows the credential attribute that each value in `users` maps to.
+
+| User | Credential attribute |
+|------|----------------------|
+| `mc-editor` | `message_vpn.editor_management_credential` |
+| `mc-manager` | `message_vpn.manager_management_credential` |
+| `mc-viewer` | `message_vpn.viewer_management_credential` |
+
+Only the passwords of the listed users change. Usernames and the other credentials, such as the messaging client credential, are not affected.
+
+#### When a rotation happens
+
+Passwords are rotated when `trigger` changes on an existing event broker service that already has the block. Its value means nothing; only a change matters, so a date or a ticket number works well. To rotate again, change it and apply.
+
+The following do **not** rotate anything:
+
+* Creating an event broker service with the block. New event broker services already have fresh passwords, and the first `trigger` is only recorded.
+* Adding the block to an event broker service that already exists. The first `trigger` is only recorded, and a later change to it rotates. `terraform plan` shows a "Passwords not rotated" warning, unless the whole block depends on a value that isn't known until apply. Either way nothing rotates, so change `trigger` once more if you wanted to rotate when adding the block.
+* Changing `users` without changing `trigger`.
+* Removing the block.
+
+When `trigger` changes, `terraform plan` shows the passwords of the listed users as `(known after apply)`.
+
+The `mc-manager` user exists only on event brokers that have a manager credential, which older event broker versions lack. If you name it for such an event broker, `terraform plan` rejects it when you add the block or change `trigger`, and the error names the user. It isn't checked at plan when you create the event broker service with the block, because the event broker service doesn't exist yet, or when `users` isn't known until apply.
+
+#### If a rotation fails
+
+The provider sends the rotation request once and never retries it. Retrying could rotate the passwords a second time, or collide with a rotation that has already started. In most failures below, state keeps the previous `trigger` and passwords, so the next apply requests the rotation again. The exception is a rotation that succeeds when the event broker service can't be read back afterwards: see the last case.
+
+* **Resource Conflict.** Only one operation can run on a service at a time, and a rotation request that arrives while one is running is refused. The error shows the API's message, which names the job that is still running. Wait for it to finish, then apply again.
+* **Password rotation may have started.** The API timed out before answering. The rotation may already have started or finished. Check the event broker service in the Cloud Console before you apply again; applying requests a new rotation, and the passwords change again.
+* **The operation failed or timed out.** The request was accepted, but the operation then reported a failure, or did not finish within 15 minutes. Some of the listed passwords may already have changed, even though the apply failed. State keeps the previous `trigger` and passwords until a later refresh reads the service, so run `terraform refresh` (or `terraform plan`) to see the current credentials, and update anything that holds a copy. Applying again requests a new rotation, and the passwords change again.
+* **Forbidden.** Your API token needs the `mission_control:access` or `services:post` permission, and access to the specific service.
+* **Passwords were rotated but could not be read back.** The rotation finished, but reading the event broker service afterwards failed. The apply fails with a warning saying so. The new `trigger` is recorded, so the next apply does not rotate again, but state still holds the old passwords, and they no longer work. Run `terraform refresh` (or `terraform apply`) once the event broker service can be read to store the new passwords, then update anything that holds a copy.
+
+#### Credentials in state
+
+The new passwords are stored in the Terraform state like the existing ones. They are marked sensitive, which hides them from plan and apply output, but they are not encrypted in the state file. Protect the state with your backend's access controls and encryption. Anything that holds a copy of the old password, such as a secrets manager or an application configuration, must be updated after a rotation.
+
 ### Accessing DMR Cluster Information
 
 These attributes are only populated for a service created with `dmr_enabled = true`. For a service without DMR, `dmr_cluster` is null. See [Dynamic Message Routing (DMR)](#dynamic-message-routing-dmr).
@@ -232,7 +305,7 @@ output "dmr_remote_address" {
 
 ## Dynamic Message Routing (DMR)
 
-Solace Cloud creates new event broker services **without** a DMR cluster unless you opt in. Set `dmr_enabled = true` to create the service with a cloud-managed DMR cluster, and optionally name the cluster with `cluster_name`.
+Solace Cloud creates new event broker services without a DMR cluster unless you opt in. Set `dmr_enabled = true` to create the service with a cloud-managed DMR cluster, and optionally name the cluster with `cluster_name`.
 
 ```hcl
 resource "solacecloud_service" "mesh_member" {
@@ -246,9 +319,9 @@ resource "solacecloud_service" "mesh_member" {
 
 Keep the following in mind:
 
-* `cluster_name` requires `dmr_enabled = true`. Setting `cluster_name` without opting in is rejected when you run `terraform plan`.
+* The `cluster_name` argument requires `dmr_enabled = true`. Setting `cluster_name` without opting in is rejected when you run `terraform plan`.
 * A service without DMR has no `cluster_name`, and its `dmr_cluster` attribute is null.
-* Existing configurations that set neither argument keep applying without a plan diff. `dmr_enabled` is read from the service, so an existing DMR-enabled service reports `true`.
+* Existing configurations that set neither argument keep applying without a plan diff. The provider reads `dmr_enabled` from the service, so an existing DMR-enabled service reports `true`.
 * Service packages that always enable DMR (legacy packages) ignore `dmr_enabled` when creating the service. If you set `dmr_enabled = false` on such a package, the provider disables DMR and deletes the cluster right after the service is created so it matches your configuration, and reports a warning saying so. Remove `dmr_enabled = false` if you want to keep the DMR cluster.
 
 ### Enabling and Disabling DMR
@@ -264,9 +337,9 @@ resource "solacecloud_service" "mesh_member" {
 }
 ```
 
-* **Enabling** creates a cloud-managed DMR cluster and enables DMR on the Message VPN. Solace Cloud generates and stores the cluster credential. You can name the cluster in the same change by adding `cluster_name`; otherwise a name is generated.
-* **Disabling** deletes the DMR cluster and disables DMR on the Message VPN. Solace Cloud refuses the request while the service belongs to an event mesh, and the refusal is reported as a Terraform error. Remove the service from the event mesh first.
-* Each direction runs as an asynchronous Solace Cloud operation that reconfigures the broker, so the apply waits for it to finish.
+* Enabling DMR creates a cloud-managed DMR cluster and enables DMR on the Message VPN. Solace Cloud generates and stores the cluster credential. You can name the cluster in the same change by adding `cluster_name`; otherwise a name is generated.
+* Disabling DMR deletes the DMR cluster and disables DMR on the Message VPN. Solace Cloud refuses the request while the service belongs to an event mesh, and the refusal is reported as a Terraform error. Remove the service from the event mesh first.
+* Each direction runs as an asynchronous Solace Cloud operation that reconfigures the event broker, so the apply waits for it to finish.
 * An existing cluster cannot be renamed. Changing `cluster_name` on a service that already has a DMR cluster is rejected.
 
 ## Complete Example

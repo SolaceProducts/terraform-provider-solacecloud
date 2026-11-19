@@ -234,6 +234,7 @@ const (
 	JobOperationTypesInfrastructureRequest    JobOperationTypes = "infrastructureRequest"
 	JobOperationTypesInstallCertificate       JobOperationTypes = "installCertificate"
 	JobOperationTypesMoveDnsName              JobOperationTypes = "moveDnsName"
+	JobOperationTypesResetBrokerPasswords     JobOperationTypes = "resetBrokerPasswords"
 	JobOperationTypesRotateReplicationPSK     JobOperationTypes = "rotateReplicationPSK"
 	JobOperationTypesServiceRequest           JobOperationTypes = "serviceRequest"
 	JobOperationTypesServiceScaleUp           JobOperationTypes = "serviceScaleUp"
@@ -374,6 +375,12 @@ type Broker struct {
 // BrokerMonitoringMode The monitoring mode. This can be 'BASIC' or 'ADVANCED'. The value of BASIC is default monitoring and ADVANCED means that monitoring of the event broker is enabled.
 type BrokerMonitoringMode string
 
+// BrokerManagerUser defines model for BrokerManagerUser.
+type BrokerManagerUser struct {
+	// Username The Broker Manager user whose password you want to reset. The valid values are:<li>'mc-editor'&mdash;The Mission Control Editor user.</li><li>'mc-manager'&mdash;The Mission Control Manager user.</li><li>'mc-viewer'&mdash;The Mission Control Viewer user.</li>
+	Username string `json:"username"`
+}
+
 // BrokerSempProxyError The error response of the broker SEMP proxy request.
 type BrokerSempProxyError struct {
 	// Meta The metadata of the broker SEMP proxy request error.
@@ -415,6 +422,36 @@ type CertificateAuthority struct {
 
 // CertificateType The certificate type.
 type CertificateType string
+
+// ClientCertificateAuthority defines model for ClientCertificateAuthority.
+type ClientCertificateAuthority struct {
+	// Id The unique identifier for the client certificate authority. This value matches the name field.
+	Id *string `json:"id,omitempty"`
+
+	// Name The name of the client certificate authority.
+	Name *string `json:"name,omitempty"`
+
+	// OcspNonResponderCertEnabled Indicates whether the event broker service accepts an OCSP response signed by a certificate other than the certificate of the OCSP responder. The default is false.
+	OcspNonResponderCertEnabled *bool `json:"ocspNonResponderCertEnabled,omitempty"`
+
+	// OcspOverrideUrl The URL of the OCSP responder to use instead of the one named in the client certificate.
+	OcspOverrideUrl *string `json:"ocspOverrideUrl,omitempty"`
+
+	// OcspTimeout The number of seconds to wait for an OCSP response. Valid values are 1 to 86400. The default is 5.
+	OcspTimeout *int32 `json:"ocspTimeout,omitempty"`
+
+	// RevocationCheckEnabled Indicates whether the event broker service uses OCSP to check the revocation status of client certificates issued by this certificate authority. The default is false.
+	RevocationCheckEnabled *bool `json:"revocationCheckEnabled,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// ClientCertificateAuthorityResponse defines model for ClientCertificateAuthorityResponse.
+type ClientCertificateAuthorityResponse struct {
+	Data ClientCertificateAuthority        `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
 
 // ClientProfile The client profile configured on the event broker service.
 type ClientProfile struct {
@@ -941,6 +978,27 @@ type ConnectionEndpointList struct {
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
+// CreateClientCertificateAuthority defines model for CreateClientCertificateAuthority.
+type CreateClientCertificateAuthority struct {
+	// CertContent The PEM-encoded X.509 certificate. Provide exactly one certificate. This field is write-only and is never returned.
+	CertContent *string `json:"certContent,omitempty"`
+
+	// Name The name of the certificate authority. The name must be 1 to 64 characters. Use only letters, digits, periods, underscores, and hyphens. The name must be unique among the certificate authorities of the same type on the event broker service. You cannot change the name after you create the certificate authority.
+	Name string `json:"name"`
+
+	// OcspNonResponderCertEnabled Indicates whether the event broker service accepts an OCSP response signed by a certificate other than the certificate of the OCSP responder. The default is false.
+	OcspNonResponderCertEnabled bool `json:"ocspNonResponderCertEnabled"`
+
+	// OcspOverrideUrl The URL of the OCSP responder to use instead of the OCSP responder URL in the client certificate. The URL must include the scheme, for example http://ocsp.example.com. HTTPS is not supported. An empty string means no override URL.
+	OcspOverrideUrl *string `json:"ocspOverrideUrl,omitempty"`
+
+	// OcspTimeout The number of seconds to wait for an OCSP response. Valid values are 1 to 86400. The default is 5.
+	OcspTimeout int32 `json:"ocspTimeout"`
+
+	// RevocationCheckEnabled Indicates whether the event broker service uses OCSP to check the revocation status of client certificates issued by this certificate authority. The default is false.
+	RevocationCheckEnabled bool `json:"revocationCheckEnabled"`
+}
+
 // CreateConnectionEndpoint A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
 type CreateConnectionEndpoint struct {
 	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
@@ -1018,6 +1076,15 @@ type CreateConnectionEndpointAccessType string
 
 // CreateConnectionEndpointK8sServiceType The connectivity configuration that is used in the Kubernetes cluster.
 type CreateConnectionEndpointK8sServiceType string
+
+// CreateDomainCertificateAuthority defines model for CreateDomainCertificateAuthority.
+type CreateDomainCertificateAuthority struct {
+	// CertContent The PEM-encoded X.509 certificate. Provide exactly one certificate. This field is write-only and is never returned.
+	CertContent *string `json:"certContent,omitempty"`
+
+	// Name The name of the certificate authority. The name must be 1 to 64 characters. Use only letters, digits, periods, underscores, and hyphens. The name must be unique among the certificate authorities of the same type on the event broker service. You cannot change the name after you create the certificate authority.
+	Name string `json:"name"`
+}
 
 // CreateLdapManagementAccess defines model for CreateLdapManagementAccess.
 type CreateLdapManagementAccess struct {
@@ -1222,6 +1289,24 @@ type DnsNameMoveRequest struct {
 	Type *string `json:"type,omitempty"`
 }
 
+// DomainCertificateAuthority defines model for DomainCertificateAuthority.
+type DomainCertificateAuthority struct {
+	// Id The unique identifier for the domain certificate authority. This value matches the name field.
+	Id *string `json:"id,omitempty"`
+
+	// Name The name of the domain certificate authority.
+	Name *string `json:"name,omitempty"`
+
+	// Type The type of object for informational purposes.
+	Type *string `json:"type,omitempty"`
+}
+
+// DomainCertificateAuthorityResponse defines model for DomainCertificateAuthorityResponse.
+type DomainCertificateAuthorityResponse struct {
+	Data DomainCertificateAuthority        `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
 // Environment defines model for Environment.
 type Environment struct {
 	// AllowServiceCreationInPublicRegions When this setting is false, it blocks the creation of services in public regions in this environment.
@@ -1341,9 +1426,21 @@ type EventBrokerVersionsResponse struct {
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
+// GetAllClientCertificateAuthoritiesResponse defines model for GetAllClientCertificateAuthoritiesResponse.
+type GetAllClientCertificateAuthoritiesResponse struct {
+	Data []ClientCertificateAuthority      `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
 // GetAllConnectionEndpointDnsNamesResponse Response containing a list of connection endpoint DNS names
 type GetAllConnectionEndpointDnsNamesResponse struct {
 	Data []DnsName                         `json:"data"`
+	Meta map[string]map[string]interface{} `json:"meta"`
+}
+
+// GetAllDomainCertificateAuthoritiesResponse defines model for GetAllDomainCertificateAuthoritiesResponse.
+type GetAllDomainCertificateAuthoritiesResponse struct {
+	Data []DomainCertificateAuthority      `json:"data"`
 	Meta map[string]map[string]interface{} `json:"meta"`
 }
 
@@ -1817,6 +1914,12 @@ type RedundancyRedundancy string
 // ReleaseChannel "The release channel indicates the type of release, either Production or Preview. The release types offer differing support and upgrade paths. See the documentation for more information.
 type ReleaseChannel string
 
+// ReplaceDomainCertificateAuthority defines model for ReplaceDomainCertificateAuthority.
+type ReplaceDomainCertificateAuthority struct {
+	// CertContent The PEM-encoded X.509 certificate. Provide exactly one certificate. This field is write-only and is never returned.
+	CertContent *string `json:"certContent,omitempty"`
+}
+
 // Replication defines model for Replication.
 type Replication struct {
 	// ActiveServiceId The identifier of the active event broker service in a replication pair.
@@ -1828,6 +1931,12 @@ type Replication struct {
 
 	// Type The type of object for informational purposes
 	Type *string `json:"type,omitempty"`
+}
+
+// ResetBrokerPasswords defines model for ResetBrokerPasswords.
+type ResetBrokerPasswords struct {
+	// Users The Broker Manager users whose passwords you want to reset. The new passwords are auto-generated and not returned in the response.
+	Users []BrokerManagerUser `json:"users"`
 }
 
 // SEMPOverMsgBus Indicates whether SEMP-Over-Message-Bus attributes is enabled.
@@ -2229,6 +2338,24 @@ type SpoolScaleUpCapabilityInfo struct {
 	SpoolScaleUpTestTimestamp *time.Time `json:"spoolScaleUpTestTimestamp,omitempty"`
 }
 
+// UpdateClientCertificateAuthority defines model for UpdateClientCertificateAuthority.
+type UpdateClientCertificateAuthority struct {
+	// CertContent The PEM-encoded X.509 certificate. Provide exactly one certificate. This field is write-only and is never returned. If you do not include this field, the event broker service keeps the current certificate.
+	CertContent *string `json:"certContent,omitempty"`
+
+	// OcspNonResponderCertEnabled Indicates whether the event broker service accepts an OCSP response signed by a certificate other than the certificate of the OCSP responder. The default is false. If you do not include this field, its current value does not change.
+	OcspNonResponderCertEnabled *bool `json:"ocspNonResponderCertEnabled,omitempty"`
+
+	// OcspOverrideUrl The URL of the OCSP responder to use instead of the OCSP responder URL in the client certificate. The URL must include the scheme, for example http://ocsp.example.com. HTTPS is not supported. An empty string means no override URL. If you do not include this field, its current value does not change.
+	OcspOverrideUrl *string `json:"ocspOverrideUrl,omitempty"`
+
+	// OcspTimeout The number of seconds to wait for an OCSP response. Valid values are 1 to 86400. The default is 5. If you do not include this field, its current value does not change.
+	OcspTimeout *int32 `json:"ocspTimeout,omitempty"`
+
+	// RevocationCheckEnabled Indicates whether the event broker service uses OCSP to check the revocation status of client certificates issued by this certificate authority. The default is false. If you do not include this field, its current value does not change.
+	RevocationCheckEnabled *bool `json:"revocationCheckEnabled,omitempty"`
+}
+
 // UpdateConnectionEndpoint A collection of networking protocol and port configurations that permit applications to connect to the event broker service.
 type UpdateConnectionEndpoint struct {
 	// AccessType The connectivity for the connection endpoint. This can be through private IP addresses (PRIVATE) or public internet (PUBLIC).
@@ -2544,6 +2671,15 @@ type CreateResourceJSONBody = string
 // ReplaceResourceJSONBody defines parameters for ReplaceResource.
 type ReplaceResourceJSONBody = string
 
+// GetClientCertificateAuthoritiesParams defines parameters for GetClientCertificateAuthorities.
+type GetClientCertificateAuthoritiesParams struct {
+	// PageNumber The page number to return. The first page is 1. The default is 1.
+	PageNumber *int32 `form:"pageNumber,omitempty" json:"pageNumber,omitempty"`
+
+	// PageSize The number of certificate authorities to return per page, from 1 to 100. The default is 20.
+	PageSize *int32 `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+}
+
 // GetClientProfilesParams defines parameters for GetClientProfiles.
 type GetClientProfilesParams struct {
 	// PageNumber The page number to retrieve.
@@ -2554,6 +2690,15 @@ type GetClientProfilesParams struct {
 
 	// Sort The sorting criteria for the list of client profiles.
 	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
+}
+
+// GetDomainCertificateAuthoritiesParams defines parameters for GetDomainCertificateAuthorities.
+type GetDomainCertificateAuthoritiesParams struct {
+	// PageNumber The page number to return. The first page is 1. The default is 1.
+	PageNumber *int32 `form:"pageNumber,omitempty" json:"pageNumber,omitempty"`
+
+	// PageSize The number of certificate authorities to return per page, from 1 to 100. The default is 20.
+	PageSize *int32 `form:"pageSize,omitempty" json:"pageSize,omitempty"`
 }
 
 // GetServiceOperationsParams defines parameters for GetServiceOperations.
@@ -2620,6 +2765,12 @@ type ReplaceResourceJSONRequestBody = ReplaceResourceJSONBody
 // EnableDmrClusterJSONRequestBody defines body for EnableDmrCluster for application/json ContentType.
 type EnableDmrClusterJSONRequestBody = DmrClusterRequest
 
+// CreateClientCertificateAuthorityJSONRequestBody defines body for CreateClientCertificateAuthority for application/json ContentType.
+type CreateClientCertificateAuthorityJSONRequestBody = CreateClientCertificateAuthority
+
+// UpdateClientCertificateAuthorityJSONRequestBody defines body for UpdateClientCertificateAuthority for application/json ContentType.
+type UpdateClientCertificateAuthorityJSONRequestBody = UpdateClientCertificateAuthority
+
 // CreateClientProfileJSONRequestBody defines body for CreateClientProfile for application/json ContentType.
 type CreateClientProfileJSONRequestBody = ClientProfileRequest
 
@@ -2641,6 +2792,12 @@ type CreateConnectionEndpointDnsNameJSONRequestBody = DnsNameCreateRequest
 // MoveConnectionEndpointDnsNameJSONRequestBody defines body for MoveConnectionEndpointDnsName for application/json ContentType.
 type MoveConnectionEndpointDnsNameJSONRequestBody = DnsNameMoveRequest
 
+// CreateDomainCertificateAuthorityJSONRequestBody defines body for CreateDomainCertificateAuthority for application/json ContentType.
+type CreateDomainCertificateAuthorityJSONRequestBody = CreateDomainCertificateAuthority
+
+// UpdateDomainCertificateAuthorityJSONRequestBody defines body for UpdateDomainCertificateAuthority for application/json ContentType.
+type UpdateDomainCertificateAuthorityJSONRequestBody = ReplaceDomainCertificateAuthority
+
 // UpdateLdapManagementAccessJSONRequestBody defines body for UpdateLdapManagementAccess for application/json ContentType.
 type UpdateLdapManagementAccessJSONRequestBody = UpdateLdapManagementAccess
 
@@ -2652,6 +2809,9 @@ type UpdateMateLinkEncryptionJSONRequestBody = MateLinkEncryption
 
 // UpdateMessageSpoolJSONRequestBody defines body for UpdateMessageSpool for application/json ContentType.
 type UpdateMessageSpoolJSONRequestBody = MessageSpool
+
+// ResetBrokerPasswordsJSONRequestBody defines body for ResetBrokerPasswords for application/json ContentType.
+type ResetBrokerPasswordsJSONRequestBody = ResetBrokerPasswords
 
 // DisableOrEnableJSONRequestBody defines body for DisableOrEnable for application/json ContentType.
 type DisableOrEnableJSONRequestBody = BasicAuthAvailability
@@ -2827,6 +2987,25 @@ type ClientInterface interface {
 	// GetBrokerStateByServiceId request
 	GetBrokerStateByServiceId(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetClientCertificateAuthorities request
+	GetClientCertificateAuthorities(ctx context.Context, serviceId string, params *GetClientCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateClientCertificateAuthorityWithBody request with any body
+	CreateClientCertificateAuthorityWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateClientCertificateAuthority(ctx context.Context, serviceId string, body CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteClientCertificateAuthority request
+	DeleteClientCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClientCertificateAuthority request
+	GetClientCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateClientCertificateAuthorityWithBody request with any body
+	UpdateClientCertificateAuthorityWithBody(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateClientCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetClientProfiles request
 	GetClientProfiles(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2886,6 +3065,25 @@ type ClientInterface interface {
 
 	MoveConnectionEndpointDnsName(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetDomainCertificateAuthorities request
+	GetDomainCertificateAuthorities(ctx context.Context, serviceId string, params *GetDomainCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateDomainCertificateAuthorityWithBody request with any body
+	CreateDomainCertificateAuthorityWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateDomainCertificateAuthority(ctx context.Context, serviceId string, body CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteDomainCertificateAuthority request
+	DeleteDomainCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetDomainCertificateAuthority request
+	GetDomainCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateDomainCertificateAuthorityWithBody request with any body
+	UpdateDomainCertificateAuthorityWithBody(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateDomainCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeleteLdapManagementAccess request
 	DeleteLdapManagementAccess(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2920,6 +3118,11 @@ type ClientInterface interface {
 
 	// GetServiceOperation request
 	GetServiceOperation(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ResetBrokerPasswordsWithBody request with any body
+	ResetBrokerPasswordsWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ResetBrokerPasswords(ctx context.Context, serviceId string, body ResetBrokerPasswordsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DisableOrEnableWithBody request with any body
 	DisableOrEnableWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3366,6 +3569,90 @@ func (c *Client) GetBrokerStateByServiceId(ctx context.Context, serviceId string
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetClientCertificateAuthorities(ctx context.Context, serviceId string, params *GetClientCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClientCertificateAuthoritiesRequest(c.Server, serviceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateClientCertificateAuthorityWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateClientCertificateAuthorityRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateClientCertificateAuthority(ctx context.Context, serviceId string, body CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateClientCertificateAuthorityRequest(c.Server, serviceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteClientCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteClientCertificateAuthorityRequest(c.Server, serviceId, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClientCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClientCertificateAuthorityRequest(c.Server, serviceId, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateClientCertificateAuthorityWithBody(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateClientCertificateAuthorityRequestWithBody(c.Server, serviceId, certificateAuthorityName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateClientCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateClientCertificateAuthorityRequest(c.Server, serviceId, certificateAuthorityName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetClientProfiles(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClientProfilesRequest(c.Server, serviceId, params)
 	if err != nil {
@@ -3630,6 +3917,90 @@ func (c *Client) MoveConnectionEndpointDnsName(ctx context.Context, serviceId st
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetDomainCertificateAuthorities(ctx context.Context, serviceId string, params *GetDomainCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDomainCertificateAuthoritiesRequest(c.Server, serviceId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateDomainCertificateAuthorityWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateDomainCertificateAuthorityRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateDomainCertificateAuthority(ctx context.Context, serviceId string, body CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateDomainCertificateAuthorityRequest(c.Server, serviceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteDomainCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteDomainCertificateAuthorityRequest(c.Server, serviceId, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetDomainCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDomainCertificateAuthorityRequest(c.Server, serviceId, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateDomainCertificateAuthorityWithBody(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateDomainCertificateAuthorityRequestWithBody(c.Server, serviceId, certificateAuthorityName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateDomainCertificateAuthority(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateDomainCertificateAuthorityRequest(c.Server, serviceId, certificateAuthorityName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) DeleteLdapManagementAccess(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteLdapManagementAccessRequest(c.Server, serviceId)
 	if err != nil {
@@ -3776,6 +4147,30 @@ func (c *Client) GetServiceOperations(ctx context.Context, serviceId string, par
 
 func (c *Client) GetServiceOperation(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetServiceOperationRequest(c.Server, serviceId, operationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ResetBrokerPasswordsWithBody(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewResetBrokerPasswordsRequestWithBody(c.Server, serviceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ResetBrokerPasswords(ctx context.Context, serviceId string, body ResetBrokerPasswordsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewResetBrokerPasswordsRequest(c.Server, serviceId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5259,6 +5654,261 @@ func NewGetBrokerStateByServiceIdRequest(server string, serviceId string) (*http
 	return req, nil
 }
 
+// NewGetClientCertificateAuthoritiesRequest generates requests for GetClientCertificateAuthorities
+func NewGetClientCertificateAuthoritiesRequest(server string, serviceId string, params *GetClientCertificateAuthoritiesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/clientCertificateAuthorities", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageNumber != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageNumber", runtime.ParamLocationQuery, *params.PageNumber); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageSize != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageSize", runtime.ParamLocationQuery, *params.PageSize); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateClientCertificateAuthorityRequest calls the generic CreateClientCertificateAuthority builder with application/json body
+func NewCreateClientCertificateAuthorityRequest(server string, serviceId string, body CreateClientCertificateAuthorityJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateClientCertificateAuthorityRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewCreateClientCertificateAuthorityRequestWithBody generates requests for CreateClientCertificateAuthority with any type of body
+func NewCreateClientCertificateAuthorityRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/clientCertificateAuthorities", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteClientCertificateAuthorityRequest generates requests for DeleteClientCertificateAuthority
+func NewDeleteClientCertificateAuthorityRequest(server string, serviceId string, certificateAuthorityName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "certificateAuthorityName", runtime.ParamLocationPath, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/clientCertificateAuthorities/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClientCertificateAuthorityRequest generates requests for GetClientCertificateAuthority
+func NewGetClientCertificateAuthorityRequest(server string, serviceId string, certificateAuthorityName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "certificateAuthorityName", runtime.ParamLocationPath, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/clientCertificateAuthorities/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateClientCertificateAuthorityRequest calls the generic UpdateClientCertificateAuthority builder with application/json body
+func NewUpdateClientCertificateAuthorityRequest(server string, serviceId string, certificateAuthorityName string, body UpdateClientCertificateAuthorityJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateClientCertificateAuthorityRequestWithBody(server, serviceId, certificateAuthorityName, "application/json", bodyReader)
+}
+
+// NewUpdateClientCertificateAuthorityRequestWithBody generates requests for UpdateClientCertificateAuthority with any type of body
+func NewUpdateClientCertificateAuthorityRequestWithBody(server string, serviceId string, certificateAuthorityName string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "certificateAuthorityName", runtime.ParamLocationPath, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/clientCertificateAuthorities/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetClientProfilesRequest generates requests for GetClientProfiles
 func NewGetClientProfilesRequest(server string, serviceId string, params *GetClientProfilesParams) (*http.Request, error) {
 	var err error
@@ -6005,6 +6655,261 @@ func NewMoveConnectionEndpointDnsNameRequestWithBody(server string, serviceId st
 	return req, nil
 }
 
+// NewGetDomainCertificateAuthoritiesRequest generates requests for GetDomainCertificateAuthorities
+func NewGetDomainCertificateAuthoritiesRequest(server string, serviceId string, params *GetDomainCertificateAuthoritiesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/domainCertificateAuthorities", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageNumber != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageNumber", runtime.ParamLocationQuery, *params.PageNumber); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageSize != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageSize", runtime.ParamLocationQuery, *params.PageSize); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateDomainCertificateAuthorityRequest calls the generic CreateDomainCertificateAuthority builder with application/json body
+func NewCreateDomainCertificateAuthorityRequest(server string, serviceId string, body CreateDomainCertificateAuthorityJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateDomainCertificateAuthorityRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewCreateDomainCertificateAuthorityRequestWithBody generates requests for CreateDomainCertificateAuthority with any type of body
+func NewCreateDomainCertificateAuthorityRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/domainCertificateAuthorities", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteDomainCertificateAuthorityRequest generates requests for DeleteDomainCertificateAuthority
+func NewDeleteDomainCertificateAuthorityRequest(server string, serviceId string, certificateAuthorityName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "certificateAuthorityName", runtime.ParamLocationPath, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/domainCertificateAuthorities/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetDomainCertificateAuthorityRequest generates requests for GetDomainCertificateAuthority
+func NewGetDomainCertificateAuthorityRequest(server string, serviceId string, certificateAuthorityName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "certificateAuthorityName", runtime.ParamLocationPath, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/domainCertificateAuthorities/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateDomainCertificateAuthorityRequest calls the generic UpdateDomainCertificateAuthority builder with application/json body
+func NewUpdateDomainCertificateAuthorityRequest(server string, serviceId string, certificateAuthorityName string, body UpdateDomainCertificateAuthorityJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateDomainCertificateAuthorityRequestWithBody(server, serviceId, certificateAuthorityName, "application/json", bodyReader)
+}
+
+// NewUpdateDomainCertificateAuthorityRequestWithBody generates requests for UpdateDomainCertificateAuthority with any type of body
+func NewUpdateDomainCertificateAuthorityRequestWithBody(server string, serviceId string, certificateAuthorityName string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "certificateAuthorityName", runtime.ParamLocationPath, certificateAuthorityName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/domainCertificateAuthorities/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewDeleteLdapManagementAccessRequest generates requests for DeleteLdapManagementAccess
 func NewDeleteLdapManagementAccessRequest(server string, serviceId string) (*http.Request, error) {
 	var err error
@@ -6442,6 +7347,53 @@ func NewGetServiceOperationRequest(server string, serviceId string, operationId 
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewResetBrokerPasswordsRequest calls the generic ResetBrokerPasswords builder with application/json body
+func NewResetBrokerPasswordsRequest(server string, serviceId string, body ResetBrokerPasswordsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewResetBrokerPasswordsRequestWithBody(server, serviceId, "application/json", bodyReader)
+}
+
+// NewResetBrokerPasswordsRequestWithBody generates requests for ResetBrokerPasswords with any type of body
+func NewResetBrokerPasswordsRequestWithBody(server string, serviceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "serviceId", runtime.ParamLocationPath, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v2/missionControl/eventBrokerServices/%s/resetBrokerPasswords", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -7018,6 +7970,25 @@ type ClientWithResponsesInterface interface {
 	// GetBrokerStateByServiceIdWithResponse request
 	GetBrokerStateByServiceIdWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*GetBrokerStateByServiceIdResponse, error)
 
+	// GetClientCertificateAuthoritiesWithResponse request
+	GetClientCertificateAuthoritiesWithResponse(ctx context.Context, serviceId string, params *GetClientCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*GetClientCertificateAuthoritiesResponse, error)
+
+	// CreateClientCertificateAuthorityWithBodyWithResponse request with any body
+	CreateClientCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateClientCertificateAuthorityResponse, error)
+
+	CreateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateClientCertificateAuthorityResponse, error)
+
+	// DeleteClientCertificateAuthorityWithResponse request
+	DeleteClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*DeleteClientCertificateAuthorityResponse, error)
+
+	// GetClientCertificateAuthorityWithResponse request
+	GetClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*GetClientCertificateAuthorityResponse, error)
+
+	// UpdateClientCertificateAuthorityWithBodyWithResponse request with any body
+	UpdateClientCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateClientCertificateAuthorityResponse, error)
+
+	UpdateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateClientCertificateAuthorityResponse, error)
+
 	// GetClientProfilesWithResponse request
 	GetClientProfilesWithResponse(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*GetClientProfilesResponse, error)
 
@@ -7077,6 +8048,25 @@ type ClientWithResponsesInterface interface {
 
 	MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...RequestEditorFn) (*MoveConnectionEndpointDnsNameResponse, error)
 
+	// GetDomainCertificateAuthoritiesWithResponse request
+	GetDomainCertificateAuthoritiesWithResponse(ctx context.Context, serviceId string, params *GetDomainCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*GetDomainCertificateAuthoritiesResponse, error)
+
+	// CreateDomainCertificateAuthorityWithBodyWithResponse request with any body
+	CreateDomainCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateDomainCertificateAuthorityResponse, error)
+
+	CreateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateDomainCertificateAuthorityResponse, error)
+
+	// DeleteDomainCertificateAuthorityWithResponse request
+	DeleteDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*DeleteDomainCertificateAuthorityResponse, error)
+
+	// GetDomainCertificateAuthorityWithResponse request
+	GetDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*GetDomainCertificateAuthorityResponse, error)
+
+	// UpdateDomainCertificateAuthorityWithBodyWithResponse request with any body
+	UpdateDomainCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateDomainCertificateAuthorityResponse, error)
+
+	UpdateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateDomainCertificateAuthorityResponse, error)
+
 	// DeleteLdapManagementAccessWithResponse request
 	DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*DeleteLdapManagementAccessResponse, error)
 
@@ -7111,6 +8101,11 @@ type ClientWithResponsesInterface interface {
 
 	// GetServiceOperationWithResponse request
 	GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *GetServiceOperationParams, reqEditors ...RequestEditorFn) (*GetServiceOperationResponse, error)
+
+	// ResetBrokerPasswordsWithBodyWithResponse request with any body
+	ResetBrokerPasswordsWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ResetBrokerPasswordsResponse, error)
+
+	ResetBrokerPasswordsWithResponse(ctx context.Context, serviceId string, body ResetBrokerPasswordsJSONRequestBody, reqEditors ...RequestEditorFn) (*ResetBrokerPasswordsResponse, error)
 
 	// DisableOrEnableWithBodyWithResponse request with any body
 	DisableOrEnableWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DisableOrEnableResponse, error)
@@ -7766,6 +8761,150 @@ func (r GetBrokerStateByServiceIdResponse) StatusCode() int {
 	return 0
 }
 
+type GetClientCertificateAuthoritiesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetAllClientCertificateAuthoritiesResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClientCertificateAuthoritiesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClientCertificateAuthoritiesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateClientCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateClientCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateClientCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteClientCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteClientCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteClientCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetClientCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClientCertificateAuthorityResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClientCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClientCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateClientCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateClientCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateClientCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetClientProfilesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8170,6 +9309,150 @@ func (r MoveConnectionEndpointDnsNameResponse) StatusCode() int {
 	return 0
 }
 
+type GetDomainCertificateAuthoritiesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetAllDomainCertificateAuthoritiesResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDomainCertificateAuthoritiesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDomainCertificateAuthoritiesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateDomainCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateDomainCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateDomainCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteDomainCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteDomainCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteDomainCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetDomainCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DomainCertificateAuthorityResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDomainCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDomainCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateDomainCertificateAuthorityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON422      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateDomainCertificateAuthorityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateDomainCertificateAuthorityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type DeleteLdapManagementAccessResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8413,6 +9696,34 @@ func (r GetServiceOperationResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetServiceOperationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ResetBrokerPasswordsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *OperationResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON403      *ErrorResponse
+	JSON404      *ErrorResponse
+	JSON409      *ErrorResponse
+	JSON503      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ResetBrokerPasswordsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ResetBrokerPasswordsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8973,6 +10284,67 @@ func (c *ClientWithResponses) GetBrokerStateByServiceIdWithResponse(ctx context.
 	return ParseGetBrokerStateByServiceIdResponse(rsp)
 }
 
+// GetClientCertificateAuthoritiesWithResponse request returning *GetClientCertificateAuthoritiesResponse
+func (c *ClientWithResponses) GetClientCertificateAuthoritiesWithResponse(ctx context.Context, serviceId string, params *GetClientCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*GetClientCertificateAuthoritiesResponse, error) {
+	rsp, err := c.GetClientCertificateAuthorities(ctx, serviceId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClientCertificateAuthoritiesResponse(rsp)
+}
+
+// CreateClientCertificateAuthorityWithBodyWithResponse request with arbitrary body returning *CreateClientCertificateAuthorityResponse
+func (c *ClientWithResponses) CreateClientCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateClientCertificateAuthorityResponse, error) {
+	rsp, err := c.CreateClientCertificateAuthorityWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateClientCertificateAuthorityResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateClientCertificateAuthorityResponse, error) {
+	rsp, err := c.CreateClientCertificateAuthority(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateClientCertificateAuthorityResponse(rsp)
+}
+
+// DeleteClientCertificateAuthorityWithResponse request returning *DeleteClientCertificateAuthorityResponse
+func (c *ClientWithResponses) DeleteClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*DeleteClientCertificateAuthorityResponse, error) {
+	rsp, err := c.DeleteClientCertificateAuthority(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteClientCertificateAuthorityResponse(rsp)
+}
+
+// GetClientCertificateAuthorityWithResponse request returning *GetClientCertificateAuthorityResponse
+func (c *ClientWithResponses) GetClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*GetClientCertificateAuthorityResponse, error) {
+	rsp, err := c.GetClientCertificateAuthority(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClientCertificateAuthorityResponse(rsp)
+}
+
+// UpdateClientCertificateAuthorityWithBodyWithResponse request with arbitrary body returning *UpdateClientCertificateAuthorityResponse
+func (c *ClientWithResponses) UpdateClientCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateClientCertificateAuthorityResponse, error) {
+	rsp, err := c.UpdateClientCertificateAuthorityWithBody(ctx, serviceId, certificateAuthorityName, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateClientCertificateAuthorityResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateClientCertificateAuthorityResponse, error) {
+	rsp, err := c.UpdateClientCertificateAuthority(ctx, serviceId, certificateAuthorityName, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateClientCertificateAuthorityResponse(rsp)
+}
+
 // GetClientProfilesWithResponse request returning *GetClientProfilesResponse
 func (c *ClientWithResponses) GetClientProfilesWithResponse(ctx context.Context, serviceId string, params *GetClientProfilesParams, reqEditors ...RequestEditorFn) (*GetClientProfilesResponse, error) {
 	rsp, err := c.GetClientProfiles(ctx, serviceId, params, reqEditors...)
@@ -9164,6 +10536,67 @@ func (c *ClientWithResponses) MoveConnectionEndpointDnsNameWithResponse(ctx cont
 	return ParseMoveConnectionEndpointDnsNameResponse(rsp)
 }
 
+// GetDomainCertificateAuthoritiesWithResponse request returning *GetDomainCertificateAuthoritiesResponse
+func (c *ClientWithResponses) GetDomainCertificateAuthoritiesWithResponse(ctx context.Context, serviceId string, params *GetDomainCertificateAuthoritiesParams, reqEditors ...RequestEditorFn) (*GetDomainCertificateAuthoritiesResponse, error) {
+	rsp, err := c.GetDomainCertificateAuthorities(ctx, serviceId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDomainCertificateAuthoritiesResponse(rsp)
+}
+
+// CreateDomainCertificateAuthorityWithBodyWithResponse request with arbitrary body returning *CreateDomainCertificateAuthorityResponse
+func (c *ClientWithResponses) CreateDomainCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateDomainCertificateAuthorityResponse, error) {
+	rsp, err := c.CreateDomainCertificateAuthorityWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateDomainCertificateAuthorityResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateDomainCertificateAuthorityResponse, error) {
+	rsp, err := c.CreateDomainCertificateAuthority(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateDomainCertificateAuthorityResponse(rsp)
+}
+
+// DeleteDomainCertificateAuthorityWithResponse request returning *DeleteDomainCertificateAuthorityResponse
+func (c *ClientWithResponses) DeleteDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*DeleteDomainCertificateAuthorityResponse, error) {
+	rsp, err := c.DeleteDomainCertificateAuthority(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteDomainCertificateAuthorityResponse(rsp)
+}
+
+// GetDomainCertificateAuthorityWithResponse request returning *GetDomainCertificateAuthorityResponse
+func (c *ClientWithResponses) GetDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...RequestEditorFn) (*GetDomainCertificateAuthorityResponse, error) {
+	rsp, err := c.GetDomainCertificateAuthority(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDomainCertificateAuthorityResponse(rsp)
+}
+
+// UpdateDomainCertificateAuthorityWithBodyWithResponse request with arbitrary body returning *UpdateDomainCertificateAuthorityResponse
+func (c *ClientWithResponses) UpdateDomainCertificateAuthorityWithBodyWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateDomainCertificateAuthorityResponse, error) {
+	rsp, err := c.UpdateDomainCertificateAuthorityWithBody(ctx, serviceId, certificateAuthorityName, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateDomainCertificateAuthorityResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateDomainCertificateAuthorityResponse, error) {
+	rsp, err := c.UpdateDomainCertificateAuthority(ctx, serviceId, certificateAuthorityName, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateDomainCertificateAuthorityResponse(rsp)
+}
+
 // DeleteLdapManagementAccessWithResponse request returning *DeleteLdapManagementAccessResponse
 func (c *ClientWithResponses) DeleteLdapManagementAccessWithResponse(ctx context.Context, serviceId string, reqEditors ...RequestEditorFn) (*DeleteLdapManagementAccessResponse, error) {
 	rsp, err := c.DeleteLdapManagementAccess(ctx, serviceId, reqEditors...)
@@ -9275,6 +10708,23 @@ func (c *ClientWithResponses) GetServiceOperationWithResponse(ctx context.Contex
 		return nil, err
 	}
 	return ParseGetServiceOperationResponse(rsp)
+}
+
+// ResetBrokerPasswordsWithBodyWithResponse request with arbitrary body returning *ResetBrokerPasswordsResponse
+func (c *ClientWithResponses) ResetBrokerPasswordsWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ResetBrokerPasswordsResponse, error) {
+	rsp, err := c.ResetBrokerPasswordsWithBody(ctx, serviceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseResetBrokerPasswordsResponse(rsp)
+}
+
+func (c *ClientWithResponses) ResetBrokerPasswordsWithResponse(ctx context.Context, serviceId string, body ResetBrokerPasswordsJSONRequestBody, reqEditors ...RequestEditorFn) (*ResetBrokerPasswordsResponse, error) {
+	rsp, err := c.ResetBrokerPasswords(ctx, serviceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseResetBrokerPasswordsResponse(rsp)
 }
 
 // DisableOrEnableWithBodyWithResponse request with arbitrary body returning *DisableOrEnableResponse
@@ -10638,6 +12088,374 @@ func ParseGetBrokerStateByServiceIdResponse(rsp *http.Response) (*GetBrokerState
 	return response, nil
 }
 
+// ParseGetClientCertificateAuthoritiesResponse parses an HTTP response from a GetClientCertificateAuthoritiesWithResponse call
+func ParseGetClientCertificateAuthoritiesResponse(rsp *http.Response) (*GetClientCertificateAuthoritiesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClientCertificateAuthoritiesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetAllClientCertificateAuthoritiesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateClientCertificateAuthorityResponse parses an HTTP response from a CreateClientCertificateAuthorityWithResponse call
+func ParseCreateClientCertificateAuthorityResponse(rsp *http.Response) (*CreateClientCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateClientCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteClientCertificateAuthorityResponse parses an HTTP response from a DeleteClientCertificateAuthorityWithResponse call
+func ParseDeleteClientCertificateAuthorityResponse(rsp *http.Response) (*DeleteClientCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteClientCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClientCertificateAuthorityResponse parses an HTTP response from a GetClientCertificateAuthorityWithResponse call
+func ParseGetClientCertificateAuthorityResponse(rsp *http.Response) (*GetClientCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClientCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClientCertificateAuthorityResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateClientCertificateAuthorityResponse parses an HTTP response from a UpdateClientCertificateAuthorityWithResponse call
+func ParseUpdateClientCertificateAuthorityResponse(rsp *http.Response) (*UpdateClientCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateClientCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetClientProfilesResponse parses an HTTP response from a GetClientProfilesWithResponse call
 func ParseGetClientProfilesResponse(rsp *http.Response) (*GetClientProfilesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -11546,6 +13364,374 @@ func ParseMoveConnectionEndpointDnsNameResponse(rsp *http.Response) (*MoveConnec
 	return response, nil
 }
 
+// ParseGetDomainCertificateAuthoritiesResponse parses an HTTP response from a GetDomainCertificateAuthoritiesWithResponse call
+func ParseGetDomainCertificateAuthoritiesResponse(rsp *http.Response) (*GetDomainCertificateAuthoritiesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDomainCertificateAuthoritiesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetAllDomainCertificateAuthoritiesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateDomainCertificateAuthorityResponse parses an HTTP response from a CreateDomainCertificateAuthorityWithResponse call
+func ParseCreateDomainCertificateAuthorityResponse(rsp *http.Response) (*CreateDomainCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateDomainCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteDomainCertificateAuthorityResponse parses an HTTP response from a DeleteDomainCertificateAuthorityWithResponse call
+func ParseDeleteDomainCertificateAuthorityResponse(rsp *http.Response) (*DeleteDomainCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteDomainCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetDomainCertificateAuthorityResponse parses an HTTP response from a GetDomainCertificateAuthorityWithResponse call
+func ParseGetDomainCertificateAuthorityResponse(rsp *http.Response) (*GetDomainCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDomainCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DomainCertificateAuthorityResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateDomainCertificateAuthorityResponse parses an HTTP response from a UpdateDomainCertificateAuthorityWithResponse call
+func ParseUpdateDomainCertificateAuthorityResponse(rsp *http.Response) (*UpdateDomainCertificateAuthorityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateDomainCertificateAuthorityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseDeleteLdapManagementAccessResponse parses an HTTP response from a DeleteLdapManagementAccessWithResponse call
 func ParseDeleteLdapManagementAccessResponse(rsp *http.Response) (*DeleteLdapManagementAccessResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -12124,6 +14310,74 @@ func ParseGetServiceOperationResponse(rsp *http.Response) (*GetServiceOperationR
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseResetBrokerPasswordsResponse parses an HTTP response from a ResetBrokerPasswordsWithResponse call
+func ParseResetBrokerPasswordsResponse(rsp *http.Response) (*ResetBrokerPasswordsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ResetBrokerPasswordsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
 		var dest ErrorResponse

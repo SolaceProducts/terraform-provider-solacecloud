@@ -1,3 +1,8 @@
+---
+page_title: "Managing Multiple Services"
+subcategory: "Services"
+---
+
 # Managing Multiple Services
 
 This guide explains how to manage multiple event broker services using the Terraform provider, including best practices for organization, configuration, and maintenance.
@@ -38,7 +43,7 @@ resource "solacecloud_service" "prod_service" {
 
 For better organization, you can split your configuration into multiple files based on environment:
 
-**dev.tf**:
+`dev.tf`:
 ```hcl
 resource "solacecloud_service" "dev_service" {
   name             = "dev-service"
@@ -47,7 +52,7 @@ resource "solacecloud_service" "dev_service" {
 }
 ```
 
-**qa.tf**:
+`qa.tf`:
 ```hcl
 resource "solacecloud_service" "qa_service" {
   name             = "qa-service"
@@ -56,7 +61,7 @@ resource "solacecloud_service" "qa_service" {
 }
 ```
 
-**prod.tf**:
+`prod.tf`:
 ```hcl
 resource "solacecloud_service" "prod_service" {
   name             = "prod-service"
@@ -111,7 +116,7 @@ terraform apply
 
 For the most scalable approach, create a reusable module for your Solace Cloud services:
 
-**modules/solace-service/main.tf**:
+`modules/solace-service/main.tf`:
 ```hcl
 variable "name" {
   description = "The name of the service"
@@ -167,7 +172,7 @@ output "message_vpn" {
 
 ```
 
-**main.tf**:
+`main.tf`:
 ```hcl
 module "dev_service" {
   source          = "./modules/solace-service"
@@ -241,7 +246,7 @@ resource "solacecloud_service" "prod_service" {
 
 ## Managing Service Credentials
 
-When managing multiple services, it's important to handle credentials securely. You can output the credentials for each service:
+When you manage multiple services, handle their credentials securely. You can output the credentials for each service:
 
 ```hcl
 data "solacecloud_connection_endpoints" "dev_endpoints" {
@@ -285,7 +290,7 @@ output "service_credentials" {
 
 ## Best Practices
 
-When managing multiple Solace Cloud services with Terraform, consider these best practices:
+When you manage multiple event broker services with Terraform, consider these best practices:
 
 1. **Use Consistent Naming Conventions**: Adopt a consistent naming convention for your services, such as `<environment>-<application>-<purpose>`.
 
@@ -396,4 +401,4 @@ output "service_credentials" {
 }
 ```
 
-This example creates four services across two environments, with different configurations for each service. The outputs provide the URLs and credentials for each service, which can be used to configure the services further or connect to them from applications.
+This example creates four services across two environments, with different configurations for each service. The outputs provide the credentials for each service, which can be used to configure the services further or connect to them from applications.
