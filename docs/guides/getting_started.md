@@ -1,4 +1,8 @@
-# Getting Started with Solace Cloud Provider
+---
+page_title: "Get Started with the Solace Cloud Terraform Provider"
+---
+
+# Get Started with the Solace Cloud Terraform Provider
 
 This guide will help you get started with the Solace Cloud Terraform Provider, allowing you to manage your Solace Cloud resources using Terraform.
 
@@ -6,7 +10,7 @@ This guide will help you get started with the Solace Cloud Terraform Provider, a
 
 Before you begin, ensure you have:
 
-1. [Terraform](https://www.terraform.io/downloads.html) installed (version 0.13.0 or later)
+1. [Terraform](https://www.terraform.io/downloads.html) installed (version 1.0.0 or later)
 2. A Solace Cloud account with the Mission Control Manager or Administrator role. For more information, see [Managing Users, Groups, Roles and Permissions](https://docs.solace.com/Cloud/cloud-user-management.htm).
 3. A Solace Cloud API token with the `services:post` permissions
 
@@ -14,12 +18,12 @@ Before you begin, ensure you have:
 
 To use the Solace Cloud Terraform Provider, you'll need an API token:
 
-1. Log in to your [Solace Cloud account](https://console.solace.cloud/)
-2. Click User & Accounts (lower-left corner) and select Token Management.
-3. Enter a name for your API token in the Token Name field.
-4. Select the checkboxes for the required permissions, in this case, at least Create Services (`services:post`).
-5. Click Create Token.
-6. On the API Token dialog, click Copy (you won't see the token again after closing the dialog).
+1. Log in to your [Solace Cloud account](https://console.solace.cloud/).
+2. Click **User & Accounts** (lower-left corner) and select **Token Management**.
+3. Enter a name for your API token in the **Token Name** field.
+4. Select the checkboxes for the required permissions, in this case, at least **Create Services** (`services:post`).
+5. Click **Create Token**.
+6. In the **API Token** dialog, click **Copy**. You can't view the token again after you close the dialog.
 
 ## Provider Configuration
 
@@ -46,7 +50,7 @@ variable "solace_api_token" {
 }
 ```
 
-Create a `terraform.tfvars` file to store your API token (make sure to add this file to your `.gitignore` to avoid committing sensitive information):
+Create a `terraform.tfvars` file to store your API token. Add this file to your `.gitignore` file so that you don't commit the token:
 
 ```hcl
 solace_api_token = "your-api-token-here"
@@ -89,7 +93,7 @@ output "service_management_url" {
 }
 ```
 
-## Initialize and Apply
+## Initializing and Applying the Configuration
 
 Initialize the Terraform working directory:
 
@@ -143,11 +147,11 @@ When prompted, confirm the action by typing `yes`.
 
 Now that you've created your first Solace Cloud service with Terraform, you can:
 
-1. Explore the [Solace Cloud Provider documentation](../index.md) for more details on available resources and data sources.
-2. Learn how to [configure your service](services/service_configuration.md) with advanced options.
-3. Set up [multiple services](services/multiple_services.md) across different environments.
-4. Integrate with the [Solace Broker Provider](services/broker_integration.md) to configure messaging resources within your service.
+- Explore the [Solace Cloud Terraform Provider documentation](../index.md) for more details on available resources and data sources.
+- Learn how to [configure your service](service_configuration.md) with advanced options.
+- Set up [multiple services](multiple_services.md) across different environments.
+- Integrate with the [Solace Event Broker Provider](broker_integration.md) to configure messaging resources within your service.
 
 ## Troubleshooting
 
-If you encounter any issues, refer to the [Troubleshooting Guide](../troubleshooting.md) for common problems and solutions.
+If you encounter any issues, refer to the [Troubleshooting Guide](troubleshooting.md) for common problems and solutions.

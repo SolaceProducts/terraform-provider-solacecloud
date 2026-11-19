@@ -67,6 +67,11 @@ func (r *ConnectionEndpointResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	serviceId := data.ServiceId.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
 
 	// Prepare endpoint configuration
 	config := EndpointConfig{
@@ -147,6 +152,11 @@ func (r *ConnectionEndpointResource) Update(ctx context.Context, req resource.Up
 
 	serviceId := state.ServiceId.ValueString()
 	connectionEndpointId := state.Id.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
 
 	// Prepare endpoint configuration
 	config := EndpointConfig{
@@ -195,6 +205,11 @@ func (r *ConnectionEndpointResource) Delete(ctx context.Context, req resource.De
 
 	serviceId := data.ServiceId.ValueString()
 	connectionEndpointId := data.Id.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
 
 	// Delete the endpoint using EndpointManager
 	r.endpointManager.DeleteEndpoint(ctx, serviceId, connectionEndpointId, &resp.Diagnostics)

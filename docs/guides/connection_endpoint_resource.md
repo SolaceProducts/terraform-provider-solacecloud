@@ -1,4 +1,9 @@
- # Connection Endpoint Resource
+---
+page_title: "Connection Endpoint Resource"
+subcategory: "Connection Endpoints"
+---
+
+# Connection Endpoint Resource
  
 The connection endpoint resource allows you to create and manage connection endpoints for a Solace Cloud service.
 
@@ -15,33 +20,36 @@ The available protocols and their corresponding port configurations are:
 - `smf_compressed` - SMF compressed port configuration.
 - `amqp` - AMQP plain-text port configuration.
 - `amqp_tls` - AMQP over TLS port configuration.
-- `mqtt` - MQTT plain-text port configuration.
+- `mqtt` - MQTT plaintext port configuration.
 - `mqtt_tls` - MQTT over TLS port configuration.
-- `mqtt_websocket` - MQTT WebSocket plain-text port configuration.
+- `mqtt_websocket` - MQTT WebSocket plaintext port configuration.
 - `mqtt_websocket_tls` - MQTT WebSocket over TLS port configuration.
 - `web` - WebSocket over HTTP port configuration.
 - `web_tls` - WebSocket over HTTPS port configuration.
-- `rest_incoming` - REST incoming plain-text port configuration.
+- `rest_incoming` - REST incoming plaintext port configuration.
 - `rest_incoming_tls` - REST incoming over TLS port configuration.
 - `management_tls` - Management over TLS port configuration (SEMP).
 - `ssh_tls` - SSH over TLS port configuration (CLI access).
 
-These protocols can be mapped to the REST API protocols as follows:
-- `smf` -> `serviceSmfPlainTextListenPort`
-- `smf_tls` -> `serviceSmfTlsListenPort`
-- `smf_compressed` -> `serviceSmfCompressedListenPort`
-- `amqp` -> `serviceAmqpPlainTextListenPort`
-- `amqp_tls` -> `serviceAmqpTlsListenPort`
-- `mqtt` -> `serviceMqttPlainTextListenPort`
-- `mqtt_tls` -> `serviceMqttTlsListenPort`
-- `mqtt_websocket` -> `serviceMqttWebSocketListenPort`
-- `mqtt_websocket_tls` -> `serviceMqttTlsWebSocketListenPort`
-- `web` -> `serviceWebPlainTextListenPort`
-- `web_tls` -> `serviceWebTlsListenPort`
-- `rest_incoming` -> `serviceRestIncomingPlainTextListenPort`
-- `rest_incoming_tls` -> `serviceRestIncomingTlsListenPort`
-- `management_tls` -> `serviceManagementTlsListenPort`
-- `ssh_tls` -> `managementSshTlsListenPort`
+The following table maps each Terraform port to its REST API field.
+
+| Terraform port | REST API field |
+|---|---|
+| `smf` | `serviceSmfPlainTextListenPort` |
+| `smf_tls` | `serviceSmfTlsListenPort` |
+| `smf_compressed` | `serviceSmfCompressedListenPort` |
+| `amqp` | `serviceAmqpPlainTextListenPort` |
+| `amqp_tls` | `serviceAmqpTlsListenPort` |
+| `mqtt` | `serviceMqttPlainTextListenPort` |
+| `mqtt_tls` | `serviceMqttTlsListenPort` |
+| `mqtt_websocket` | `serviceMqttWebSocketListenPort` |
+| `mqtt_websocket_tls` | `serviceMqttTlsWebSocketListenPort` |
+| `web` | `serviceWebPlainTextListenPort` |
+| `web_tls` | `serviceWebTlsListenPort` |
+| `rest_incoming` | `serviceRestIncomingPlainTextListenPort` |
+| `rest_incoming_tls` | `serviceRestIncomingTlsListenPort` |
+| `management_tls` | `serviceManagementTlsListenPort` |
+| `ssh_tls` | `managementSshTlsListenPort` |
 
 ### Example Usage
 
@@ -62,23 +70,23 @@ resource "solacecloud_connection_endpoint" "endpoint" {
 }
 ```
 
-## Update
+## Updating Connection Endpoints
 All the parameters except for `access_type` can be updated. Applying changes starts a job that may take several minutes to complete.
 
-## Delete
+## Deleting Connection Endpoints
 Deleting the connection endpoint removes it from the associated service. This action may also take several minutes.
 
-## Import
+## Importing Connection Endpoints
 
-The import ID is not a normal connection endpoint ID. It is a combination of the service ID and the connection endpoint ID separated by a slash.
+The import ID is not a normal connection endpoint ID. It is a combination of the service ID and the connection endpoint ID, joined by `/connectionEndpoints/`.
 
-The exact format is: `${service_id}/connectioneEndpoints/${connection_endpoint_id}`
+The format is `<service_id>/connectionEndpoints/<connection_endpoint_id>`.
 
 
 ### Example
 ```hcl
 import {
-  to =solacecloud_service_connection_endpoint.endpoint
+  to = solacecloud_connection_endpoint.endpoint
   id = "myserviceid/connectionEndpoints/myendpointid"
 }
 

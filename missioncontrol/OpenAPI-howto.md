@@ -1,5 +1,7 @@
 # Overview
 
+> **Note:** The current public spec does not generate cleanly against this client because it has duplicate type names and needs a newer runtime. Do not replace the whole spec. To add the client and domain certificate authority operations, run `scripts/add-ca-spec-paths.sh <path-to-public-mission-control.json>` instead. It copies only those operations and the schemas they use into `MissionControl-specs.json`, then regenerates `missioncontrol.go`. The steps below describe a full refresh, which works only after the public spec generates cleanly again.
+
 * Retrieve the latest OpenAPI spec from the Solace Cloud API [Solace Cloud OpenAPI Specifications](https://api.solace.dev/cloud/page/openapi-specifications)
 * Save as file the `Mission Control - v2.0 - JSON` link - Overwrite [MissionControl-specs.json](./MissionControl-specs.json)
 

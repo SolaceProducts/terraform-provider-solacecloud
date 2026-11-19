@@ -1,10 +1,15 @@
+---
+page_title: "solacecloud_ldap_management_access Resource - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Resource: solacecloud_ldap_management_access
 
 This resource manages LDAP authentication of management users for an event broker service. It controls whether management users log in with their LDAP credentials, and which LDAP groups get which Mission Control role for the event broker service.
 
 Each event broker service has at most one LDAP management access configuration, so the resource is identified by the event broker service ID.
 
-**Prerequisites:**
+This resource requires the following:
 - An existing event broker service. Shared event broker services are not supported.
 - An LDAP authentication profile named `management` on that event broker service. For more information, see [Creating the Management Profile](#creating-the-management-profile).
 
@@ -23,6 +28,8 @@ resource "solacecloud_ldap_management_access" "ldap" {
 ```
 
 ## Argument Reference
+
+The following arguments are supported.
 
 ### Required Arguments
 
@@ -104,6 +111,8 @@ terraform import solacecloud_ldap_management_access.ldap myserviceid
 ```
 
 ## Troubleshooting
+
+The following sections describe common errors and how to resolve them.
 
 ### "LDAP management access is already configured"
 

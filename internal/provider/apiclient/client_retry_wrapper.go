@@ -28,6 +28,7 @@ type CRUDClientWithResponses interface {
 	UpdateServiceWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...mc.RequestEditorFn) (*mc.UpdateServiceResponse, error)
 	UpdateMessageSpoolWithBodyWithResponse(ctx context.Context, serviceId string, contentType string, body io.Reader, reqEditors ...mc.RequestEditorFn) (*mc.UpdateMessageSpoolResponse, error)
 	GetServiceOperationWithResponse(ctx context.Context, serviceId string, operationId string, params *mc.GetServiceOperationParams, reqEditors ...mc.RequestEditorFn) (*mc.GetServiceOperationResponse, error)
+	ResetBrokerPasswordsWithResponse(ctx context.Context, serviceId string, body mc.ResetBrokerPasswordsJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.ResetBrokerPasswordsResponse, error)
 
 	// DMR cluster operations
 	EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body mc.EnableDmrClusterJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.EnableDmrClusterResponse, error)
@@ -52,6 +53,16 @@ type CRUDClientWithResponses interface {
 	CreateConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, body mc.CreateConnectionEndpointDnsNameJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateConnectionEndpointDnsNameResponse, error)
 	DeleteConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteConnectionEndpointDnsNameResponse, error)
 	MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body mc.MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.MoveConnectionEndpointDnsNameResponse, error)
+
+	// Certificate authority operations
+	GetClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.GetClientCertificateAuthorityResponse, error)
+	CreateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body mc.CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateClientCertificateAuthorityResponse, error)
+	UpdateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body mc.UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateClientCertificateAuthorityResponse, error)
+	DeleteClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteClientCertificateAuthorityResponse, error)
+	GetDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.GetDomainCertificateAuthorityResponse, error)
+	CreateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body mc.CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateDomainCertificateAuthorityResponse, error)
+	UpdateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body mc.UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateDomainCertificateAuthorityResponse, error)
+	DeleteDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDomainCertificateAuthorityResponse, error)
 }
 
 func NewRetryableClient(api CRUDClientWithResponses, maxRetries, waitSeconds int) *RetryableClientWithResponses {
@@ -149,6 +160,12 @@ func (w *RetryableClientWithResponses) GetServiceOperationWithResponse(ctx conte
 	return retry(ctx, func() (*mc.GetServiceOperationResponse, error) {
 		return w.api.GetServiceOperationWithResponse(ctx, serviceId, operationId, params, reqEditors...)
 	}, w.maxRetries, w.waitSeconds)
+}
+
+// Not retried: every call generates new passwords, and a 5xx such as a 503 can arrive after the
+// reset started, so a replay could get a 409 or rotate twice.
+func (w *RetryableClientWithResponses) ResetBrokerPasswordsWithResponse(ctx context.Context, serviceId string, body mc.ResetBrokerPasswordsJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.ResetBrokerPasswordsResponse, error) {
+	return w.api.ResetBrokerPasswordsWithResponse(ctx, serviceId, body, reqEditors...)
 }
 
 func (w *RetryableClientWithResponses) EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body mc.EnableDmrClusterJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.EnableDmrClusterResponse, error) {
@@ -254,5 +271,54 @@ func (w *RetryableClientWithResponses) DeleteConnectionEndpointDnsNameWithRespon
 func (w *RetryableClientWithResponses) MoveConnectionEndpointDnsNameWithResponse(ctx context.Context, serviceId string, connectionEndpointId string, dnsName string, body mc.MoveConnectionEndpointDnsNameJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.MoveConnectionEndpointDnsNameResponse, error) {
 	return retry(ctx, func() (*mc.MoveConnectionEndpointDnsNameResponse, error) {
 		return w.api.MoveConnectionEndpointDnsNameWithResponse(ctx, serviceId, connectionEndpointId, dnsName, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+// Certificate authority operations
+func (w *RetryableClientWithResponses) GetClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.GetClientCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.GetClientCertificateAuthorityResponse, error) {
+		return w.api.GetClientCertificateAuthorityWithResponse(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) CreateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body mc.CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateClientCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.CreateClientCertificateAuthorityResponse, error) {
+		return w.api.CreateClientCertificateAuthorityWithResponse(ctx, serviceId, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) UpdateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body mc.UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateClientCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.UpdateClientCertificateAuthorityResponse, error) {
+		return w.api.UpdateClientCertificateAuthorityWithResponse(ctx, serviceId, certificateAuthorityName, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) DeleteClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteClientCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.DeleteClientCertificateAuthorityResponse, error) {
+		return w.api.DeleteClientCertificateAuthorityWithResponse(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) GetDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.GetDomainCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.GetDomainCertificateAuthorityResponse, error) {
+		return w.api.GetDomainCertificateAuthorityWithResponse(ctx, serviceId, certificateAuthorityName, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) CreateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body mc.CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.CreateDomainCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.CreateDomainCertificateAuthorityResponse, error) {
+		return w.api.CreateDomainCertificateAuthorityWithResponse(ctx, serviceId, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) UpdateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body mc.UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...mc.RequestEditorFn) (*mc.UpdateDomainCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.UpdateDomainCertificateAuthorityResponse, error) {
+		return w.api.UpdateDomainCertificateAuthorityWithResponse(ctx, serviceId, certificateAuthorityName, body, reqEditors...)
+	}, w.maxRetries, w.waitSeconds)
+}
+
+func (w *RetryableClientWithResponses) DeleteDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...mc.RequestEditorFn) (*mc.DeleteDomainCertificateAuthorityResponse, error) {
+	return retry(ctx, func() (*mc.DeleteDomainCertificateAuthorityResponse, error) {
+		return w.api.DeleteDomainCertificateAuthorityWithResponse(ctx, serviceId, certificateAuthorityName, reqEditors...)
 	}, w.maxRetries, w.waitSeconds)
 }

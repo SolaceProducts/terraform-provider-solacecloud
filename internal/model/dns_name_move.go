@@ -65,7 +65,7 @@ func DnsNameMoveResourceSchema() schema.Schema {
 			},
 			"target_connection_endpoint_id": schema.StringAttribute{
 				MarkdownDescription: "The unique identifier of the target connection endpoint. " +
-					"If not specified, defaults to the target service's only connection endpoint.",
+					"Always set it: the provider does not look up a default endpoint.",
 				Optional: true,
 				Computed: true,
 				PlanModifiers: []planmodifier.String{

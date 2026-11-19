@@ -1,4 +1,8 @@
-# Troubleshooting
+---
+page_title: "Troubleshooting the Solace Cloud Terraform Provider"
+---
+
+# Troubleshooting the Solace Cloud Terraform Provider
 
 This guide provides solutions to common issues you might encounter when using the Solace Cloud Terraform Provider.
 
@@ -6,7 +10,7 @@ This guide provides solutions to common issues you might encounter when using th
 
 ### Error: Authentication Failed
 
-**Error Message:**
+Error message:
 
 ```text
 Error: Authentication Failed During Service Status Check
@@ -15,7 +19,7 @@ This may indicate that your API token has expired or been revoked during the ser
 Verify your authentication configuration and try again.
 ```
 
-**Solution:**
+Solution:
 
 1. Verify that your API token is correct and has not expired.
 2. Ensure the API token has the necessary permissions to create and manage services.
@@ -26,14 +30,14 @@ Verify your authentication configuration and try again.
 
 ### Error: Service Creation Failed
 
-**Error Message:**
+Error message:
 
 ```text
 Error: Resource Creation FAILED
 Received creationState as: FAILED from the GetService API Request
 ```
 
-**Solution:**
+Solution:
 
 1. Check the service class and datacenter compatibility.
 2. Verify that your account has sufficient permissions to create the requested service class. For more information, see [Managing Users, Groups, Roles, and Permissions](https://docs.solace.com/Cloud/cloud-user-management.htm).
@@ -42,32 +46,31 @@ Received creationState as: FAILED from the GetService API Request
 
 ### Error: Service Operation Timeout
 
-**Error Message:**
+Error message:
 
 ```text
 Error: Service operation timeout
 Message spool update operation timed out after 5 minutes
 ```
 
-**Solution:**
+Solution:
 
-1. Increase the `api_polling_interval` in your provider configuration.
+1. The operation may still be running after the timeout. Check its status in the Solace Cloud Console. For more information, see [Configuring Message Spool Sizes](https://docs.solace.com/Cloud/Configure-Message-Spools.htm).
 2. For large spool size changes, the operation may take longer than expected.
-3. Check the Cloud Console to verify if the operation is still in progress. For more information, see [Configuring Message Spool Sizes](https://docs.solace.com/Cloud/Configure-Message-Spools.htm).
-4. Try breaking down large changes into smaller increments.
+3. Try breaking down large changes into smaller increments.
 
 ## Resource Management Issues
 
 ### Error: Cannot Delete Service
 
-**Error Message:**
+You see an error similar to:
 
 ```text
 Error: Cannot delete service
 The service is locked and cannot be deleted
 ```
 
-**Solution:**
+Solution:
 
 1. Check if the `locked` attribute is set to `true` for the service. For more information, see [Using Deletion Protection](https://docs.solace.com/Cloud/ght_service_deletion_protection.htm).
 2. Update the service to set `locked = false` before attempting to delete.
@@ -75,31 +78,31 @@ The service is locked and cannot be deleted
 
 ### Error: Cannot Update Immutable Attributes
 
-**Error Message:**
+You see an error similar to:
 
 ```text
 Error: Cannot update immutable attribute
 The following attributes cannot be updated: service_class_id, datacenter_id, message_vpn_name
 ```
 
-**Solution:**
+Solution:
 
 1. Some attributes are immutable and cannot be changed after creation.
 2. To change these attributes, you must create a new service and migrate your data.
-3. Review the documentation to understand which attributes are immutable.
+3. For more information, see [Service Class Changes and Immutable Attributes](service_lifecycle.md#service-class-changes-and-immutable-attributes).
 
 ## Environment Issues
 
 ### Error: Environment Not Found
 
-**Error Message:**
+Error message:
 
 ```text
 Error: Environment Not Found
 Could not find environment with name 'MyEnvironment'
 ```
 
-**Solution:**
+Solution:
 
 1. Verify that the environment name exists and is spelled correctly. For more information, see [Creating and Managing Environments](https://docs.solace.com/Cloud/environments.htm).
 2. Check that your API token has access to the specified environment. For more information, see [Managing API Tokens](https://docs.solace.com/Cloud/ght_api_tokens.htm).
@@ -110,14 +113,14 @@ Could not find environment with name 'MyEnvironment'
 
 ### Error: Failed to Connect to Solace Cloud API
 
-**Error Message:**
+You see an error similar to:
 
 ```text
 Error: Failed to connect to Solace Cloud API
 Could not create the API client as there is an unknown configuration value for the Solace Cloud Base URL
 ```
 
-**Solution:**
+Solution:
 
 1. Check your network connectivity to the Solace Cloud API.
 2. Verify that the `base_url` is correct and includes the protocol (https://).
@@ -128,14 +131,14 @@ Could not create the API client as there is an unknown configuration value for t
 
 ### Error: Resource Import Failed
 
-**Error Message:**
+You see an error similar to:
 
 ```text
 Error: Resource Import Failed
 Could not find service with ID 'service-id'
 ```
 
-**Solution:**
+Solution:
 
 1. Verify that the service ID is correct.
 2. Ensure your API token has access to the service you're trying to import. For more information, see [Managing API Tokens](https://docs.solace.com/Cloud/ght_api_tokens.htm).
@@ -171,8 +174,8 @@ Could not find service with ID 'service-id'
 
 ## Getting Help
 
-If you continue to experience issues after trying these troubleshooting steps, consider:
+If you continue to experience issues after you try these steps, use one of these options:
 
-1. Opening an issue in the [Solace Cloud Terraform Provider GitHub repository](https://github.com/SolaceProducts/terraform-provider-solacecloud).
-2. [Contact Solace](https://docs.solace.com/get-support.htm).
-3. Posting a question on the [Solace Community Forum](https://solace.community/).
+- Open an issue in the [Solace Cloud Terraform Provider GitHub repository](https://github.com/SolaceProducts/terraform-provider-solacecloud).
+- [Contact Solace](https://docs.solace.com/get-support.htm).
+- Post a question on the [Solace Community Forum](https://solace.community/).

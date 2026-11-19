@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"testing/iotest"
@@ -375,5 +376,97 @@ func TestSetupLdapManagementAccessMocksFollowsTheApiLifecycle(t *testing.T) {
 	mock.Remove()
 	if mock.Configured() || send("GET", "") != 404 {
 		t.Error("expected Remove to delete the configuration")
+	}
+}
+
+func postPasswordReset(t *testing.T, instance *TestInstance, body string) *http.Response {
+	t.Helper()
+	resp, err := http.Post(instance.baseUrl+eventBrokerServicesPath+"6q1p55o6ovr/resetBrokerPasswords",
+		"application/json", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("reset request failed: %v", err)
+	}
+	t.Cleanup(func() { _ = resp.Body.Close() })
+	return resp
+}
+
+func readMockedPasswords(t *testing.T, instance *TestInstance) (viewer, editor string) {
+	t.Helper()
+	resp, err := http.Get(instance.baseUrl + eventBrokerServicesPath + "6q1p55o6ovr")
+	if err != nil {
+		t.Fatalf("service read failed: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("could not read the service response: %v", err)
+	}
+	broker := decodeServiceResponse(t, string(body))["broker"].(map[string]interface{})
+	viewer = broker["managementReadOnlyLoginCredential"].(map[string]interface{})["password"].(string)
+	vpn := broker["msgVpns"].([]interface{})[0].(map[string]interface{})
+	editor = vpn["managementAdminLoginCredential"].(map[string]interface{})["password"].(string)
+	return viewer, editor
+}
+
+func TestSetupPasswordResetMocksRotatesTheRequestedUsers(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	instance := &TestInstance{baseUrl: "https://api.solace.test", mockedApi: true}
+	params := ConfigurableParams{ServiceName: "mock-reset"}
+	instance.SetupDefaultMocks(params)
+	rec := instance.SetupPasswordResetMocks(params, 0, "")
+
+	if resp := postPasswordReset(t, instance, `{"users":[{"username":"mc-viewer"}]}`); resp.StatusCode != 202 {
+		t.Fatalf("expected 202 from the reset request, got %d", resp.StatusCode)
+	}
+
+	viewer, editor := readMockedPasswords(t, instance)
+	rotated := ConfigurableParams{PasswordGenerations: map[string]int{PasswordUserViewer: 1}}
+	if viewer != MockedPassword(rotated, PasswordUserViewer) {
+		t.Errorf("expected the viewer password to be rotated, got %q", viewer)
+	}
+	if editor != MockedPassword(params, PasswordUserEditor) {
+		t.Errorf("expected the editor password to be unchanged, got %q", editor)
+	}
+	if got := rec.Requests(); !reflect.DeepEqual(got, [][]string{{PasswordUserViewer}}) {
+		t.Errorf("expected one request for mc-viewer, got %v", got)
+	}
+}
+
+func TestSetupPasswordResetMocksRefusesWithoutRotating(t *testing.T) {
+	cases := []struct {
+		name         string
+		params       ConfigurableParams
+		failStatus   int
+		body         string
+		wantStatus   int
+		wantRequests int
+	}{
+		{"configured failure", ConfigurableParams{}, 403, `{"users":[{"username":"mc-viewer"}]}`, 403, 1},
+		{"mc-manager without a manager credential", ConfigurableParams{NoManagerCredential: true}, 0,
+			`{"users":[{"username":"mc-manager"}]}`, 400, 1},
+		{"invalid JSON", ConfigurableParams{}, 0, `not json`, 400, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+
+			instance := &TestInstance{baseUrl: "https://api.solace.test", mockedApi: true}
+			tc.params.ServiceName = "mock-reset"
+			instance.SetupDefaultMocks(tc.params)
+			rec := instance.SetupPasswordResetMocks(tc.params, tc.failStatus, `{"message":"refused","errorId":"mock"}`)
+
+			if resp := postPasswordReset(t, instance, tc.body); resp.StatusCode != tc.wantStatus {
+				t.Fatalf("expected %d from the reset request, got %d", tc.wantStatus, resp.StatusCode)
+			}
+			if got := len(rec.Requests()); got != tc.wantRequests {
+				t.Errorf("expected %d recorded requests, got %d", tc.wantRequests, got)
+			}
+			if viewer, _ := readMockedPasswords(t, instance); viewer != MockedPassword(tc.params, PasswordUserViewer) {
+				t.Errorf("expected the viewer password to be unchanged, got %q", viewer)
+			}
+		})
 	}
 }

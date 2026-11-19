@@ -1,3 +1,8 @@
+---
+page_title: "solacecloud_environment Data Source - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Data Source: solacecloud_environment
 
 This data source provides information about a Solace Cloud environment. Environments in Solace Cloud are used to organize and manage services, allowing for better control over resource allocation and access. For more information, see [Creating and Managing Environments](https://docs.solace.com/Cloud/environments.htm).

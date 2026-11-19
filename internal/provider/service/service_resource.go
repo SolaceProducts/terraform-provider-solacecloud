@@ -196,7 +196,9 @@ func (r *ServiceResource) Create(ctx context.Context, req resource.CreateRequest
 	// Apply what the create request cannot carry (owner, lock, DMR, mate-link, endpoint)
 	///////////////////////////////////////////////
 
-	updateDiags := r.updateInternal(ctx, &assumedState, &data)
+	// Create never rotates: the first readDataInternal has already copied the planned rotation
+	// block into state, so the trigger is unchanged and the first trigger is only recorded.
+	_, updateDiags := r.updateInternal(ctx, &assumedState, &data)
 	resp.Diagnostics.Append(updateDiags...)
 	if resp.Diagnostics.HasError() {
 		// The service exists. Record it so Terraform tracks it (as tainted) instead of leaking it.
@@ -380,6 +382,16 @@ func (r *ServiceResource) readDataInternal(ctx context.Context, currentState *Se
 		if name != "" {
 			currentState.CustomRouterName = types.StringValue(name)
 		}
+	}
+	// broker_password_rotation is configuration only; the API does not report it. Take it from
+	// the plan on Create/Update. On refresh (no plan) the prior state is kept.
+	if initialPlan != nil {
+		currentState.BrokerPasswordRotation = initialPlan.BrokerPasswordRotation
+	}
+	// A zero-value ObjectValue has no attribute types, which means nothing has set this attribute.
+	// Store a typed null instead, because an object without a type cannot be saved to state.
+	if len(currentState.BrokerPasswordRotation.AttributeTypes(ctx)) == 0 {
+		currentState.BrokerPasswordRotation = types.ObjectNull(brokerPasswordRotationAttrTypes())
 	}
 	readDefaultDiags := r.readDefaultConnectionEndpoint(ctx, currentState, initialPlan)
 	diagnostics.Append(*readDefaultDiags...)

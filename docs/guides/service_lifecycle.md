@@ -1,3 +1,8 @@
+---
+page_title: "Service Lifecycle Management"
+subcategory: "Services"
+---
+
 # Service Lifecycle Management
 
 This guide explains how to manage the lifecycle of Solace Cloud services using the Terraform provider, including service upscaling, upgrading, and understanding the relationship between Terraform attributes and the Solace Cloud V2 API.
@@ -12,7 +17,7 @@ The following attributes can be modified to upscale a service:
 
 1. **max_spool_usage** - Increase the message spool size to handle more guaranteed messages. For more information, see [Configuring Message Spool Sizes](https://docs.solace.com/Cloud/Configure-Message-Spools.htm).
 
-Example of increasing the message spool size:
+The following example shows how to increase the message spool size:
 
 ```hcl
 resource "solacecloud_service" "broker_service" {
@@ -50,9 +55,9 @@ Some attributes of a service cannot be changed after creation and require creati
 6. **custom_router_name** - The custom router name prefix.
 7. **environment_id** - The environment where the service is deployed.
 
-`dmr_enabled` is **not** immutable: changing it enables or disables Dynamic Message Routing on the existing service. For more information, see [Enabling and Disabling DMR](service_configuration.md#enabling-and-disabling-dmr).
+The `dmr_enabled` attribute is mutable: changing it enables or disables Dynamic Message Routing on the existing service. For more information, see [Enabling and Disabling DMR](service_configuration.md#enabling-and-disabling-dmr).
 
-`mate_link_encryption` is **not** immutable either: changing it enables or disables mate-link encryption on the existing high-availability service. For more information, see [Mate Link Encryption](service_configuration.md#mate-link-encryption).
+The `mate_link_encryption` attribute is also mutable: changing it enables or disables mate-link encryption on the existing high-availability service. For more information, see [Mate Link Encryption](service_configuration.md#mate-link-encryption).
 
 If you need to change any of these attributes, you must:
 
@@ -60,7 +65,7 @@ If you need to change any of these attributes, you must:
 2. Migrate your data and configuration to the new service.
 3. Delete the old service once migration is complete.
 
-Example of creating a new service with a different service class:
+The following example shows how to create a new service with a different service class:
 
 ```hcl
 # Original service
@@ -89,7 +94,7 @@ To upgrade the event broker version:
 2. Migrate your data and configuration to the new service.
 3. Delete the old service once migration is complete.
 
-Example of specifying an event broker version:
+The following example shows how to specify an event broker version:
 
 ```hcl
 resource "solacecloud_service" "broker_service" {
@@ -142,7 +147,7 @@ When reading a service from the API, the provider maps the API response fields t
 
 ## V2 API Features Not Implemented in Terraform
 
-Some features of the Solace Cloud V2 API are not currently implemented in the Terraform provider. These include:
+The Terraform provider does not implement the following features of the Solace Cloud V2 API:
 
 1. **Service Upgrades**: The API supports upgrading the event broker version, but this is not implemented in the provider.
 
@@ -156,23 +161,23 @@ Some features of the Solace Cloud V2 API are not currently implemented in the Te
 
 6. **Service Plugins**: The API supports managing service plugins, but this is not exposed in the provider.
 
-7. **Service Backup and Restore**: While the API supports backup and restore operations, the provider does not directly implement these. Instead, you can use the Solace Broker Provider to implement backup and restore functionality as described in the [Importing Services](importing_services.md) guide.
+7. **Service Backup and Restore**: While the API supports backup and restore operations, the provider does not directly implement these. Instead, you can use the Solace Event Broker Provider to implement backup and restore functionality.
 
 ## Best Practices for Service Lifecycle Management
 
-1. **Plan for Immutability**: Design your infrastructure with the understanding that certain service attributes cannot be changed after creation.
+- Plan for immutability — Design your infrastructure with the understanding that certain service attributes cannot be changed after creation.
 
-2. **Use Terraform Modules**: Create reusable modules for service creation to ensure consistency across your infrastructure.
+- Use Terraform modules — Create reusable modules for service creation to ensure consistency across your infrastructure.
 
-3. **Version Control**: Keep your Terraform configurations in version control to track changes.
+- Version control — Keep your Terraform configurations in version control to track changes.
 
-4. **Test Changes in Non-Production**: Always test service modifications in a non-production environment first.
+- Test changes in non-production — Always test service modifications in a non-production environment first.
 
-5. **Document Service Attributes**: Maintain documentation of your service attributes, especially those that cannot be changed.
+- Document service attributes — Maintain documentation of your service attributes, especially those that cannot be changed.
 
-6. **Implement Backup and Restore**: Use the Solace Broker Provider to implement backup and restore functionality for your services.
+- Implement backup and restore — Use the Solace Event Broker Provider to implement backup and restore functionality for your services.
 
-7. **Monitor Service Status**: Monitor the status of your services during and after modifications to ensure they are functioning correctly.
+- Monitor service status — Monitor the status of your services during and after modifications to ensure they are functioning correctly.
 
 ## Conclusion
 

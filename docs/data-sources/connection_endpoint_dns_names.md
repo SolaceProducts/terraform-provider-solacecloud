@@ -1,3 +1,8 @@
+---
+page_title: "solacecloud_connection_endpoint_dns_names Data Source - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Data Source: solacecloud_connection_endpoint_dns_names
 
 This data source provides information about DNS names for a specific connection endpoint. DNS names are the fully qualified domain names that can be used to connect to the event broker service through the specified connection endpoint.

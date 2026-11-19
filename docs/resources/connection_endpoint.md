@@ -1,8 +1,15 @@
+---
+page_title: "solacecloud_connection_endpoint Resource - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Resource: solacecloud_connection_endpoint
 
 This resource allows you to create and manage connection endpoints for a Solace Cloud service. Connection endpoints define how clients can connect to your event broker service using various messaging protocols.
 
 ## Example Usage
+
+The following examples show how to configure the resource.
 
 ### Basic Connection Endpoint
 
@@ -58,6 +65,8 @@ resource "solacecloud_connection_endpoint" "public_endpoint" {
 
 ## Argument Reference
 
+The following arguments are supported.
+
 ### Required Arguments
 
 * `service_id` - (Required) The ID of the Solace Cloud service that the connection endpoint is associated to.
@@ -78,20 +87,20 @@ The `ports` argument accepts a map with the following protocol keys. Each protoc
 * `smf_compressed` - SMF compressed port configuration.
 * `amqp` - AMQP plain-text port configuration.
 * `amqp_tls` - AMQP over TLS port configuration.
-* `mqtt` - MQTT plain-text port configuration.
+* `mqtt` - MQTT plaintext port configuration.
 * `mqtt_tls` - MQTT over TLS port configuration.
-* `mqtt_websocket` - MQTT WebSocket plain-text port configuration.
+* `mqtt_websocket` - MQTT WebSocket plaintext port configuration.
 * `mqtt_websocket_tls` - MQTT WebSocket over TLS port configuration.
 * `web` - WebSocket over HTTP port configuration.
 * `web_tls` - WebSocket over HTTPS port configuration.
-* `rest_incoming` - REST incoming plain-text port configuration.
+* `rest_incoming` - REST incoming plaintext port configuration.
 * `rest_incoming_tls` - REST incoming over TLS port configuration.
-* `management_tls` - Management over TLS port configuration (SEMP).
+* `management_tls` - Management over TLS port configuration (Solace Element Management Protocol, or SEMP).
 * `ssh_tls` - SSH over TLS port configuration (CLI access).
 
 #### Protocol to REST API Mapping
 
-These protocols map to the REST API protocols as follows:
+The following table maps each Terraform protocol to its REST API protocol.
 
 | Terraform Protocol    | REST API Protocol                   |
 |-----------------------|-------------------------------------|

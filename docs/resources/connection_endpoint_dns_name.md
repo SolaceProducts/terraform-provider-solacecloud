@@ -1,25 +1,33 @@
+---
+page_title: "solacecloud_connection_endpoint_dns_name Resource - terraform-provider-solacecloud"
+subcategory: ""
+---
+
 # Resource: solacecloud_connection_endpoint_dns_name
 
 This resource allows you to create and manage custom DNS names (hostnames) for Solace Cloud connection endpoints.
 
 ## About Custom Hostnames
 
-Each connection endpoint has a unique, randomly generated hostname, such as `mr1egxydp8fguv.messaging.solace.cloud`. You can configure custom hostnames to provide personalized names in the `messaging.solace.com` domain or use your own custom domains.
+Each connection endpoint has a unique, randomly generated hostname, such as `mr1egxydp8fguv.messaging.solace.cloud`. You can configure custom hostnames to provide personalized names in the `messaging.solace.cloud` domain or use your own custom domains.
 
 Custom hostnames are useful for:
 - **Migration** - Maintain consistent hostnames when migrating from other messaging platforms.
-- **Client integration** - Use simpler, memorable names that align with your naming conventions.
+- **Client integration** - Use short, memorable names that align with your naming conventions.
 - **Application partitioning** - Assign distinct hostnames to different applications or environments.
 
 You can access the event broker service using any configured custom hostname, as well as the initial generated hostname.
 
-**Prerequisites:**
-- An existing event broker service (`solacecloud_service`)
-- A configured connection endpoint (`solacecloud_connection_endpoint`)
-- For custom domains outside `messaging.solace.com`, you must own and control the domain 
+Before you use this resource, check the following:
+
+- You have an existing event broker service (`solacecloud_service`).
+- You have configured a connection endpoint (`solacecloud_connection_endpoint`).
+- If you use a custom domain outside `messaging.solace.cloud`, you own and control that domain.
 
 
 ## Example Usage
+
+The following example shows how to configure the resource.
 
 ### Basic DNS Name
 
@@ -32,6 +40,8 @@ resource "solacecloud_connection_endpoint_dns_name" "custom_hostname" {
 ```
 
 ## Argument Reference
+
+The following arguments are supported.
 
 ### Required Arguments
 
@@ -47,15 +57,15 @@ The `dns_name` argument must meet the following requirements:
 * Limit each label (segment between dots) to 1-63 characters.
 * Include only alphanumeric characters and hyphens in labels.
 * Cannot start or end a label with hyphens.
-* Keep total length under 230 characters.
+* Keep the total length to 230 characters or fewer.
 * Include at least one dot (e.g., `broker.example.com` is valid, but `broker` is not).
 
-**Valid examples:**
+The following examples are valid:
 * `broker.example.com`
 * `my-broker.prod.company.com`
 * `event-mesh-1.us-east.example.org`
 
-**Invalid examples:**
+The following examples are not valid:
 * `broker` (missing domain)
 * `-broker.example.com` (label starts with hyphen)
 * `broker-.example.com` (label ends with hyphen)
@@ -68,7 +78,7 @@ The `dns_name` argument must meet the following requirements:
   * `CustomerManaged` - You own and control the domain (e.g., `broker.example.com`).
   * `SolaceManaged` - Solace owns the domain (e.g., `broker.messaging.solace.cloud`).
 
-## Limitations
+## DNS Name Limitations
 
 * Each connection endpoint supports a maximum of 5 DNS names.
 * DNS names are immutable - any changes require resource replacement (destroy and recreate).

@@ -123,6 +123,12 @@ func (r *LdapManagementAccessResource) Create(ctx context.Context, req resource.
 	}
 
 	serviceId := data.ServiceId.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
+
 	body := missioncontrol.CreateLdapManagementAccessJSONRequestBody{
 		Enabled:               data.Enabled.ValueBool(),
 		GroupAttributeName:    data.GroupAttributeName.ValueString(),
@@ -221,6 +227,12 @@ func (r *LdapManagementAccessResource) Update(ctx context.Context, req resource.
 	}
 
 	serviceId := plan.ServiceId.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
+
 	body, changed := updateBody(ctx, plan, state, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
@@ -270,6 +282,12 @@ func (r *LdapManagementAccessResource) Delete(ctx context.Context, req resource.
 	}
 
 	serviceId := data.ServiceId.ValueString()
+	unlock, ok := shared.LockService(ctx, serviceId, &resp.Diagnostics)
+	if !ok {
+		return
+	}
+	defer unlock()
+
 	apiResp, err := r.APIClient.DeleteLdapManagementAccessWithResponse(ctx, serviceId)
 	if err != nil {
 		resp.Diagnostics.AddError(

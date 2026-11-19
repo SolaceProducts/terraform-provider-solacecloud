@@ -48,6 +48,10 @@ func (m *MockAPIClient) GetServiceOperationWithResponse(ctx context.Context, ser
 	return m.opResponse, m.opError
 }
 
+func (m *MockAPIClient) ResetBrokerPasswordsWithResponse(ctx context.Context, serviceId string, body missioncontrol.ResetBrokerPasswordsJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.ResetBrokerPasswordsResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (m *MockAPIClient) EnableDmrClusterWithResponse(ctx context.Context, serviceId string, body missioncontrol.EnableDmrClusterJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.EnableDmrClusterResponse, error) {
 	return nil, errors.New("not implemented")
 }
@@ -180,4 +184,36 @@ func TestUpdateEndpoint_Success(t *testing.T) {
 	if mockClient.opCallCount < 1 {
 		t.Errorf("Expected at least 1 operation status check, but got %d", mockClient.opCallCount)
 	}
+}
+
+func (m *MockAPIClient) GetClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.GetClientCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) CreateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body missioncontrol.CreateClientCertificateAuthorityJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.CreateClientCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) UpdateClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body missioncontrol.UpdateClientCertificateAuthorityJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.UpdateClientCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) DeleteClientCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.DeleteClientCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) GetDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.GetDomainCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) CreateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, body missioncontrol.CreateDomainCertificateAuthorityJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.CreateDomainCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) UpdateDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, body missioncontrol.UpdateDomainCertificateAuthorityJSONRequestBody, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.UpdateDomainCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MockAPIClient) DeleteDomainCertificateAuthorityWithResponse(ctx context.Context, serviceId string, certificateAuthorityName string, reqEditors ...missioncontrol.RequestEditorFn) (*missioncontrol.DeleteDomainCertificateAuthorityResponse, error) {
+	return nil, errors.New("not implemented")
 }
